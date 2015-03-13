@@ -47,8 +47,9 @@ class DocxTemplate(object):
         src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',cellbg,src_xml,flags=re.DOTALL)
         
         for y in ['tr', 'p', 'r']:
-            # replace into xml code the row containing {%y xxx %} or {{y xxx}} template tag 
-            # by {% xxx %} or {{ xx }} without any surronding xml tags.
+            # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag 
+            # by {% xxx %} or {{ xx }} without any surronding xml tags :
+            # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
             src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
         
