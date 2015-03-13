@@ -24,9 +24,6 @@ class DocxTemplate(object):
     def build_xml(self,context):
         src_xml = etree.tostring(self.docx._element.body, pretty_print=True)
         
-        with open('/tmp/docx1.xml','w') as fh:
-            fh.write(src_xml)
-
         # strip all xml tags inside {% %} and {{ }}
         # that Microsoft word can insert into xml code for this part of the document
         def striptags(m):
@@ -48,9 +45,6 @@ class DocxTemplate(object):
         
         # replace xml code corresponding to the paragraph containing {% p-xxx template tag by {% xxx template tag itself
         src_xml = re.sub(r'<w:p[ >](?:(?!<w:p[ >]).)*{%\s*p-([^%]*%}).*?</w:p>',r'{% \1',src_xml,flags=re.DOTALL)
-        
-        with open('/tmp/docx2.xml','w') as fh:
-            fh.write(src_xml)
         
         template = Template(src_xml)
         dst_xml = template.render(context)

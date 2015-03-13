@@ -24,7 +24,7 @@ News
 """ % read('README', 'CHANGES')
 
 setup(name='docxtpl',
-      version='0.1.1',
+      version='0.1.2',
       description='Python docx template engine',
       long_description=long_description,
       classifiers=[
