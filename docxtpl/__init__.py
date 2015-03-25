@@ -79,7 +79,7 @@ class DocxTemplate(object):
         return Subdoc(self)
 
 class Subdoc(object):
-    """ Class for subdocumentation insertion into master document """
+    """ Class for subdocument to insert into master document """
     def __init__(self, tpl):
         self.tpl = tpl
         self.docx = tpl.get_docx()
@@ -97,6 +97,55 @@ class Subdoc(object):
     
     
 
-class Tpldoc(object):
-    """ class to build documenation to be passed into template variables """
-    pass
+class RichText(object):
+    """ class to generate Rich Text when using templates variables
+    
+    This is much faster than using Subdoc class, but this only for texts INSIDE an existing paragraph. 
+    """
+    def __init__(self, text=None, **text_prop):
+        self.xml = ''
+        if text:
+            self.add_run(text, **text_prop)
+            
+    def add(self, text, style=None, 
+                        color=None, 
+                        highlight=None, 
+                        size=None, 
+                        bold=False, 
+                        italic=False, 
+                        underline=False, 
+                        strike=False):
+        
+        prop = ''
+
+        if style:
+            prop += '<w:rStyle w:val="%s"/>' % style
+        if color:
+            if color[0] == '#':
+                color = color[1:]
+            prop += '<w:color w:val="%s"/>' % color
+        if highlight:
+            if highlight[0] == '#':
+                highlight = highlight[1:]
+            prop += '<w:highlight w:val="%s"/>' % highlight
+        if size:
+            prop += '<w:sz w:val="%s"/>' % size
+            prop += '<w:szCs w:val="%s"/>' % size
+        if bold:
+            prop += '<w:b/>'
+        if italic:
+            prop += '<w:i/>'
+        if underline:
+            if underline not in ['single','double']:
+                underline = 'single'
+            prop += '<w:u w:val="%s"/>' % underline
+        if strike:
+            prop += '<w:strike/>'
+            
+        self.xml += '<w:r>'
+        if prop:
+            self.xml += '<w:rPr>%s</w:rPr>' % prop
+        self.xml += '<w:t>%s</w:t></w:r>\n' % text
+
+    def __unicode__(self):
+        return xml
