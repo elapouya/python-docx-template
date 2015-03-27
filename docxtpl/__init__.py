@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.1'
+__version__ = '0.1.4'
 
 from lxml import etree
 from docx import Document
