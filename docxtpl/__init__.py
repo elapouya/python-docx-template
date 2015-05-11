@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 from lxml import etree
 from docx import Document
@@ -53,10 +53,14 @@ class DocxTemplate(object):
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
             src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
+            
+        src_xml = src_xml.replace(r"&#8216;","'")
 
         return src_xml
 
     def render_xml(self,src_xml,context):
+        with open('/tmp/titi','w') as fh:
+            fh.write(src_xml)
         template = Template(src_xml)
         dst_xml = template.render(context)
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')

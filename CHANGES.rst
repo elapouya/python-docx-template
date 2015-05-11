@@ -1,3 +1,7 @@
+0.1.5 (2015-05-11)
+------------------
+- fix template filter with quote
+
 0.1.4 (2015-03-27)
 ------------------
 - add RichText support
