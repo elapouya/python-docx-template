@@ -65,7 +65,7 @@ In order to manage paragraphs, table rows, runs, special syntax has to be used :
    {%r jinja2_tag %} for runs
 
 By using these tags, python-docx-template will take care to put the real jinja2 tags at the right place into the document's xml source code.
-In addition, these tags also tells python-docx-template to remove the paragraph, table row or run where are located the begin and ending tags.
+In addition, these tags also tells python-docx-template to remove the paragraph, table row or run where are located the begin and ending tags and only takes care about what is in between.
 
 Display variables
 .................

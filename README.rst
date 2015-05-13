@@ -24,4 +24,4 @@ Now you can use python-docx-template to generate as many word documents you want
 Documentation
 -------------
 
-Please, read `http://docxtpl.readthedocs.org`_
+Please, `read the doc <http://docxtpl.readthedocs.org>`_
