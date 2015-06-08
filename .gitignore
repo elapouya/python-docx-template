@@ -54,4 +54,6 @@ docs/_build/
 target/
 
 #eclipse
-.settings/
+.settings
+*.pydevproject
+.metadata
