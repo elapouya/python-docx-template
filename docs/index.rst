@@ -10,7 +10,7 @@ Welcome to python-docx-template's documentation!
 
 To install::
 
-    pip install python-docx-template
+    pip install docxtpl
 
 Usage::
 
