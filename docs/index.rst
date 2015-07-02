@@ -14,7 +14,7 @@ To install::
 
 Usage::
 
-    from python-docx-template import DocxTemplate
+    from docxtpl import DocxTemplate
 
     doc = DocxTemplate("my_word_template.docx")
     context = { 'company_name' : 'World company" }
@@ -95,6 +95,30 @@ Escaping
 In order to display `{%`, `%}`, `{{` or `}}`, one can use ::
 
    {_%, %_}, {_{ or  }_}
+
+Sub-documents
+-------------
+
+A template variable can contain a complex and built from scratch with python-docx word document.
+To do so, get first a sub-document object from template object and use it as a python-docx document object, see exemple in `tests/subdoc.py`.
+
+RichText
+--------
+
+When you use `{{ <var> }}` tag in your template, it will be remplaced by the string contained within `var` variable.
+BUT it will keep the current style.
+If you want to add dynamically changeable style, you have to use both : the `{{r <var> }}` tag AND a RichText object within `var` variable.
+You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
+( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see exemple in `tests/richtext.py`
+
+
+Exemples
+--------
+
+The best way to see how it works is to read exemples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
+
+
+
 
 .. rubric:: Functions index
 
