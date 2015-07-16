@@ -59,8 +59,6 @@ class DocxTemplate(object):
         return src_xml
 
     def render_xml(self,src_xml,context):
-        with open('/tmp/titi','w') as fh:
-            fh.write(src_xml)
         template = Template(src_xml)
         dst_xml = template.render(context)
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
