@@ -24,7 +24,7 @@ News
 """ % read('README', 'CHANGES')
 
 setup(name='docxtpl',
-      version='0.1.5',
+      version='0.1.6',
       description='Python docx template engine',
       long_description=long_description,
       classifiers=[
@@ -39,6 +39,6 @@ setup(name='docxtpl',
       author_email='elapouya@gmail.com',
       license='LGPL 2.1',
       packages=['docxtpl'],
-      install_requires = ['Sphinx<1.3b', 'sphinxcontrib-napoleon', 'python-docx','jinja2'],
+      install_requires = ['Sphinx<1.3b', 'sphinxcontrib-napoleon', 'python-docx','jinja2', 'lxml'],
       eager_resources = ['docs'],
       zip_safe=False)
