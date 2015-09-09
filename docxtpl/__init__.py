@@ -5,14 +5,14 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 from lxml import etree
 from docx import Document
 from jinja2 import Template
 from cgi import escape
-import copy
 import re
+import six
 
 class DocxTemplate(object):
     """ Class for managing docx files as they were jinja2 templates """
@@ -26,7 +26,7 @@ class DocxTemplate(object):
         return self.docx
 
     def get_xml(self):
-        return etree.tostring(self.docx._element.body, pretty_print=True)
+        return etree.tostring(self.docx._element.body, encoding='unicode', pretty_print=True)
 
     def write_xml(self,filename):
         with open(filename,'w') as fh:
@@ -93,12 +93,17 @@ class Subdoc(object):
     def __getattr__(self, name):
         return getattr(self.subdocx, name)
 
-    def __unicode__(self):
+    def _get_xml(self):
         xml = ''
         for p in self.paragraphs:
-            xml += '<w:p>\n' + re.sub(r'^.*\n', '', etree.tostring(p._element,pretty_print=True))
+            xml += '<w:p>\n' + re.sub(r'^.*\n', '', etree.tostring(p._element, encoding='unicode', pretty_print=True))
         return xml
 
+    def __unicode__(self):
+        return self._get_xml()
+
+    def __str__(self):
+        return self._get_xml()
 
 
 class RichText(object):
@@ -121,7 +126,7 @@ class RichText(object):
                         strike=False):
 
 
-        if not isinstance(text, unicode):
+        if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
         text = escape(text).replace('\n','<w:br/>')
 
@@ -157,4 +162,7 @@ class RichText(object):
         self.xml += u'<w:t xml:space="preserve">%s</w:t></w:r>\n' % text
 
     def __unicode__(self):
+        return self.xml
+
+    def __str__(self):
         return self.xml
