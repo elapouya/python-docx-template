@@ -112,7 +112,7 @@ You can change color, bold, italic, size and so on, but the best way is to use M
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see exemple in `tests/richtext.py`
 
 
-Exemples
+Examples
 --------
 
 The best way to see how it works is to read exemples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
