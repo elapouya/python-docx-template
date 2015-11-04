@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 from lxml import etree
 from docx import Document
@@ -35,6 +35,9 @@ class DocxTemplate(object):
     def patch_xml(self,src_xml):
         # strip all xml tags inside {% %} and {{ }}
         # that Microsoft word can insert into xml code for this part of the document
+        
+        # A essayer : src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
+        
         def striptags(m):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
         src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,src_xml,flags=re.DOTALL)
