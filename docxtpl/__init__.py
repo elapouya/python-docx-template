@@ -50,6 +50,7 @@ class DocxTemplate(object):
             tag_stack.append(tag)
 
             # get subsequent leaf nodes in the tree.
+            parser.reset()
             while len(tag_stack) > 0:
                 ctag = tag_stack.pop()
 
@@ -59,27 +60,22 @@ class DocxTemplate(object):
                 if len(ctag.getchildren()) > 0:
                     tag_stack.append(ctag.getchildren()[0])
                 elif ctag.text is not None:
+                    parser.parse_string(ctag.text)
                     next_nodes.append(ctag)
-
-            # parse incrementally until all tags are closed.
-            parser.reset()
-            i = 0
-            while i < len(next_nodes):
-                parser.parse_string(next_nodes[i].text)
-                i += 1
-
-                if parser.state == parser.CLOSED:
-                    break
+                    if parser.state == parser.CLOSED:
+                        break
 
             # modify xml if all tags are closed
             if parser.state == parser.CLOSED:
-                # move text to the first tag, and clear the other tags.
+                # move text to the first node.
                 tag.text = parser.parsed_string
-                while i > 1:
-                    i -= 1
-                    next_nodes[i].text = ''
-                    if next_nodes[i] in possibly_split_tags:
-                        possibly_split_tags.remove(next_nodes[i])
+                next_nodes.remove(tag)
+
+                # clear the other nodes.
+                for node in next_nodes:
+                    node.text = ''
+                    if node in possibly_split_tags:
+                        possibly_split_tags.remove(node)
 
     def patch_xml(self,src_xml):
         # strip all xml tags inside {% %} and {{ }}
