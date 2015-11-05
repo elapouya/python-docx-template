@@ -23,8 +23,16 @@ News
 %(CHANGES)s
 """ % read('README', 'CHANGES')
 
+def get_version(pkg):
+    path = os.path.join(os.path.dirname(__file__),pkg,'__init__.py')
+    with open(path) as fh:
+        m = re.search(r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]',fh.read(),re.M)
+    if m:
+        return m.group(1)
+    raise RuntimeError("Unable to find __version__ string in %s." % path)
+
 setup(name='docxtpl',
-      version='0.1.7',
+      version=get_version('docxtpl'),
       description='Python docx template engine',
       long_description=long_description,
       classifiers=[

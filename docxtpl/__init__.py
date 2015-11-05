@@ -26,18 +26,16 @@ class DocxTemplate(object):
         return self.docx
 
     def get_xml(self):
-        return etree.tostring(self.docx._element.body, encoding='unicode', pretty_print=True)
+        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
+        return etree.tostring(self.docx._element.body, encoding='unicode', pretty_print=False)
 
     def write_xml(self,filename):
         with open(filename,'w') as fh:
             fh.write(self.get_xml())
 
     def patch_xml(self,src_xml):
-        # strip all xml tags inside {% %} and {{ }}
-        # that Microsoft word can insert into xml code for this part of the document
-        
-        # A essayer : src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
-        
+        # strip all xml tags inside {% %} and {{ }} that MS word can insert into xml source
+        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
         def striptags(m):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
         src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,src_xml,flags=re.DOTALL)

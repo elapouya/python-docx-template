@@ -1,3 +1,7 @@
+0.1.8 (2015-11-05)
+------------------
+- better xml code cleaning around Jinja2 tags
+
 0.1.7 (2015-09-09)
 ------------------
 - python 3 support
