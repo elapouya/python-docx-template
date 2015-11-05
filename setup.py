@@ -1,5 +1,6 @@
 from setuptools import setup
 import os
+import re
 
 def read(*names):
     values = dict()
