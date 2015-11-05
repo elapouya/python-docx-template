@@ -33,6 +33,51 @@ class DocxTemplate(object):
         with open(filename,'w') as fh:
             fh.write(self.get_xml())
 
+    def clean_tree(self):
+        parser = LooseTagParser()
+        docx_body = self.docx._element.body
+
+        possibly_split_tags = [t for t in docx_body.xpath('//*[not(*)]/text()[contains(.,"{")]/..') if t.text.count('{') != t.text.count('}')]
+
+        # try to fix tags that are possibly split because the amount of parenthesis doesn't match.
+        for tag in possibly_split_tags:
+
+            tag_stack = []
+            next_nodes = []
+
+            if tag.getparent() is not None and tag.getparent().getnext() is not None:
+                tag_stack.append(tag.getparent().getnext())
+
+            tag_stack.append(tag)
+
+            # get subsequent leaf nodes in the tree.
+            parser.reset()
+            while len(tag_stack) > 0:
+                ctag = tag_stack.pop()
+
+                if ctag.getnext() is not None:
+                    tag_stack.append(ctag.getnext())
+
+                if len(ctag.getchildren()) > 0:
+                    tag_stack.append(ctag.getchildren()[0])
+                elif ctag.text is not None:
+                    parser.parse_string(ctag.text)
+                    next_nodes.append(ctag)
+                    if parser.state == parser.CLOSED:
+                        break
+
+            # modify xml if all tags are closed
+            if parser.state == parser.CLOSED:
+                # move text to the first node.
+                tag.text = parser.parsed_string
+                next_nodes.remove(tag)
+
+                # clear the other nodes.
+                for node in next_nodes:
+                    node.text = ''
+                    if node in possibly_split_tags:
+                        possibly_split_tags.remove(node)
+
     def patch_xml(self,src_xml):
         # strip all xml tags inside {% %} and {{ }} that MS word can insert into xml source
         src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
@@ -66,6 +111,8 @@ class DocxTemplate(object):
         return dst_xml
 
     def build_xml(self,context):
+        xml = self.get_xml()
+        self.clean_tree()
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         xml = self.render_xml(xml, context)
@@ -105,7 +152,6 @@ class Subdoc(object):
 
     def __str__(self):
         return self._get_xml()
-
 
 class RichText(object):
     """ class to generate Rich Text when using templates variables
@@ -167,3 +213,67 @@ class RichText(object):
 
     def __str__(self):
         return self.xml
+
+
+class LooseTagParser(object):
+    """ class that can parse a string, count the tags and aid identifying and fixing the markup of a document.
+    """
+    CLOSED = 0
+    PREOPEN = 1
+    OPEN = 2
+    PRECLOSE = 3
+
+    def __init__(self):
+        self.state = self.CLOSED
+        self.tags_found = 0
+        self.errors = 0
+        self.parsed_string = ''
+        self.tag_type = ''
+
+    def reset(self):
+        self.state = self.CLOSED
+        self.tags_found = 0
+        self.errors = 0
+        self.parsed_string = ''
+        self.tag_type = ''
+
+    def parse_string(self, input_str):
+        """
+        Implementation of a very simple and loose incremental parser.
+        :param input_str: String to be parsed
+        """
+
+        if input_str is None:
+            return
+
+        self.parsed_string += input_str
+        tag_count = 0
+
+        for c in input_str:
+
+            # Tag open
+            if self.state == self.PREOPEN:
+                if c in ['{', '%', '#']:
+                    self.tag_type = c if c != '{' else '}'
+                    self.state = self.OPEN
+                else:
+                    self.state = self.CLOSED
+
+            # Tag close
+            elif self.state == self.PRECLOSE:
+                if c == '}':
+                    self.state = self.CLOSED
+                    tag_count += 1
+                else:
+                    self.state = self.OPEN
+
+            # Tag pre-open
+            elif c == '{' and self.state == self.CLOSED:
+                self.state = self.PREOPEN
+
+            # Tag pre-close
+            elif self.state == self.OPEN and c == self.tag_type:
+                self.state = self.PRECLOSE
+
+        self.tags_found += tag_count
+
