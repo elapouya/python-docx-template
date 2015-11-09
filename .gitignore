@@ -57,6 +57,7 @@ target/
 .settings
 *.pydevproject
 .metadata
+.project
 
 #Pycharm
 .idea
