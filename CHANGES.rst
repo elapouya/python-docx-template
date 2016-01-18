@@ -1,3 +1,7 @@
+0.1.9 (2016-1-18)
+-----------------
+- better subdoc management : accept tables
+
 0.1.8 (2015-11-05)
 ------------------
 - better xml code cleaning around Jinja2 tags

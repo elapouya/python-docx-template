@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 from lxml import etree
 from docx import Document
@@ -95,9 +95,7 @@ class Subdoc(object):
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
-        xml = ''
-        for p in self.paragraphs:
-            xml += '<w:p>\n' + re.sub(r'^.*\n', '', etree.tostring(p._element, encoding='unicode', pretty_print=True))
+        xml = re.sub(r'</?w:body[^>]*>','',etree.tostring(self.subdocx._element.body, encoding='unicode', pretty_print=False))
         return xml
 
     def __unicode__(self):
