@@ -35,25 +35,25 @@ class DocxTemplate(object):
 
     def patch_xml(self,src_xml):
         # strip all xml tags inside {% %} and {{ }} that MS word can insert into xml source
-        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
+        src_xml = re.compile(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})',flags=re.DOTALL).sub('',src_xml)
         def striptags(m):
-            return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
-        src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,src_xml,flags=re.DOTALL)
+            return re.compile('</w:t>.*?(<w:t>|<w:t [^>]*>)',flags=re.DOTALL).sub('',m.group(0))
+        src_xml = re.compile(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',flags=re.DOTALL).sub(striptags,src_xml)
 
         # manage table cell background color
         def cellbg(m):
             cell_xml = m.group(1) + m.group(3)
-            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>','',cell_xml,flags=re.DOTALL)
+            cell_xml = re.compile(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>',flags=re.DOTALL).sub('',cell_xml)
             cell_xml = re.sub(r'<w:shd[^/]*/>','', cell_xml, count=1)
             return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:shd w:val="clear" w:color="auto" w:fill="{{%s}}"/>' % m.group(2), cell_xml)
-        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',cellbg,src_xml,flags=re.DOTALL)
+        src_xml = re.compile(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',flags=re.DOTALL).sub(cellbg,src_xml)
 
         for y in ['tr', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag
             # by {% xxx %} or {{ xx }} without any surronding xml tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
-            src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
+            src_xml = re.compile(pat,flags=re.DOTALL).sub(r'\1 \2',src_xml)
 
         src_xml = src_xml.replace(r"&#8216;","'")
 
