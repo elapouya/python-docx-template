@@ -118,6 +118,21 @@ If you want to add dynamically changeable style, you have to use both : the `{{r
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see exemple in `tests/richtext.py`
 
+Jinja custom filters
+--------------------
+
+``render()`` accepts ``jinja_env`` optionnal argument : you may pass a jinja environment object.
+By this way you will be able to add some custom jinja filters::
+
+    from docxtpl import DocxTemplate
+    import jinja2
+
+    doc = DocxTemplate("my_word_template.docx")
+    context = { 'company_name' : "World company" }
+    jinja_env = jinja2.Environment()
+    jinja_env.filters['myfilter'] = myfilterfunc
+    doc.render(context,jinja_env)
+    doc.save("generated_doc.docx")
 
 Examples
 --------

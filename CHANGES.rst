@@ -1,3 +1,8 @@
+0.1.10 (2016-2-11)
+------------------
+- render() accepts optionnal jinja_env argument :
+  useful to set custom filters and other things
+
 0.1.9 (2016-1-18)
 -----------------
 - better subdoc management : accept tables

@@ -59,16 +59,19 @@ class DocxTemplate(object):
 
         return src_xml
 
-    def render_xml(self,src_xml,context):
-        template = Template(src_xml)
+    def render_xml(self,src_xml,context,jinja_env=None):
+        if jinja_env:
+            template = jinja_env.from_string(src_xml)
+        else:
+            template = Template(src_xml)
         dst_xml = template.render(context)
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
 
-    def build_xml(self,context):
+    def build_xml(self,context,jinja_env=None):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
-        xml = self.render_xml(xml, context)
+        xml = self.render_xml(xml, context, jinja_env)
         return xml
 
     def map_xml(self,xml):
@@ -76,8 +79,8 @@ class DocxTemplate(object):
         body = root.body
         root.replace(body,etree.fromstring(xml))
 
-    def render(self,context):
-        xml = self.build_xml(context)
+    def render(self,context,jinja_env=None):
+        xml = self.build_xml(context,jinja_env)
         self.map_xml(xml)
 
     def new_subdoc(self):
