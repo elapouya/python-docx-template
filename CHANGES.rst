@@ -1,3 +1,7 @@
+0.1.11 (2016-3-1)
+-----------------
+- '>' and '<' can now be used inside jinja tags
+
 0.1.10 (2016-2-11)
 ------------------
 - render() accepts optionnal jinja_env argument :

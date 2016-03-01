@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
 from lxml import etree
 from docx import Document
@@ -55,7 +55,9 @@ class DocxTemplate(object):
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
             src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
 
-        src_xml = src_xml.replace(r"&#8216;","'")
+        def clean_tags(m):
+            return m.group(0).replace(r"&#8216;","'").replace('&lt;','<').replace('&gt;','>')
+        src_xml = re.sub(r'(?<=\{[\{%])([^\}%]*)(?=[\}%]})',clean_tags,src_xml)        
 
         return src_xml
 
