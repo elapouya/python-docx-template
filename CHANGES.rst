@@ -1,6 +1,6 @@
 0.2.0 (2016-03-17)
 ------------------
-- Add Header and Footer support (Thanks to Debby Weinberg)
+- Add Header and Footer support (Thanks to Denny Weinberg)
 
 0.1.11 (2016-03-1)
 ------------------
