@@ -40,11 +40,6 @@ Now you can use python-docx-template to generate as many word documents you want
 
 Note : python-docx-template as been tested with MS Word 97, it may not work with other version.
 
-Note 2 : As python-docx does not manage headers and footers, this is the same for python-docx-template.
-Nevertheless, it is possible to manage them though Microsoft word : the idea is to create a variable 
-inside word document and then use it (or link it) in the header, the footer and the body. When the template modify a variable
-in the body, MS Word will update headers and footers automatically.
-
 Jinja2-like syntax
 ------------------
 

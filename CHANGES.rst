@@ -1,14 +1,18 @@
-0.1.11 (2016-3-1)
------------------
+0.2.0 (2016-03-17)
+------------------
+- Add Header and Footer support (Thanks to Debby Weinberg)
+
+0.1.11 (2016-03-1)
+------------------
 - '>' and '<' can now be used inside jinja tags
 
-0.1.10 (2016-2-11)
-------------------
+0.1.10 (2016-02-11)
+-------------------
 - render() accepts optionnal jinja_env argument :
   useful to set custom filters and other things
 
-0.1.9 (2016-1-18)
------------------
+0.1.9 (2016-01-18)
+------------------
 - better subdoc management : accept tables
 
 0.1.8 (2015-11-05)

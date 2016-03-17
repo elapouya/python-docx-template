@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.1.11'
+__version__ = '0.2.0'
 
 from lxml import etree
 from docx import Document
@@ -16,6 +16,10 @@ import six
 
 class DocxTemplate(object):
     """ Class for managing docx files as they were jinja2 templates """
+
+    HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
+    FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
+
     def __init__(self, docx):
         self.docx = Document(docx)
 
@@ -57,7 +61,7 @@ class DocxTemplate(object):
 
         def clean_tags(m):
             return m.group(0).replace(r"&#8216;","'").replace('&lt;','<').replace('&gt;','>')
-        src_xml = re.sub(r'(?<=\{[\{%])([^\}%]*)(?=[\}%]})',clean_tags,src_xml)        
+        src_xml = re.sub(r'(?<=\{[\{%])([^\}%]*)(?=[\}%]})',clean_tags,src_xml)
 
         return src_xml
 
@@ -81,9 +85,32 @@ class DocxTemplate(object):
         body = root.body
         root.replace(body,etree.fromstring(xml))
 
+    def get_headers_footers_xml(self, uri):
+        for relKey, val in self.docx._part._rels.items():
+            if val.reltype == uri:
+                yield relKey, val._target._blob.decode()
+
+    def build_headers_footers_xml(self,context, uri,jinja_env=None):
+        for relKey, xml in self.get_headers_footers_xml(uri):
+            xml = self.patch_xml(xml)
+            xml = self.render_xml(xml, context, jinja_env)
+            yield relKey, xml
+
+    def map_headers_footers_xml(self, relKey, xml):
+        self.docx._part._rels[relKey]._target._blob = xml.encode()
+
     def render(self,context,jinja_env=None):
+        # Body
         xml = self.build_xml(context,jinja_env)
         self.map_xml(xml)
+
+        # Headers
+        for relKey, xml in self.build_headers_footers_xml(context, self.HEADER_URI, jinja_env):
+            self.map_headers_footers_xml(relKey, xml)
+
+        # Footers
+        for relKey, xml in self.build_headers_footers_xml(context, self.FOOTER_URI, jinja_env):
+            self.map_headers_footers_xml(relKey, xml)
 
     def new_subdoc(self):
         return Subdoc(self)

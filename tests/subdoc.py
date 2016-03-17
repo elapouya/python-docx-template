@@ -22,7 +22,7 @@ sd.add_heading('Heading, level 1', level=1)
 sd.add_paragraph('This is an Intense quote', style='IntenseQuote')
 
 sd.add_paragraph('A picture :')
-sd.add_picture('python_logo.png', width=Inches(1.25))
+sd.add_picture('test_files/python_logo.png', width=Inches(1.25))
 
 sd.add_paragraph('A Table :')
 table = sd.add_table(rows=1, cols=3)
@@ -39,7 +39,7 @@ for item in recordset:
     row_cells[1].text = str(item[1])
     row_cells[2].text = item[2]
 
-context = { 
+context = {
     'mysubdoc' : sd,
 }
 
