@@ -5,26 +5,50 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.2.0'
+__version__ = '0.1.11'
 
 from lxml import etree
 from docx import Document
 from jinja2 import Template
+import zipfile
 from cgi import escape
+from StringIO import StringIO
 import re
 import six
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 class DocxTemplate(object):
     """ Class for managing docx files as they were jinja2 templates """
+    def __init__(self, file):
+        self.document = zipfile.ZipFile(file, 'r')
 
-    HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
-    FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
-
-    def __init__(self, docx):
-        self.docx = Document(docx)
+        self.document_part = self.document.read('word/document.xml').decode().encode("utf-8")
+        self.header = self.document.read('word/header1.xml').decode().encode("utf-8") \
+            if 'word/header1.xml' in self.document.namelist() else None
+        self.footer = self.document.read('word/footer1.xml').decode().encode("utf-8") \
+            if 'word/footer1.xml' in self.document.namelist() else None
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
+
+    def save(self, write_file):
+        temp_buffer = StringIO()
+        with zipfile.ZipFile(temp_buffer, 'a', compression=zipfile.ZIP_DEFLATED) as document:
+            for item in self.document.infolist():
+                if item.filename != 'word/document.xml' and item.filename != 'word/header1.xml' \
+                and item.filename != 'word/footer1.xml':
+                    document.writestr(item.filename, (self.document.read(item.filename)))
+
+            document.writestr('word/document.xml', str(self.document_part))
+            if self.header:
+                document.writestr('word/header1.xml', str(self.header))
+            if self.footer:
+                document.writestr('word/footer1.xml', str(self.footer))
+
+        write_file.write(temp_buffer.getvalue())
+        self.document.close()
 
     def get_docx(self):
         return self.docx
@@ -66,6 +90,7 @@ class DocxTemplate(object):
         return src_xml
 
     def render_xml(self,src_xml,context,jinja_env=None):
+        src_xml = src_xml.encode('ascii', 'ignore')
         if jinja_env:
             template = jinja_env.from_string(src_xml)
         else:
@@ -74,43 +99,24 @@ class DocxTemplate(object):
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
 
-    def build_xml(self,context,jinja_env=None):
-        xml = self.get_xml()
+    def build_xml(self, context, xml, jinja_env=None):
         xml = self.patch_xml(xml)
         xml = self.render_xml(xml, context, jinja_env)
         return xml
+
 
     def map_xml(self,xml):
         root = self.docx._element
         body = root.body
         root.replace(body,etree.fromstring(xml))
 
-    def get_headers_footers_xml(self, uri):
-        for relKey, val in self.docx._part._rels.items():
-            if val.reltype == uri:
-                yield relKey, val._target._blob.decode()
-
-    def build_headers_footers_xml(self,context, uri,jinja_env=None):
-        for relKey, xml in self.get_headers_footers_xml(uri):
-            xml = self.patch_xml(xml)
-            xml = self.render_xml(xml, context, jinja_env)
-            yield relKey, xml
-
-    def map_headers_footers_xml(self, relKey, xml):
-        self.docx._part._rels[relKey]._target._blob = xml.encode()
-
     def render(self,context,jinja_env=None):
-        # Body
-        xml = self.build_xml(context,jinja_env)
-        self.map_xml(xml)
+        self.document_part = self.build_xml(context, self.document_part, jinja_env)
+        if self.header:
+            self.header = self.build_xml(context, self.header, jinja_env)
+        if self.footer:
+            self.footer = self.build_xml(context, self.footer, jinja_env)
 
-        # Headers
-        for relKey, xml in self.build_headers_footers_xml(context, self.HEADER_URI, jinja_env):
-            self.map_headers_footers_xml(relKey, xml)
-
-        # Footers
-        for relKey, xml in self.build_headers_footers_xml(context, self.FOOTER_URI, jinja_env):
-            self.map_headers_footers_xml(relKey, xml)
 
     def new_subdoc(self):
         return Subdoc(self)
