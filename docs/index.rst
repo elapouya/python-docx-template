@@ -31,7 +31,7 @@ This package uses 2 major packages :
 
 python-docx-template has been created because python-docx is powerful for creating documents but not for modifying them.
 
-The idea is to begin to create an exemple of the document you want to generate with microsoft word, it can be as complex as you want :
+The idea is to begin to create an example of the document you want to generate with microsoft word, it can be as complex as you want :
 pictures, index tables, footer, header, variables, anything you can do with word.
 Then, as you are still editing the document with microsoft word, you insert jinja2-like tags directly in the document.
 You save the document as a .docx file (xml format) : it will be your .docx template file.
@@ -51,7 +51,7 @@ Restrictions
 
 The usual jinja2 tags, are only to be used inside a same run of a same paragraph, it can not be used across several paragraphs, table rows, runs.
 
-Note : a 'run' for microsoft word is a sequence of characters with the same style. For exemple, if you create a paragraph with all characters the same style :
+Note : a 'run' for microsoft word is a sequence of characters with the same style. For example, if you create a paragraph with all characters the same style :
 word will create internally only one 'run' in the paragraph. Now, if you put in bold a text in the middle of this paragraph, word will transform the previous 'run' into 3 'runs' (normal - bold - normal).
 
 Extensions
@@ -102,16 +102,16 @@ Sub-documents
 -------------
 
 A template variable can contain a complex and built from scratch with python-docx word document.
-To do so, get first a sub-document object from template object and use it as a python-docx document object, see exemple in `tests/subdoc.py`.
+To do so, get first a sub-document object from template object and use it as a python-docx document object, see example in `tests/subdoc.py`.
 
 RichText
 --------
 
-When you use `{{ <var> }}` tag in your template, it will be remplaced by the string contained within `var` variable.
+When you use `{{ <var> }}` tag in your template, it will be replaced by the string contained within `var` variable.
 BUT it will keep the current style.
 If you want to add dynamically changeable style, you have to use both : the `{{r <var> }}` tag AND a RichText object within `var` variable.
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
-( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see exemple in `tests/richtext.py`
+( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 
 Jinja custom filters
 --------------------
@@ -132,7 +132,7 @@ By this way you will be able to add some custom jinja filters::
 Examples
 --------
 
-The best way to see how it works is to read exemples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
+The best way to see how it works is to read examples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
 
 
 
