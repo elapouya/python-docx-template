@@ -76,11 +76,11 @@ As part of jinja2, one can used double braces::
 
    {{ <var> }}
 
-But if `<var>` is an RichText object, you must specify that you are changing the actual 'run' ::
+But if ``<var>`` is an RichText object, you must specify that you are changing the actual 'run' ::
 
    {{r <var> }}
 
-Note the 'r' right after the openning braces
+Note the ``r`` right after the openning braces
 
 Cell color
 ..........
@@ -94,7 +94,7 @@ There is a special case when you want to change the background color of a table 
 Escaping
 ........
 
-In order to display `{%`, `%}`, `{{` or `}}`, one can use ::
+In order to display ``{%``, ``%}``, ``{{`` or ``}}``, one can use ::
 
    {_%, %_}, {_{ or  }_}
 
@@ -107,11 +107,27 @@ To do so, get first a sub-document object from template object and use it as a p
 RichText
 --------
 
-When you use `{{ <var> }}` tag in your template, it will be replaced by the string contained within `var` variable.
+When you use ``{{ <var> }}`` tag in your template, it will be replaced by the string contained within `var` variable.
 BUT it will keep the current style.
-If you want to add dynamically changeable style, you have to use both : the `{{r <var> }}` tag AND a RichText object within `var` variable.
+If you want to add dynamically changeable style, you have to use both : the ``{{r <var> }}`` tag AND a ``RichText`` object within `var` variable.
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
+Instead of using ``RichText()``, one can use its shortcut : ``T()``
+
+Escaping, newline, new paragraph
+--------------------------------
+
+When you use a ``{{ <var> }}``, you are modifying an **XML** word document, this means you cannot use all chars,
+especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. There are 3 ways :
+
+   *  ``context = { 'var':R('my text') }`` and ``{{r <var> }}`` in the template (note the ``r``),
+   *  ``context = { 'var':'my text'}`` and ``{{ <var>|e }}`` in your word template
+   *  ``context = { 'var':escape('my text')}`` and ``{{ <var> }}`` in the template.
+
+The RichText() or R() offers newline and new paragraph feature : just use ``\n`` or ``\a`` in the
+text, they will be converted accordingly.
+
+See tests/escape.py example for more informations.
 
 Jinja custom filters
 --------------------
@@ -140,8 +156,6 @@ The best way to see how it works is to read examples, they are located in `tests
 .. rubric:: Functions index
 
 .. currentmodule:: docxtpl
-
-.. to list all function : grep "def " *.py | sed -e 's,^def ,,' -e 's,(.*,,' | sort
 
 .. rubric:: Functions documentation
 

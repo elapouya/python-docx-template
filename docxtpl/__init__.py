@@ -159,7 +159,7 @@ class RichText(object):
 
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
-        text = escape(text).replace('\n','<w:br/>')
+        text = escape(text).replace('\n','<w:br/>').replace('\a','</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')
 
         prop = u''
 
@@ -190,10 +190,13 @@ class RichText(object):
         self.xml += u'<w:r>'
         if prop:
             self.xml += u'<w:rPr>%s</w:rPr>' % prop
-        self.xml += u'<w:t xml:space="preserve">%s</w:t></w:r>\n' % text
+        self.xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
 
     def __unicode__(self):
         return self.xml
 
     def __str__(self):
         return self.xml
+
+R = RichText
+
