@@ -1,3 +1,8 @@
+0.2.1 (2016-06-11)
+------------------
+- Fix bug where using subdocs is corrupting header and footer in generated docx
+  Thanks to Denny Weinberg for his help.
+
 0.2.0 (2016-03-17)
 ------------------
 - Add Header and Footer support (Thanks to Denny Weinberg)

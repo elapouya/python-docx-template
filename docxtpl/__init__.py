@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 from lxml import etree
 from docx import Document
@@ -127,6 +127,8 @@ class Subdoc(object):
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
+        if self.subdocx._element.body.sectPr is not None:
+            self.subdocx._element.body.remove(self.subdocx._element.body.sectPr)
         xml = re.sub(r'</?w:body[^>]*>','',etree.tostring(self.subdocx._element.body, encoding='unicode', pretty_print=False))
         return xml
 
