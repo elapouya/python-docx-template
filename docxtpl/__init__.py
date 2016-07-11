@@ -20,8 +20,9 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, docx):
+    def __init__(self, docx, encoding=None):
         self.docx = Document(docx)
+        self._encoding = encoding
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -88,7 +89,7 @@ class DocxTemplate(object):
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
             if val.reltype == uri:
-                yield relKey, val._target._blob.decode()
+                yield relKey, val._target._blob.decode(self._encoding)
 
     def build_headers_footers_xml(self,context, uri,jinja_env=None):
         for relKey, xml in self.get_headers_footers_xml(uri):
@@ -97,7 +98,7 @@ class DocxTemplate(object):
             yield relKey, xml
 
     def map_headers_footers_xml(self, relKey, xml):
-        self.docx._part._rels[relKey]._target._blob = xml.encode()
+        self.docx._part._rels[relKey]._target._blob = xml.encode(self._encoding)
 
     def render(self,context,jinja_env=None):
         # Body
