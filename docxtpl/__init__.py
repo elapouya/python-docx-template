@@ -88,16 +88,23 @@ class DocxTemplate(object):
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
             if val.reltype == uri:
-                yield relKey, val._target._blob.decode()
+                yield relKey, val._target._blob
+
+    def get_headers_footers_encoding(self,xml):
+        m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"',xml,re.I)
+        if m:
+            return m.group(1)
+        return 'utf-8'
 
     def build_headers_footers_xml(self,context, uri,jinja_env=None):
         for relKey, xml in self.get_headers_footers_xml(uri):
-            xml = self.patch_xml(xml)
+            encoding = self.get_headers_footers_encoding(xml)
+            xml = self.patch_xml(xml).decode(encoding)
             xml = self.render_xml(xml, context, jinja_env)
-            yield relKey, xml
+            yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
-        self.docx._part._rels[relKey]._target._blob = xml.encode()
+        self.docx._part._rels[relKey]._target._blob = xml
 
     def render(self,context,jinja_env=None):
         # Body
