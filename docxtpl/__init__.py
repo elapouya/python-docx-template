@@ -70,6 +70,7 @@ class DocxTemplate(object):
             template = jinja_env.from_string(src_xml)
         else:
             template = Template(src_xml)
+
         dst_xml = template.render(context)
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
@@ -87,8 +88,8 @@ class DocxTemplate(object):
 
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
-            if val.reltype == uri:
-                yield relKey, val._target._blob.decode()
+            if val.reltype == uri: 
+                yield relKey, val._target._blob.decode('utf-8')
 
     def build_headers_footers_xml(self,context, uri,jinja_env=None):
         for relKey, xml in self.get_headers_footers_xml(uri):
@@ -97,7 +98,7 @@ class DocxTemplate(object):
             yield relKey, xml
 
     def map_headers_footers_xml(self, relKey, xml):
-        self.docx._part._rels[relKey]._target._blob = xml.encode()
+        self.docx._part._rels[relKey]._target._blob = xml.encode('utf-8')
 
     def render(self,context,jinja_env=None):
         # Body
