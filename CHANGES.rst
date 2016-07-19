@@ -1,3 +1,8 @@
+0.2.2 (2016-06-11)
+------------------
+- Fix bug where using utf-8 chracters inside foot or header in .docx template
+  It now detects header/footer encoding automatically
+
 0.2.1 (2016-06-11)
 ------------------
 - Fix bug where using subdocs is corrupting header and footer in generated docx
