@@ -98,8 +98,12 @@ class DocxTemplate(object):
 
     def build_headers_footers_xml(self,context, uri,jinja_env=None):
         for relKey, xml in self.get_headers_footers_xml(uri):
+            if six.PY3:
+                xml = xml.decode('utf-8')
             encoding = self.get_headers_footers_encoding(xml)
-            xml = self.patch_xml(xml).decode(encoding)
+            xml = self.patch_xml(xml)
+            if not six.PY3:
+                xml = xml.decode(encoding)
             xml = self.render_xml(xml, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
