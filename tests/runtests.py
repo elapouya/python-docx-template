@@ -1,12 +1,13 @@
 import subprocess
 import glob
+import six
 
 tests = glob.glob('[A-Za-z]*.py')
 excludes = ['runtests.py']
 
 for test in tests:
     if test not in excludes:
-        print '%s ...' % test
+        six.print_('%s ...' % test)
         subprocess.call(['python','./%s' % test])
 
-print 'Done.'
+six.print_('Done.')
