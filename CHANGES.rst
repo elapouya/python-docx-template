@@ -1,3 +1,7 @@
+0.2.4 (2016-11-30)
+------------------
+- Fix /n in RichText class
+
 0.2.3 (2016-08-09)
 ------------------
 - Add Python 3 support for footer and header
