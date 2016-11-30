@@ -1,3 +1,7 @@
+0.2.3 (2016-06-11)
+------------------
+- Fix \n in RichText objects
+
 0.2.2 (2016-06-11)
 ------------------
 - Fix bug when using utf-8 chracters inside footer or header in .docx template
