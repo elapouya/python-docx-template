@@ -172,7 +172,7 @@ class RichText(object):
 
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
-        text = escape(text).replace('\n','<w:br/>').replace('\a','</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')
+        text = escape(text).replace('\n','</w:t><w:br/><w:t>').replace('\a','</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')
 
         prop = u''
 

@@ -1,7 +1,6 @@
 0.2.3 (2016-08-09)
 ------------------
 - Add Python 3 support for footer and header
-  Thanks to Mattia Larentis for his help.
 
 0.2.2 (2016-06-11)
 ------------------
