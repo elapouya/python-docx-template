@@ -44,6 +44,14 @@ class DocxTemplate(object):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
         src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,src_xml,flags=re.DOTALL)
 
+        # manage table cell colspan
+        def colspan(m):
+            cell_xml = m.group(1) + m.group(3)
+            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>','',cell_xml,flags=re.DOTALL)
+            cell_xml = re.sub(r'<w:gridSpan[^/]*/>','', cell_xml, count=1)
+            return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:gridSpan w:val="{{%s}}"/>' % m.group(2), cell_xml)
+        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*colspan\s+([^%]*)\s*%}(.*?</w:tc>)',colspan,src_xml,flags=re.DOTALL)
+
         # manage table cell background color
         def cellbg(m):
             cell_xml = m.group(1) + m.group(3)
