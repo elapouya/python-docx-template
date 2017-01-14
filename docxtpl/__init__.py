@@ -219,5 +219,19 @@ class RichText(object):
     def __str__(self):
         return self.xml
 
+class InlineImage(object):
+    """ class to generate an inline image
+
+    This is much faster than using Subdoc class.
+    """
+    def __init__(self, tpl, file, width=None, height=None):
+        self.xml = '</w:t></w:r></w:p><w:p><w:r><w:drawing>'+tpl.docx._part.new_pic_inline(file, width,height).xml+'</w:drawing></w:r></w:p><w:p><w:r><w:t>'
+
+    def __unicode__(self):
+        return self.xml
+
+    def __str__(self):
+        return self.xml
+
 R = RichText
 
