@@ -1,3 +1,7 @@
+0.2.5 (2017-01-14)
+------------------
+- Add dynamic colspan tag for tables
+
 0.2.4 (2016-11-30)
 ------------------
 - Fix /n in RichText class

@@ -91,6 +91,16 @@ There is a special case when you want to change the background color of a table 
 
 `<var>` must contain the color's hexadecimal code *without* the hash sign
 
+Column spanning
+...............
+
+If you want to dynamically span a table cell over many column (this is useful when you have a table with a dynamic column count),
+you must put the following tag at the very beginning of the cell to span ::
+
+   {% colspan <var> %}
+
+`<var>` must contain an integer for the number of columns to span. See tests/test_files/dynamic_table.py for an example.
+
 Escaping
 ........
 
