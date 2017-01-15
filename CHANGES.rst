@@ -1,3 +1,7 @@
+0.3.0 (2017-01-15)
+------------------
+- You can now add images directly without using subdoc, it is much more faster.
+
 0.2.5 (2017-01-14)
 ------------------
 - Add dynamic colspan tag for tables

@@ -108,12 +108,6 @@ In order to display ``{%``, ``%}``, ``{{`` or ``}}``, one can use ::
 
    {_%, %_}, {_{ or  }_}
 
-Sub-documents
--------------
-
-A template variable can contain a complex and built from scratch with python-docx word document.
-To do so, get first a sub-document object from template object and use it as a python-docx document object, see example in `tests/subdoc.py`.
-
 RichText
 --------
 
@@ -123,6 +117,24 @@ If you want to add dynamically changeable style, you have to use both : the ``{{
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 Instead of using ``RichText()``, one can use its shortcut : ``T()``
+
+Inline image
+------------
+
+You can dynamically add one or many images into your document (tested with JPEG and PNG files).
+just add ``{{ <var> }}`` tag in your template where ``<var>`` is an instance of doxtpl.InlineImage ::
+
+   myimage = InlineImage(tpl,'test_files/python_logo.png',width=Mm(20))
+
+You just have to specify the template object, the image file path and optionnally width and/or height.
+For height and width you have to use millimeters (Mm), inches (Inches) or points(Pt) class.
+Please see tests/inline_image.py for an example.
+
+Sub-documents
+-------------
+
+A template variable can contain a complex and built from scratch with python-docx word document.
+To do so, get first a sub-document object from template object and use it as a python-docx document object, see example in `tests/subdoc.py`.
 
 Escaping, newline, new paragraph
 --------------------------------

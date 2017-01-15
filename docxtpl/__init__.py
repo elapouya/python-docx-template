@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.2.5'
+__version__ = '0.3.0'
 
 from lxml import etree
 from docx import Document
@@ -225,7 +225,8 @@ class InlineImage(object):
     This is much faster than using Subdoc class.
     """
     def __init__(self, tpl, file, width=None, height=None):
-        self.xml = '</w:t></w:r></w:p><w:p><w:r><w:drawing>'+tpl.docx._part.new_pic_inline(file, width,height).xml+'</w:drawing></w:r></w:p><w:p><w:r><w:t>'
+        image_xml = tpl.docx._part.new_pic_inline(file, width, height).xml
+        self.xml = '</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r><w:t xml:space="preserve">' % image_xml
 
     def __unicode__(self):
         return self.xml
