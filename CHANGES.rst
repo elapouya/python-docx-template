@@ -1,3 +1,7 @@
+0.3.1 (2017-01-16)
+------------------
+- Add PNG & JPEG in tests/test_files/
+
 0.3.0 (2017-01-15)
 ------------------
 - You can now add images directly without using subdoc, it is much more faster.
