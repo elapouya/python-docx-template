@@ -51,6 +51,6 @@ setup(name='docxtpl',
       license='LGPL 2.1',
       packages=['docxtpl'],
       install_requires=['six', 'python-docx', 'jinja2', 'lxml'],
-      extras_require={'docs': ['Sphinx<1.3b', 'sphinxcontrib-napoleon']},
+      extras_require={'docs': ['Sphinx', 'sphinxcontrib-napoleon']},
       eager_resources=['docs'],
       zip_safe=False)

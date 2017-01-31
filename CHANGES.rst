@@ -1,3 +1,7 @@
+0.3.2 (2017-01-16)
+------------------
+- Remove version limitation over sphinx package in setup.py
+
 0.3.1 (2017-01-16)
 ------------------
 - Add PNG & JPEG in tests/test_files/
