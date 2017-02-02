@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.2.4'
+__version__ = '0.3.2'
 
 from lxml import etree
 from docx import Document
@@ -62,7 +62,7 @@ class DocxTemplate(object):
 
         for y in ['tr', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag
-            # by {% xxx %} or {{ xx }} without any surronding xml tags :
+            # by {% xxx %} or {{ xx }} without any surronding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
             src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
@@ -212,6 +212,21 @@ class RichText(object):
         if prop:
             self.xml += u'<w:rPr>%s</w:rPr>' % prop
         self.xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
+
+    def __unicode__(self):
+        return self.xml
+
+    def __str__(self):
+        return self.xml
+
+class InlineImage(object):
+    """ class to generate an inline image
+
+    This is much faster than using Subdoc class.
+    """
+    def __init__(self, tpl, file, width=None, height=None):
+        image_xml = tpl.docx._part.new_pic_inline(file, width, height).xml
+        self.xml = '</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r><w:t xml:space="preserve">' % image_xml
 
     def __unicode__(self):
         return self.xml

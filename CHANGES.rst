@@ -1,3 +1,19 @@
+0.3.2 (2017-01-16)
+------------------
+- Remove version limitation over sphinx package in setup.py
+
+0.3.1 (2017-01-16)
+------------------
+- Add PNG & JPEG in tests/test_files/
+
+0.3.0 (2017-01-15)
+------------------
+- You can now add images directly without using subdoc, it is much more faster.
+
+0.2.5 (2017-01-14)
+------------------
+- Add dynamic colspan tag for tables
+
 0.2.4 (2016-11-30)
 ------------------
 - Fix /n in RichText class
