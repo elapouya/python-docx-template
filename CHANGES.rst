@@ -1,3 +1,7 @@
+0.3.3 (2017-02-07)
+------------------
+- Add {%tc } tags for dynamic table columns (Thanks to majkls23)
+
 0.3.2 (2017-01-16)
 ------------------
 - Remove version limitation over sphinx package in setup.py

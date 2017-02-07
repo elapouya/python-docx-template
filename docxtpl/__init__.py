@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 from lxml import etree
 from docx import Document
@@ -60,7 +60,7 @@ class DocxTemplate(object):
             return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:shd w:val="clear" w:color="auto" w:fill="{{%s}}"/>' % m.group(2), cell_xml)
         src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',cellbg,src_xml,flags=re.DOTALL)
 
-        for y in ['tr', 'p', 'r']:
+        for y in ['tr', 'tc', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag
             # by {% xxx %} or {{ xx }} without any surronding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
@@ -88,10 +88,10 @@ class DocxTemplate(object):
         xml = self.render_xml(xml, context, jinja_env)
         return xml
 
-    def map_xml(self,xml):
+    def map_tree(self, tree):
         root = self.docx._element
         body = root.body
-        root.replace(body,etree.fromstring(xml))
+        root.replace(body, tree)
 
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
@@ -120,8 +120,12 @@ class DocxTemplate(object):
 
     def render(self,context,jinja_env=None):
         # Body
-        xml = self.build_xml(context,jinja_env)
-        self.map_xml(xml)
+        xml_src = self.build_xml(context,jinja_env)
+
+        # fix tables if needed
+        tree = self.fix_tables(xml_src)
+
+        self.map_tree(tree)
 
         # Headers
         for relKey, xml in self.build_headers_footers_xml(context, self.HEADER_URI, jinja_env):
@@ -130,6 +134,43 @@ class DocxTemplate(object):
         # Footers
         for relKey, xml in self.build_headers_footers_xml(context, self.FOOTER_URI, jinja_env):
             self.map_headers_footers_xml(relKey, xml)
+
+    # using of TC tag in for cycle can cause that count of columns does not correspond to
+    # real count of columns in row. This function is able to fix it.
+    def fix_tables(self, xml):
+        tree = etree.fromstring(xml)
+        # get namespace
+        ns = '{' + tree.nsmap['w'] + '}'
+        # walk trough xml and find table
+        for t in tree.iter(ns+'tbl'):
+            tblGrid = t.find(ns+'tblGrid')
+            columns = tblGrid.findall(ns+'gridCol')
+            to_add = 0
+            # walk trough all rows and try to find if there is higher cell count
+            for r in t.iter(ns+'tr'):
+                cells = r.findall(ns+'tc')
+                if (len(columns) + to_add) < len(cells):
+                    to_add = len(cells) - len(columns)
+            # is neccessary to add columns?
+            if to_add > 0:
+                # at first, calculate width of table according to columns
+                # (we want to preserve it)
+                width = 0.0
+                new_average = None
+                for c in columns:
+                    if not c.get(ns+'w') == None:
+                        width += float(c.get(ns+'w'))
+                # try to keep proportion of table
+                if width > 0:
+                    old_average = width / len(columns)
+                    new_average = width / (len(columns) + to_add)
+                    # scale the old columns
+                    for c in columns:
+                        c.set(ns+'w', str(int(float(c.get(ns+'w')) * new_average/old_average)))
+                    # add new columns
+                for i in range(to_add):
+                    etree.SubElement(tblGrid, ns+'gridCol', {ns+'w': str(int(new_average))})
+        return tree
 
     def new_subdoc(self):
         return Subdoc(self)
