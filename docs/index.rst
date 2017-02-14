@@ -117,7 +117,10 @@ BUT it will keep the current style.
 If you want to add dynamically changeable style, you have to use both : the ``{{r <var> }}`` tag AND a ``RichText`` object within `var` variable.
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
-Instead of using ``RichText()``, one can use its shortcut : ``T()``
+Instead of using ``RichText()``, one can use its shortcut : ``R()``
+*Important* : When you use ``{{r }}`` it removes the current character styling from your docx template, this means that if
+you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
+This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
 
 Inline image
 ------------
@@ -137,8 +140,8 @@ Sub-documents
 A template variable can contain a complex and built from scratch with python-docx word document.
 To do so, get first a sub-document object from template object and use it as a python-docx document object, see example in `tests/subdoc.py`.
 
-Escaping, newline, new paragraph
---------------------------------
+Escaping, newline, new paragraph, Listing
+-----------------------------------------
 
 When you use a ``{{ <var> }}``, you are modifying an **XML** word document, this means you cannot use all chars,
 especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. There are 3 ways :
@@ -147,10 +150,20 @@ especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. T
    *  ``context = { 'var':'my text'}`` and ``{{ <var>|e }}`` in your word template
    *  ``context = { 'var':escape('my text')}`` and ``{{ <var> }}`` in the template.
 
-The RichText() or R() offers newline and new paragraph feature : just use ``\n`` or ``\a`` in the
+The ``RichText()`` or ``R()`` offers newline and new paragraph feature : just use ``\n`` or ``\a`` in the
 text, they will be converted accordingly.
 
 See tests/escape.py example for more informations.
+
+Another solution, if you want to include a listing into your document, that is to escape the text and manage \n and \a,
+you can use the ``Listing`` class :
+
+in your python code ::
+
+   context = { 'mylisting':Listing('the listing\nwith\nsome\nlines \a and some paragraph \a and special chars : <>&') }
+
+in your docx template just use ``{{ mylisting }}``
+With ``Listing()``, you will keep the current character styling (except after a ``\a`` as you start a new paragraph).
 
 Jinja custom filters
 --------------------

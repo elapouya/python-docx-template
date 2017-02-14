@@ -1,3 +1,7 @@
+0.3.4 (2017-02-14)
+------------------
+- Add Listing class to manage \n and \a (new paragraph) and escape text AND keep current styling
+
 0.3.3 (2017-02-07)
 ------------------
 - Add {%tc } tags for dynamic table columns (Thanks to majkls23)

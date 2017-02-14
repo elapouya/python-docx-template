@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 from lxml import etree
 from docx import Document
@@ -13,6 +13,9 @@ from jinja2 import Template
 from cgi import escape
 import re
 import six
+
+NEWLINE =  '</w:t><w:br/><w:t xml:space="preserve">'
+NEWPARAGRAPH = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
 
 class DocxTemplate(object):
     """ Class for managing docx files as they were jinja2 templates """
@@ -221,7 +224,7 @@ class RichText(object):
 
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
-        text = escape(text).replace('\n','</w:t><w:br/><w:t>').replace('\a','</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">')
+        text = escape(text).replace('\n',NEWLINE).replace('\a',NEWPARAGRAPH)
 
         prop = u''
 
@@ -260,6 +263,22 @@ class RichText(object):
     def __str__(self):
         return self.xml
 
+R = RichText
+
+class Listing(object):
+    r"""class to manage \n and \a without to use RichText, by this way you keep the current template styling
+
+    use {{ mylisting }} in your template and context={ mylisting:Listing(the_listing_with_newlines) }
+    """
+    def __init__(self, text):
+        self.xml = escape(text).replace('\n',NEWLINE).replace('\a',NEWPARAGRAPH)
+
+    def __unicode__(self):
+        return self.xml
+
+    def __str__(self):
+        return self.xml
+
 class InlineImage(object):
     """ class to generate an inline image
 
@@ -275,5 +294,6 @@ class InlineImage(object):
     def __str__(self):
         return self.xml
 
-R = RichText
+
+
 
