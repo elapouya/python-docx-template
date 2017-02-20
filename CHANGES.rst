@@ -1,3 +1,7 @@
+0.3.5 (2017-02-20)
+------------------
+- Fix bug where one is using '%' (modulo operator) inside a tag
+
 0.3.4 (2017-02-14)
 ------------------
 - Add Listing class to manage \n and \a (new paragraph) and escape text AND keep current styling
