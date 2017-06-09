@@ -29,12 +29,15 @@ class DocxTemplate(object):
     def __getattr__(self, name):
         return getattr(self.docx, name)
 
+    def xml_to_string(self, xml, encoding='unicode'):
+        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
+        return etree.tostring(xml, encoding='unicode', pretty_print=False)
+
     def get_docx(self):
         return self.docx
 
     def get_xml(self):
-        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
-        return etree.tostring(self.docx._element.body, encoding='unicode', pretty_print=False)
+        return self.xml_to_string(self.docx._element.body)
 
     def write_xml(self,filename):
         with open(filename,'w') as fh:
