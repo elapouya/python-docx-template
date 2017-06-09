@@ -9,6 +9,7 @@ __version__ = '0.3.5'
 
 from lxml import etree
 from docx import Document
+from docx.opc.oxml import serialize_part_xml, parse_xml
 from jinja2 import Template
 from cgi import escape
 import re
@@ -102,7 +103,7 @@ class DocxTemplate(object):
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
             if val.reltype == uri:
-                yield relKey, val._target._blob
+                yield relKey, self.xml_to_string(parse_xml(val._target._blob))
 
     def get_headers_footers_encoding(self,xml):
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"',xml,re.I)
