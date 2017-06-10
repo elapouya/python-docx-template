@@ -9,6 +9,7 @@ __version__ = '0.3.5'
 
 from lxml import etree
 from docx import Document
+from docx.opc.oxml import serialize_part_xml, parse_xml
 from jinja2 import Template
 from cgi import escape
 import re
@@ -29,12 +30,15 @@ class DocxTemplate(object):
     def __getattr__(self, name):
         return getattr(self.docx, name)
 
+    def xml_to_string(self, xml, encoding='unicode'):
+        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
+        return etree.tostring(xml, encoding='unicode', pretty_print=False)
+
     def get_docx(self):
         return self.docx
 
     def get_xml(self):
-        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
-        return etree.tostring(self.docx._element.body, encoding='unicode', pretty_print=False)
+        return self.xml_to_string(self.docx._element.body)
 
     def write_xml(self,filename):
         with open(filename,'w') as fh:
@@ -99,7 +103,7 @@ class DocxTemplate(object):
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
             if val.reltype == uri:
-                yield relKey, val._target._blob
+                yield relKey, self.xml_to_string(parse_xml(val._target._blob))
 
     def get_headers_footers_encoding(self,xml):
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"',xml,re.I)
@@ -109,12 +113,8 @@ class DocxTemplate(object):
 
     def build_headers_footers_xml(self,context, uri,jinja_env=None):
         for relKey, xml in self.get_headers_footers_xml(uri):
-            if six.PY3:
-                xml = xml.decode('utf-8')
             encoding = self.get_headers_footers_encoding(xml)
             xml = self.patch_xml(xml)
-            if not six.PY3:
-                xml = xml.decode(encoding)
             xml = self.render_xml(xml, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
