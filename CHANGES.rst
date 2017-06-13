@@ -1,3 +1,12 @@
+0.3.7 (2017-06-13)
+------------------
+- Fix git tag v0.3.6 was in fact for 0.3.5 package version
+  so create a tag 0.3.7 for 0.3.7 package version
+
+0.3.6 (2017-06-10)
+------------------
+- Better head/footer jinja2 handling (Thanks to hugokernel)
+
 0.3.5 (2017-02-20)
 ------------------
 - Fix bug where one is using '%' (modulo operator) inside a tag
