@@ -1,3 +1,7 @@
+0.3.8 (2017-06-20)
+------------------
+- Fix bug when using more than one {{r }} or {%r %} in the same run
+
 0.3.7 (2017-06-13)
 ------------------
 - Fix git tag v0.3.6 was in fact for 0.3.5 package version
