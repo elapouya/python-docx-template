@@ -1,3 +1,7 @@
+0.3.9 (2017-06-27)
+------------------
+- Fix exception in fix_table()
+
 0.3.8 (2017-06-20)
 ------------------
 - Fix bug when using more than one {{r }} or {%r %} in the same run

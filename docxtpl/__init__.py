@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.3.8'
+__version__ = '0.3.9'
 
 from lxml import etree
 from docx import Document
@@ -174,8 +174,8 @@ class DocxTemplate(object):
                     for c in columns:
                         c.set(ns+'w', str(int(float(c.get(ns+'w')) * new_average/old_average)))
                     # add new columns
-                for i in range(to_add):
-                    etree.SubElement(tblGrid, ns+'gridCol', {ns+'w': str(int(new_average))})
+                    for i in range(to_add):
+                        etree.SubElement(tblGrid, ns+'gridCol', {ns+'w': str(int(new_average))})
         return tree
 
     def new_subdoc(self):
