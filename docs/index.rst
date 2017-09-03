@@ -165,6 +165,20 @@ in your python code ::
 in your docx template just use ``{{ mylisting }}``
 With ``Listing()``, you will keep the current character styling (except after a ``\a`` as you start a new paragraph).
 
+Replace docx medias
+-------------------
+
+It is not possible to dynamically add images in header/footer, but you can change them.
+The idea is to put a dummy picture in your template, render the template as usual, then replace the dummy picture with another one.
+You can do that for all medias at the same time.
+Note: for images, the aspect ratio will be the same as the replaced image
+Note2 : it is important to have the source media files as they are required to calculate their CRC to find them in the docx
+
+Syntax to replace dummy_header_pic.jpg and dummy2.jpg in mydoc.docx::
+
+   replace_medias('mydoc.docx',[('dummy_header_pic.jpg','header_pic_i_want.jpg'),('dummy2.png','mycompany.png')])
+
+
 Jinja custom filters
 --------------------
 

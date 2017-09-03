@@ -1,3 +1,7 @@
+0.4.0 (2017-09-03)
+------------------
+- Add replace_medias() utility (useful for header/footer images)
+
 0.3.9 (2017-06-27)
 ------------------
 - Fix exception in fix_table()

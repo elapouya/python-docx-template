@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.3.9'
+__version__ = '0.4.0'
 
 from lxml import etree
 from docx import Document
@@ -14,6 +14,9 @@ from jinja2 import Template
 from cgi import escape
 import re
 import six
+import binascii
+import os
+import zipfile
 
 NEWLINE =  '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -297,6 +300,35 @@ class InlineImage(object):
     def __str__(self):
         return self.xml
 
+def replace_medias(docx_filename,src_dst_lst):
+    """Utility function replace any media by another into a docx
 
+    This has been done mainly because it is not possible to add images in docx header/footer.
+    With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
 
+    Syntax: replace_medias('mydoc.docx',[('dummy_header_pic.jpg','header_pic_i_want.jpg'),('dummy2.png','mycompany.png')])
 
+    Note: for images, the aspect ratio will be the same as the replaced image
+    Note2 : it is important to have the source media files as they are required to calculate their CRC to find them in the docx
+    """
+    crc_to_new_media = {}
+    for src,dst in src_dst_lst:
+        with open(src,'rb') as fh:
+            buf = fh.read()
+            crc = (binascii.crc32(buf) & 0xFFFFFFFF)
+        with open(dst,'rb') as fh:
+            crc_to_new_media[crc] = fh.read()
+
+    backup_filename = '%s_before_replace_medias' % docx_filename
+    os.rename(docx_filename,backup_filename)
+
+    with zipfile.ZipFile(backup_filename) as zin:
+        with zipfile.ZipFile(docx_filename, 'w') as zout:
+            for item in zin.infolist():
+                buf = zin.read(item.filename)
+                if item.filename.startswith('word/media/') and item.CRC in crc_to_new_media:
+                    zout.writestr(item, crc_to_new_media[item.CRC])
+                else:
+                    zout.writestr(item, buf)
+
+    os.remove(backup_filename)
