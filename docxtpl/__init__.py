@@ -29,6 +29,8 @@ class DocxTemplate(object):
 
     def __init__(self, docx):
         self.docx = Document(docx)
+        self.crc_to_new_media = {}
+        self.crc_to_new_embedded = {}
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -184,6 +186,65 @@ class DocxTemplate(object):
     def new_subdoc(self):
         return Subdoc(self)
 
+    @staticmethod
+    def get_file_crc(filename):
+        with open(filename, 'rb') as fh:
+            buf = fh.read()
+            crc = (binascii.crc32(buf) & 0xFFFFFFFF)
+        return crc
+
+    def replace_media(self,src_file,dst_file):
+        """Replace one media by another one into a docx
+
+        This has been done mainly because it is not possible to add images in docx header/footer.
+        With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
+
+        Syntax: tpl.replace_media('dummy_media_to_replace.png','media_to_paste.jpg')
+
+        Note: for images, the aspect ratio will be the same as the replaced image
+        Note2 : it is important to have the source media file as it is required to calculate its CRC to find them in the docx
+        """
+        with open(dst_file, 'rb') as fh:
+            crc = self.get_file_crc(src_file)
+            self.crc_to_new_media[crc] = fh.read()
+
+    def replace_embedded(self,src_file,dst_file):
+        """Replace one embdded object by another one into a docx
+
+        This has been done mainly because it is not possible to add images in docx header/footer.
+        With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
+
+        Syntax: tpl.replace_embedded('dummy_doc.docx','doc_to_paste.docx')
+
+        Note2 : it is important to have the source file as it is required to calculate its CRC to find them in the docx
+        """
+        with open(dst_file, 'rb') as fh:
+            crc = self.get_file_crc(src_file)
+            self.crc_to_new_embedded[crc] = fh.read()
+
+    def post_processing(self,docx_filename):
+        if self.crc_to_new_media or self.crc_to_new_embedded:
+            backup_filename = '%s_docxtpl_before_replace_medias' % docx_filename
+            os.rename(docx_filename,backup_filename)
+
+            with zipfile.ZipFile(backup_filename) as zin:
+                with zipfile.ZipFile(docx_filename, 'w') as zout:
+                    for item in zin.infolist():
+                        buf = zin.read(item.filename)
+                        if item.filename.startswith('word/media/') and item.CRC in self.crc_to_new_media:
+                            zout.writestr(item, self.crc_to_new_media[item.CRC])
+                        elif item.filename.startswith('word/embeddings/') and item.CRC in self.crc_to_new_embedded:
+                            zout.writestr(item, self.crc_to_new_embedded[item.CRC])
+                        else:
+                            zout.writestr(item, buf)
+
+            os.remove(backup_filename)
+
+    def save(self,filename,*args,**kwargs):
+        self.docx.save(filename,*args,**kwargs)
+        self.post_processing(filename)
+
+
 class Subdoc(object):
     """ Class for subdocument to insert into master document """
     def __init__(self, tpl):
@@ -299,36 +360,3 @@ class InlineImage(object):
 
     def __str__(self):
         return self.xml
-
-def replace_medias(docx_filename,src_dst_lst):
-    """Utility function replace any media by another into a docx
-
-    This has been done mainly because it is not possible to add images in docx header/footer.
-    With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
-
-    Syntax: replace_medias('mydoc.docx',[('dummy_header_pic.jpg','header_pic_i_want.jpg'),('dummy2.png','mycompany.png')])
-
-    Note: for images, the aspect ratio will be the same as the replaced image
-    Note2 : it is important to have the source media files as they are required to calculate their CRC to find them in the docx
-    """
-    crc_to_new_media = {}
-    for src,dst in src_dst_lst:
-        with open(src,'rb') as fh:
-            buf = fh.read()
-            crc = (binascii.crc32(buf) & 0xFFFFFFFF)
-        with open(dst,'rb') as fh:
-            crc_to_new_media[crc] = fh.read()
-
-    backup_filename = '%s_before_replace_medias' % docx_filename
-    os.rename(docx_filename,backup_filename)
-
-    with zipfile.ZipFile(backup_filename) as zin:
-        with zipfile.ZipFile(docx_filename, 'w') as zout:
-            for item in zin.infolist():
-                buf = zin.read(item.filename)
-                if item.filename.startswith('word/media/') and item.CRC in crc_to_new_media:
-                    zout.writestr(item, crc_to_new_media[item.CRC])
-                else:
-                    zout.writestr(item, buf)
-
-    os.remove(backup_filename)

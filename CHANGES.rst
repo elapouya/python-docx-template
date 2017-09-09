@@ -1,6 +1,7 @@
-0.4.0 (2017-09-03)
+0.4.0 (2017-09-09)
 ------------------
-- Add replace_medias() utility (useful for header/footer images)
+- Add replace_media() method (useful for header/footer images)
+- Add replace_embedded() method (useful for embedding docx)
 
 0.3.9 (2017-06-27)
 ------------------
