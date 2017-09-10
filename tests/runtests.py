@@ -2,7 +2,7 @@ import subprocess
 import glob
 import six
 
-tests = glob.glob('[A-Za-z]*.py')
+tests = sorted(glob.glob('[A-Za-z]*.py'))
 excludes = ['runtests.py']
 
 for test in tests:

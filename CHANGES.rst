@@ -1,3 +1,12 @@
+0.4.0 (2017-09-09)
+------------------
+- Add replace_media() method (useful for header/footer images)
+- Add replace_embedded() method (useful for embedding docx)
+
+0.3.9 (2017-06-27)
+------------------
+- Fix exception in fix_table()
+
 0.3.8 (2017-06-20)
 ------------------
 - Fix bug when using more than one {{r }} or {%r %} in the same run

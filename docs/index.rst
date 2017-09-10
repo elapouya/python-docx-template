@@ -165,6 +165,37 @@ in your python code ::
 in your docx template just use ``{{ mylisting }}``
 With ``Listing()``, you will keep the current character styling (except after a ``\a`` as you start a new paragraph).
 
+Replace docx medias
+-------------------
+
+It is not possible to dynamically add images in header/footer, but you can change them.
+The idea is to put a dummy picture in your template, render the template as usual, then replace the dummy picture with another one.
+You can do that for all medias at the same time.
+Note: for images, the aspect ratio will be the same as the replaced image
+Note2 : it is important to have the source media files as they are required to calculate their CRC to find them in the docx.
+(dummy file name is not important)
+
+Syntax to replace dummy_header_pic.jpg::
+
+   tpl.replace_media('dummy_header_pic.jpg','header_pic_i_want.jpg')
+
+
+dummy_header_pic.jpg must exist in the template directory when rendering and saving the generated docx. It must be the same
+file as the one inserted manually in the docx template.
+
+Replace embedded objects
+------------------------
+
+It works like medias replacement, except it is for embedded objects like embedded docx.
+
+Syntax to replace embedded_dummy.docx::
+
+   tpl.replace_embedded('embdded_dummy.docx','embdded_docx_i_want.docx')
+
+
+embdded_dummy.docx must exist in the template directory when rendering and saving the generated docx. It must be the same
+file as the one inserted manually in the docx template.
+
 Jinja custom filters
 --------------------
 
@@ -186,7 +217,10 @@ Examples
 
 The best way to see how it works is to read examples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
 
+Share
+-----
 
+If you like this project, please rate and share it here : http://rate.re/github/elapouya/python-docx-template
 
 
 .. rubric:: Functions index
