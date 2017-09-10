@@ -1,3 +1,7 @@
+0.4.1 (2017-09-10)
+------------------
+- Improve image attachment for InlineImage ojects
+
 0.4.0 (2017-09-09)
 ------------------
 - Add replace_media() method (useful for header/footer images)
