@@ -42,6 +42,14 @@ class DocxTemplate(object):
     def get_docx(self):
         return self.docx
 
+    def get_variables(self):
+        doc_tags = []
+        for p in self.docx.paragraphs:
+            tags = re.findall(r'\{\{(.+?)\}\}', p.text)
+            for tag in tags:
+                doc_tags.append(tag.replace(' ', ''))
+        return doc_tags
+
     def get_xml(self):
         return self.xml_to_string(self.docx._element.body)
 
