@@ -10,6 +10,8 @@ __version__ = '0.4.1'
 from lxml import etree
 from docx import Document
 from docx.opc.oxml import serialize_part_xml, parse_xml
+import docx.oxml.ns
+from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
 from cgi import escape
 import re
@@ -31,6 +33,7 @@ class DocxTemplate(object):
         self.docx = Document(docx)
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
+        self.media_to_replace = {}
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -208,6 +211,24 @@ class DocxTemplate(object):
             crc = self.get_file_crc(src_file)
             self.crc_to_new_media[crc] = fh.read()
 
+    def replace_pic(self,embedded_file,dst_file):
+        """Replace embedded picture with original-name <<embedded_file>> with picture contained in dst_file
+
+        Note: for images, the aspect ratio will be the same as the replaced image
+        Note2: embedded_file and dst_file must have the same extension/format
+
+        Oct 2017 by Riccardo Gusmeroli - riccardo.gusmeroli@polimi.it
+        """
+
+        emp_path,emb_ext=os.path.splitext(embedded_file)
+        dst_path,dst_ext=os.path.splitext(dst_file)
+
+        if emb_ext!=dst_ext:
+            raise ValueError('replace_pic: extensions must match')
+
+        with open(dst_file, 'rb') as fh:
+            self.media_to_replace[embedded_file]=fh.read()
+
     def replace_embedded(self,src_file,dst_file):
         """Replace one embdded object by another one into a docx
 
@@ -240,7 +261,60 @@ class DocxTemplate(object):
 
             os.remove(backup_filename)
 
+    def pre_processing(self):
+
+        if self.media_to_replace:
+
+            pic_map={}
+
+            # Main document
+            part=self.docx.part
+            pic_map.update(self._img_filename_to_part(part))
+
+            # Header/Footer
+            for relid, rel in self.docx.part.rels.iteritems():
+                if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
+                    pic_map.update(self._img_filename_to_part(rel.target_part))
+
+            # Do the actual replacement
+            for embedded_file,stream in self.media_to_replace.iteritems():
+                pic_map[embedded_file][1]._blob=stream
+
+    def _img_filename_to_part(self,doc_part):
+
+        et=etree.fromstring(doc_part.blob)
+
+        part_map={}
+
+        vinl=et.xpath('//w:p/w:r/w:drawing/wp:inline',namespaces=docx.oxml.ns.nsmap)
+        for inl in vinl:
+            rel=None
+            # Either IMAGE, CHART, SMART_ART, ...
+            try:
+                gd=inl.xpath('a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)[0]
+                if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
+                    # Either PICTURE or LINKED_PICTURE image
+                    blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
+                    dest=blip.xpath('@r:embed',namespaces=docx.oxml.ns.nsmap)
+                    if len(dest)>0:
+                        rel=dest[0]
+                    else:
+                        continue
+                else:
+                    continue
+
+                #title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
+                name=gd.xpath('pic:pic/pic:nvPicPr/pic:cNvPr/@name',namespaces=docx.oxml.ns.nsmap)[0]
+
+                part_map[name]=(doc_part.rels[rel].target_ref,doc_part.rels[rel].target_part)
+
+            except:
+                continue
+
+        return part_map
+
     def save(self,filename,*args,**kwargs):
+        self.pre_processing()
         self.docx.save(filename,*args,**kwargs)
         self.post_processing(filename)
 
@@ -253,7 +327,7 @@ class Subdoc(object):
         self.subdocx = Document()
         self.subdocx._part = self.docx._part
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) :
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
@@ -375,3 +449,78 @@ class InlineImage(object):
 
     def __str__(self):
         return self._insert_image()
+
+
+
+##def img_title_to_part(doc_part):
+##
+##    et=etree.fromstring(doc_part.blob)
+##
+##    ris={}
+##
+##    vinl=et.xpath('//w:p/w:r/w:drawing/wp:inline',namespaces=docx.oxml.ns.nsmap)
+##    for inl in vinl:
+##        rel=None
+##        # Either IMAGE, CHART, SMART_ART, ...
+##        try:
+##            gd=inl.xpath('a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)[0]
+##            if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
+##                # Either PICTURE or LINKED_PICTURE image
+##                blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
+##                dest=blip.xpath('@r:embed',namespaces=docx.oxml.ns.nsmap)
+##                if len(dest)>0:
+##                    rel=dest[0]
+##                else:
+##                    continue
+##            else:
+##                continue
+##
+##            title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
+##
+##            ris[title]=(et,doc_part,blip,doc_part.rels[rel].target_ref,doc_part.rels[rel].target_part)
+##
+##        except:
+##            continue
+##
+##    return ris
+##
+##if __name__ == '__main__':
+##
+##    doc=DocxTemplate(r'..\templates\test.docx' )
+##
+##    ris={}
+##
+##    part=doc.docx.part
+##    ris.update(img_title_to_part(part))
+##
+##    for relid, rel in doc.docx.part.rels.iteritems():
+##        if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
+##            ris.update(img_title_to_part(rel.target_part))
+##
+##    #ris['TIT'][1]._blob=open(r'C:\Users\riccardo.DEMETRA\Desktop\sitoGoogle\marchiopillola_zamparini.png','rb').read()
+##
+##    et,doc_part,blip,target_rel,target_part=ris['TIT']
+##    rId, image = doc_part.get_or_add_image(r'C:\Users\riccardo.DEMETRA\Desktop\sitoGoogle\fe-q.jpg')
+##
+##    doc.save('test2.docx')
+
+##class InsertImage():
+##    def __init__(self,data_doc,template):
+##        doc = docx.Document(data_doc)
+##        template_doc = docx.Document(template)
+##        for i, shape in enumerate(template_doc.inline_shapes):
+##            if shape.type == WD_INLINE_SHAPE.PICTURE:
+##                print 'i= %d, Shape is an embedded picture' %(i)
+##                assert shape.type == WD_INLINE_SHAPE.PICTURE
+##                inline = shape._inline
+##                rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
+##                image_part = doc._document_part.related_parts[rId]
+##                image_bytes = image_part.blob
+##                image_stream = BytesIO(image_bytes)
+##                template_doc.add_picture(image_stream)
+##                image_filename = image_part.filename
+##            elif shape.type == WD_INLINE_SHAPE.LINKED_PICTURE:
+##                print 'i= %d, Shape is a picture, but actual image file is not in this package' %(i)
+##            else:
+##                print 'i= %d, Shape is not a picture, got %s'  %(i, shape.type)
+##        template_doc.save(template)
