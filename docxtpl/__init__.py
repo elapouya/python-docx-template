@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 from lxml import etree
 from docx import Document
@@ -33,7 +33,7 @@ class DocxTemplate(object):
         self.docx = Document(docx)
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
-        self.media_to_replace = {}
+        self.pic_to_replace = {}
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -213,15 +213,13 @@ class DocxTemplate(object):
 
     def replace_pic(self,embedded_file,dst_file):
         """Replace embedded picture with original-name given by embedded_file.
+           (give only the file basename, not the full path)
            The new picture is given by dst_file.
 
         Notes:
             1) embedded_file and dst_file must have the same extension/format
             2) the aspect ratio will be the same as the replaced image
-            3) There is no need to keep the original file name (compare
-               function replace_embedded).
-
-        Oct 2017 - Riccardo Gusmeroli - riccardo.gusmeroli@polimi.it
+            3) There is no need to keep the original file (this is not the case for replace_embedded and replace_media)
         """
 
         emp_path,emb_ext=os.path.splitext(embedded_file)
@@ -231,7 +229,7 @@ class DocxTemplate(object):
             raise ValueError('replace_pic: extensions must match')
 
         with open(dst_file, 'rb') as fh:
-            self.media_to_replace[embedded_file]=fh.read()
+            self.pic_to_replace[embedded_file]=fh.read()
 
     def replace_embedded(self,src_file,dst_file):
         """Replace one embdded object by another one into a docx
@@ -267,7 +265,7 @@ class DocxTemplate(object):
 
     def pre_processing(self):
 
-        if self.media_to_replace:
+        if self.pic_to_replace:
 
             pic_map={}
 
@@ -281,7 +279,9 @@ class DocxTemplate(object):
                     pic_map.update(self._img_filename_to_part(rel.target_part))
 
             # Do the actual replacement
-            for embedded_file,stream in self.media_to_replace.iteritems():
+            for embedded_file,stream in self.pic_to_replace.iteritems():
+                if embedded_file not in pic_map:
+                    raise ValueError('Picture "%s" not found in the docx template' % embedded_file)
                 pic_map[embedded_file][1]._blob=stream
 
     def _img_filename_to_part(self,doc_part):

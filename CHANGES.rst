@@ -1,3 +1,7 @@
+0.4.2 (2017-10-05)
+------------------
+- Add replace_pic() method to replace pictures from its filename (Thanks to Riccardo Gusmeroli)
+
 0.4.1 (2017-09-10)
 ------------------
 - Improve image attachment for InlineImage ojects
