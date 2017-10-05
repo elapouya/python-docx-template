@@ -212,12 +212,16 @@ class DocxTemplate(object):
             self.crc_to_new_media[crc] = fh.read()
 
     def replace_pic(self,embedded_file,dst_file):
-        """Replace embedded picture with original-name <<embedded_file>> with picture contained in dst_file
+        """Replace embedded picture with original-name given by embedded_file.
+           The new picture is given by dst_file.
 
-        Note: for images, the aspect ratio will be the same as the replaced image
-        Note2: embedded_file and dst_file must have the same extension/format
+        Notes:
+            1) embedded_file and dst_file must have the same extension/format
+            2) the aspect ratio will be the same as the replaced image
+            3) There is no need to keep the original file name (compare
+               function replace_embedded).
 
-        Oct 2017 by Riccardo Gusmeroli - riccardo.gusmeroli@polimi.it
+        Oct 2017 - Riccardo Gusmeroli - riccardo.gusmeroli@polimi.it
         """
 
         emp_path,emb_ext=os.path.splitext(embedded_file)
@@ -452,75 +456,3 @@ class InlineImage(object):
 
 
 
-##def img_title_to_part(doc_part):
-##
-##    et=etree.fromstring(doc_part.blob)
-##
-##    ris={}
-##
-##    vinl=et.xpath('//w:p/w:r/w:drawing/wp:inline',namespaces=docx.oxml.ns.nsmap)
-##    for inl in vinl:
-##        rel=None
-##        # Either IMAGE, CHART, SMART_ART, ...
-##        try:
-##            gd=inl.xpath('a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)[0]
-##            if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
-##                # Either PICTURE or LINKED_PICTURE image
-##                blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
-##                dest=blip.xpath('@r:embed',namespaces=docx.oxml.ns.nsmap)
-##                if len(dest)>0:
-##                    rel=dest[0]
-##                else:
-##                    continue
-##            else:
-##                continue
-##
-##            title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
-##
-##            ris[title]=(et,doc_part,blip,doc_part.rels[rel].target_ref,doc_part.rels[rel].target_part)
-##
-##        except:
-##            continue
-##
-##    return ris
-##
-##if __name__ == '__main__':
-##
-##    doc=DocxTemplate(r'..\templates\test.docx' )
-##
-##    ris={}
-##
-##    part=doc.docx.part
-##    ris.update(img_title_to_part(part))
-##
-##    for relid, rel in doc.docx.part.rels.iteritems():
-##        if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
-##            ris.update(img_title_to_part(rel.target_part))
-##
-##    #ris['TIT'][1]._blob=open(r'C:\Users\riccardo.DEMETRA\Desktop\sitoGoogle\marchiopillola_zamparini.png','rb').read()
-##
-##    et,doc_part,blip,target_rel,target_part=ris['TIT']
-##    rId, image = doc_part.get_or_add_image(r'C:\Users\riccardo.DEMETRA\Desktop\sitoGoogle\fe-q.jpg')
-##
-##    doc.save('test2.docx')
-
-##class InsertImage():
-##    def __init__(self,data_doc,template):
-##        doc = docx.Document(data_doc)
-##        template_doc = docx.Document(template)
-##        for i, shape in enumerate(template_doc.inline_shapes):
-##            if shape.type == WD_INLINE_SHAPE.PICTURE:
-##                print 'i= %d, Shape is an embedded picture' %(i)
-##                assert shape.type == WD_INLINE_SHAPE.PICTURE
-##                inline = shape._inline
-##                rId = inline.xpath('./a:graphic/a:graphicData/pic:pic/pic:blipFill/a:blip/@r:embed')[0]
-##                image_part = doc._document_part.related_parts[rId]
-##                image_bytes = image_part.blob
-##                image_stream = BytesIO(image_bytes)
-##                template_doc.add_picture(image_stream)
-##                image_filename = image_part.filename
-##            elif shape.type == WD_INLINE_SHAPE.LINKED_PICTURE:
-##                print 'i= %d, Shape is a picture, but actual image file is not in this package' %(i)
-##            else:
-##                print 'i= %d, Shape is not a picture, got %s'  %(i, shape.type)
-##        template_doc.save(template)
