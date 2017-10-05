@@ -10,6 +10,8 @@ __version__ = '0.4.1'
 from lxml import etree
 from docx import Document
 from docx.opc.oxml import serialize_part_xml, parse_xml
+import docx.oxml.ns
+from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
 from cgi import escape
 import re
@@ -31,6 +33,7 @@ class DocxTemplate(object):
         self.docx = Document(docx)
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
+        self.media_to_replace = {}
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -208,6 +211,28 @@ class DocxTemplate(object):
             crc = self.get_file_crc(src_file)
             self.crc_to_new_media[crc] = fh.read()
 
+    def replace_pic(self,embedded_file,dst_file):
+        """Replace embedded picture with original-name given by embedded_file.
+           The new picture is given by dst_file.
+
+        Notes:
+            1) embedded_file and dst_file must have the same extension/format
+            2) the aspect ratio will be the same as the replaced image
+            3) There is no need to keep the original file name (compare
+               function replace_embedded).
+
+        Oct 2017 - Riccardo Gusmeroli - riccardo.gusmeroli@polimi.it
+        """
+
+        emp_path,emb_ext=os.path.splitext(embedded_file)
+        dst_path,dst_ext=os.path.splitext(dst_file)
+
+        if emb_ext!=dst_ext:
+            raise ValueError('replace_pic: extensions must match')
+
+        with open(dst_file, 'rb') as fh:
+            self.media_to_replace[embedded_file]=fh.read()
+
     def replace_embedded(self,src_file,dst_file):
         """Replace one embdded object by another one into a docx
 
@@ -240,7 +265,60 @@ class DocxTemplate(object):
 
             os.remove(backup_filename)
 
+    def pre_processing(self):
+
+        if self.media_to_replace:
+
+            pic_map={}
+
+            # Main document
+            part=self.docx.part
+            pic_map.update(self._img_filename_to_part(part))
+
+            # Header/Footer
+            for relid, rel in self.docx.part.rels.iteritems():
+                if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
+                    pic_map.update(self._img_filename_to_part(rel.target_part))
+
+            # Do the actual replacement
+            for embedded_file,stream in self.media_to_replace.iteritems():
+                pic_map[embedded_file][1]._blob=stream
+
+    def _img_filename_to_part(self,doc_part):
+
+        et=etree.fromstring(doc_part.blob)
+
+        part_map={}
+
+        vinl=et.xpath('//w:p/w:r/w:drawing/wp:inline',namespaces=docx.oxml.ns.nsmap)
+        for inl in vinl:
+            rel=None
+            # Either IMAGE, CHART, SMART_ART, ...
+            try:
+                gd=inl.xpath('a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)[0]
+                if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
+                    # Either PICTURE or LINKED_PICTURE image
+                    blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
+                    dest=blip.xpath('@r:embed',namespaces=docx.oxml.ns.nsmap)
+                    if len(dest)>0:
+                        rel=dest[0]
+                    else:
+                        continue
+                else:
+                    continue
+
+                #title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
+                name=gd.xpath('pic:pic/pic:nvPicPr/pic:cNvPr/@name',namespaces=docx.oxml.ns.nsmap)[0]
+
+                part_map[name]=(doc_part.rels[rel].target_ref,doc_part.rels[rel].target_part)
+
+            except:
+                continue
+
+        return part_map
+
     def save(self,filename,*args,**kwargs):
+        self.pre_processing()
         self.docx.save(filename,*args,**kwargs)
         self.post_processing(filename)
 
@@ -253,7 +331,7 @@ class Subdoc(object):
         self.subdocx = Document()
         self.subdocx._part = self.docx._part
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) :
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
@@ -375,3 +453,6 @@ class InlineImage(object):
 
     def __str__(self):
         return self._insert_image()
+
+
+
