@@ -214,22 +214,29 @@ class DocxTemplate(object):
     def replace_pic(self,embedded_file,dst_file):
         """Replace embedded picture with original-name given by embedded_file.
            (give only the file basename, not the full path)
-           The new picture is given by dst_file.
+           The new picture is given by dst_file (either a filename or a file-like
+           object)
 
         Notes:
             1) embedded_file and dst_file must have the same extension/format
+               in case dst_file is a file-like object, no check is done on
+               format compatibility
             2) the aspect ratio will be the same as the replaced image
             3) There is no need to keep the original file (this is not the case for replace_embedded and replace_media)
         """
 
-        emp_path,emb_ext=os.path.splitext(embedded_file)
-        dst_path,dst_ext=os.path.splitext(dst_file)
+        if hasattr(dst_file,'read'):
+            # NOTE: file extension not checked
+            self.pic_to_replace[embedded_file]=dst_file.read()
+        else:
+            emp_path,emb_ext=os.path.splitext(embedded_file)
+            dst_path,dst_ext=os.path.splitext(dst_file)
 
-        if emb_ext!=dst_ext:
-            raise ValueError('replace_pic: extensions must match')
+            if emb_ext!=dst_ext:
+                raise ValueError('replace_pic: extensions must match')
 
-        with open(dst_file, 'rb') as fh:
-            self.pic_to_replace[embedded_file]=fh.read()
+            with open(dst_file, 'rb') as fh:
+                self.pic_to_replace[embedded_file]=fh.read()
 
     def replace_embedded(self,src_file,dst_file):
         """Replace one embdded object by another one into a docx
