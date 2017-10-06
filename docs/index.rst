@@ -165,11 +165,28 @@ in your python code ::
 in your docx template just use ``{{ mylisting }}``
 With ``Listing()``, you will keep the current character styling (except after a ``\a`` as you start a new paragraph).
 
-Replace docx medias
--------------------
+Replace docx pictures
+---------------------
 
 It is not possible to dynamically add images in header/footer, but you can change them.
 The idea is to put a dummy picture in your template, render the template as usual, then replace the dummy picture with another one.
+You can do that for all medias at the same time.
+Note: the aspect ratio will be the same as the replaced image
+Note2 : Specify the filename that has been used to insert the image in the docx template (only its basename, not the full path)
+
+Syntax to replace dummy_header_pic.jpg::
+
+   tpl.replace_pic('dummy_header_pic.jpg','header_pic_i_want.jpg')
+
+
+The replacement occurs in headers, footers and the whole document's body.
+
+
+Replace docx medias
+-------------------
+
+It is not possible to dynamically add other medias than images in header/footer, but you can change them.
+The idea is to put a dummy media in your template, render the template as usual, then replace the dummy media with another one.
 You can do that for all medias at the same time.
 Note: for images, the aspect ratio will be the same as the replaced image
 Note2 : it is important to have the source media files as they are required to calculate their CRC to find them in the docx.
@@ -180,8 +197,9 @@ Syntax to replace dummy_header_pic.jpg::
    tpl.replace_media('dummy_header_pic.jpg','header_pic_i_want.jpg')
 
 
-dummy_header_pic.jpg must exist in the template directory when rendering and saving the generated docx. It must be the same
+WARNING : unlike replace_pic() method, dummy_header_pic.jpg MUST exist in the template directory when rendering and saving the generated docx. It must be the same
 file as the one inserted manually in the docx template.
+The replacement occurs in headers, footers and the whole document's body.
 
 Replace embedded objects
 ------------------------
@@ -193,8 +211,9 @@ Syntax to replace embedded_dummy.docx::
    tpl.replace_embedded('embdded_dummy.docx','embdded_docx_i_want.docx')
 
 
-embdded_dummy.docx must exist in the template directory when rendering and saving the generated docx. It must be the same
+WARNING : unlike replace_pic() method, embdded_dummy.docx MUST exist in the template directory when rendering and saving the generated docx. It must be the same
 file as the one inserted manually in the docx template.
+The replacement occurs in headers, footers and the whole document's body.
 
 Jinja custom filters
 --------------------
