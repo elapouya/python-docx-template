@@ -19,7 +19,8 @@ context = {
     'in_europe' : True, 
     'is_paid': False,
     'company_name' : 'The World Wide company', 
-    'total_price' : '100,000,000.00' 
+    'total_price' : '100,000,000.00',
+    'category' : 'BOOK'
 }
 
 tpl.render(context)
