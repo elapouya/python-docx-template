@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 
 from lxml import etree
 from docx import Document
@@ -277,7 +277,7 @@ class DocxTemplate(object):
             self.build_pic_map()
 
             # Do the actual replacement
-            for embedded_file,stream in self.pic_to_replace.iteritems():
+            for embedded_file,stream in six.iteritems(self.pic_to_replace):
                 if embedded_file not in self.pic_map:
                     raise ValueError('Picture "%s" not found in the docx template' % embedded_file)
                 self.pic_map[embedded_file][1]._blob=stream
@@ -290,7 +290,7 @@ class DocxTemplate(object):
             self.pic_map.update(self._img_filename_to_part(part))
 
             # Header/Footer
-            for relid, rel in self.docx.part.rels.iteritems():
+            for relid, rel in six.iteritems(self.docx.part.rels):
                 if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
                     self.pic_map.update(self._img_filename_to_part(rel.target_part))
 

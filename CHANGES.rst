@@ -1,3 +1,7 @@
+0.4.4 (2017-10-13)
+------------------
+- use six.iteritems() instead of iteritems for python 3 compatibility
+
 0.4.3 (2017-10-13)
 ------------------
 - Fixed Bug #95 on replace_pic() method
