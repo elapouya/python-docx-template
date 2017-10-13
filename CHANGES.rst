@@ -1,3 +1,7 @@
+0.4.3 (2017-10-13)
+------------------
+- Fixed Bug #95 on replace_pic() method
+
 0.4.2 (2017-10-05)
 ------------------
 - Add replace_pic() method to replace pictures from its filename (Thanks to Riccardo Gusmeroli)

@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 from lxml import etree
 from docx import Document
@@ -34,6 +34,7 @@ class DocxTemplate(object):
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
         self.pic_to_replace = {}
+        self.pic_map = {}
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -273,23 +274,28 @@ class DocxTemplate(object):
     def pre_processing(self):
 
         if self.pic_to_replace:
+            self.build_pic_map()
 
-            pic_map={}
+            # Do the actual replacement
+            for embedded_file,stream in self.pic_to_replace.iteritems():
+                if embedded_file not in self.pic_map:
+                    raise ValueError('Picture "%s" not found in the docx template' % embedded_file)
+                self.pic_map[embedded_file][1]._blob=stream
 
+    def build_pic_map(self):
+        """Searches in docx template all the xml pictures tag and store them in pic_map dict"""
+        if self.pic_to_replace:
             # Main document
             part=self.docx.part
-            pic_map.update(self._img_filename_to_part(part))
+            self.pic_map.update(self._img_filename_to_part(part))
 
             # Header/Footer
             for relid, rel in self.docx.part.rels.iteritems():
                 if rel.reltype in (REL_TYPE.HEADER,REL_TYPE.FOOTER):
-                    pic_map.update(self._img_filename_to_part(rel.target_part))
+                    self.pic_map.update(self._img_filename_to_part(rel.target_part))
 
-            # Do the actual replacement
-            for embedded_file,stream in self.pic_to_replace.iteritems():
-                if embedded_file not in pic_map:
-                    raise ValueError('Picture "%s" not found in the docx template' % embedded_file)
-                pic_map[embedded_file][1]._blob=stream
+    def get_pic_map(self):
+        return self.pic_map
 
     def _img_filename_to_part(self,doc_part):
 
@@ -297,12 +303,11 @@ class DocxTemplate(object):
 
         part_map={}
 
-        vinl=et.xpath('//w:p/w:r/w:drawing/wp:inline',namespaces=docx.oxml.ns.nsmap)
-        for inl in vinl:
+        gds=et.xpath('//a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)
+        for gd in gds:
             rel=None
             # Either IMAGE, CHART, SMART_ART, ...
             try:
-                gd=inl.xpath('a:graphic/a:graphicData',namespaces=docx.oxml.ns.nsmap)[0]
                 if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
                     # Either PICTURE or LINKED_PICTURE image
                     blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
