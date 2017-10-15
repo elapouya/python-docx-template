@@ -215,6 +215,17 @@ WARNING : unlike replace_pic() method, embdded_dummy.docx MUST exist in the temp
 file as the one inserted manually in the docx template.
 The replacement occurs in headers, footers and the whole document's body.
 
+Tables
+------
+
+You can span table cells in two ways, horizontally (see tests/dynamic_table.py) by using::
+
+   {% colspan <number of column to span> %}
+
+or vertically within a for loop (see tests/vertical_merge.py)::
+
+   {% vm %}
+
 Jinja custom filters
 --------------------
 

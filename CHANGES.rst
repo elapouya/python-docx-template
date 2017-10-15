@@ -1,3 +1,7 @@
+0.4.5 (2017-10-15)
+------------------
+- Add {% vm %} to merge cell vertically within a loop (Thanks to Arthaslixin)
+
 0.4.4 (2017-10-13)
 ------------------
 - use six.iteritems() instead of iteritems for python 3 compatibility

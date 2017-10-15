@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.4'
+__version__ = '0.4.5'
 
 from lxml import etree
 from docx import Document
@@ -88,10 +88,10 @@ class DocxTemplate(object):
         
         # add vMerge
         # use {% vm %} to make this table cell and its copies be vertically merged within a {% for %}
-        pat_vm = r'(<\/w:tcPr>.*)(<\/w:tcPr>)(.*?){%vm%}.*?<w:t>(.*?)(<\/w:t>)'
+        pat_vm = r'(<\/w:tcPr>.*)(<\/w:tcPr>)(.*?){%\s*vm\s*%}.*?<w:t>(.*?)(<\/w:t>)'
         def vMerge(m):
             return m.group(1) + '<w:vMerge {% if loop.first %}w:val="restart"{% endif %}/>' + m.group(2) + m.group(3) + "{% if loop.first %}"+ m.group(4) +"{% endif %}" + m.group(5)
-        pat_num_vm = re.compile(r'{%vm%}')
+        pat_num_vm = re.compile(r'{%\s*vm\s*%}')
         num = len(pat_num_vm.findall(src_xml))
         for i in range(0,num):
             src_xml = re.sub(pat_vm,vMerge,src_xml)
@@ -108,6 +108,7 @@ class DocxTemplate(object):
         else:
             template = Template(src_xml)
         dst_xml = template.render(context)
+        print dst_xml
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
 
