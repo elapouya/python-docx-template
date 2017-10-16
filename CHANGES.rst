@@ -1,3 +1,7 @@
+0.4.6 (2017-10-15)
+------------------
+- Remove debug traces
+
 0.4.5 (2017-10-15)
 ------------------
 - Add {% vm %} to merge cell vertically within a loop (Thanks to Arthaslixin)

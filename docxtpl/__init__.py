@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 from lxml import etree
 from docx import Document
@@ -108,7 +108,6 @@ class DocxTemplate(object):
         else:
             template = Template(src_xml)
         dst_xml = template.render(context)
-        print dst_xml
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
 
