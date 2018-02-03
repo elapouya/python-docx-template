@@ -1,3 +1,7 @@
+0.4.7 (2018-02-03)
+------------------
+- Accept variables starting with 'r' in {{}} when no space after {{
+
 0.4.6 (2017-10-15)
 ------------------
 - Remove debug traces

@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.6'
+__version__ = '0.4.7'
 
 from lxml import etree
 from docx import Document
@@ -77,7 +77,7 @@ class DocxTemplate(object):
         src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',cellbg,src_xml,flags=re.DOTALL)
 
         # avoid {{r and {%r tags to strip MS xml tags too far
-        src_xml = re.sub(r'({{r.*?}}|{%r.*?%})',r'</w:t></w:r><w:r><w:t>\1</w:t></w:r><w:r><w:t>',src_xml,flags=re.DOTALL)
+        src_xml = re.sub(r'({{r\s.*?}}|{%r\s.*?%})',r'</w:t></w:r><w:r><w:t>\1</w:t></w:r><w:r><w:t>',src_xml,flags=re.DOTALL)
 
         for y in ['tr', 'tc', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag

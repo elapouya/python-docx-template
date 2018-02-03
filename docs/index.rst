@@ -81,7 +81,11 @@ But if ``<var>`` is an RichText object, you must specify that you are changing t
 
    {{r <var> }}
 
-Note the ``r`` right after the openning braces
+Note the ``r`` right after the openning braces.
+
+**IMPORTANT** : Do not use the ``r`` variable in your template because ``{{r}}`` could be interpreted as a ``{{r``
+without variable specified. Nevertheless, in the lastest doxtpl version you can use a bigger variable name starting
+with 'r'. For example ``{{render_color}}`` will be interpreted as ``{{ render_color }}`` not as ``{{r ender_color}}``.
 
 Cell color
 ..........
