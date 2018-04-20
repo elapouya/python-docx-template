@@ -1,3 +1,7 @@
+0.4.8 (2018-04-20)
+------------------
+- Purge MANIFEST.in file
+
 0.4.7 (2018-02-03)
 ------------------
 - Accept variables starting with 'r' in {{}} when no space after {{
