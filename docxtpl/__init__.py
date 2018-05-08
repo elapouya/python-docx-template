@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.8'
+__version__ = '0.4.9'
 
 from lxml import etree
 from docx import Document
@@ -368,6 +368,9 @@ class Subdoc(object):
     def __str__(self):
         return self._get_xml()
 
+    def __html__(self):
+        return self._get_xml()
+
 
 class RichText(object):
     """ class to generate Rich Text when using templates variables
@@ -430,6 +433,9 @@ class RichText(object):
     def __str__(self):
         return self.xml
 
+    def __html__(self):
+        return self.xml
+
 R = RichText
 
 class Listing(object):
@@ -444,6 +450,9 @@ class Listing(object):
         return self.xml
 
     def __str__(self):
+        return self.xml
+
+    def __html__(self):
         return self.xml
 
 
@@ -476,5 +485,7 @@ class InlineImage(object):
     def __str__(self):
         return self._insert_image()
 
+    def __html__(self):
+        return self._insert_image()
 
 

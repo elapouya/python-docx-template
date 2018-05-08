@@ -1,3 +1,7 @@
+0.4.9 (2018-05-08)
+------------------
+- Manage autoscaping on InlineImage, Richtext and Subdoc
+
 0.4.8 (2018-04-20)
 ------------------
 - Purge MANIFEST.in file

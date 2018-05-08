@@ -8,6 +8,8 @@ Created : 2017-01-14
 from docxtpl import DocxTemplate, InlineImage
 # for height and width you have to use millimeters (Mm), inches or points(Pt) class :
 from docx.shared import Mm, Inches, Pt
+import jinja2
+from jinja2.utils import Markup
 
 tpl=DocxTemplate('test_files/inline_image_tpl.docx')
 
@@ -31,6 +33,7 @@ context = {
                      'desc': 'Tornado is a Python web framework and asynchronous networking library.'},
                     ]
 }
-
-tpl.render(context)
+# testing that it works also when autoescape has been forced to True
+jinja_env = jinja2.Environment(autoescape=True)
+tpl.render(context, jinja_env)
 tpl.save('test_files/inline_image.docx')
