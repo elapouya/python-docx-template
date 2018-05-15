@@ -1,3 +1,7 @@
+0.4.10 (2018-05-08)
+------------------
+- Wheel distribution
+
 0.4.9 (2018-05-08)
 ------------------
 - Manage autoscaping on InlineImage, Richtext and Subdoc

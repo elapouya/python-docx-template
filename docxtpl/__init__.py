@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.9'
+__version__ = '0.4.10'
 
 from lxml import etree
 from docx import Document
@@ -19,6 +19,8 @@ import six
 import binascii
 import os
 import zipfile
+from six.moves import html_parser
+unescape = html_parser.HTMLParser().unescape
 
 NEWLINE =  '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -55,6 +57,7 @@ class DocxTemplate(object):
 
     def patch_xml(self,src_xml):
         # strip all xml tags inside {% %} and {{ }} that MS word can insert into xml source
+        # also unescape html entities
         src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
         def striptags(m):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
