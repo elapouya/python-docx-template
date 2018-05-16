@@ -219,6 +219,24 @@ WARNING : unlike replace_pic() method, embdded_dummy.docx MUST exist in the temp
 file as the one inserted manually in the docx template.
 The replacement occurs in headers, footers and the whole document's body.
 
+Microsoft Word 2016 special cases
+---------------------------------
+
+MS Word 2016 will ingore ``\t`` tabulations. This is special to that version.
+Libreoffice or Wordpad do not have this problem. The same thing occurs for line
+beginning with a jinja2 tag provinding spaces : They will be ignored.
+To solve these problem, the solution is to use Richtext::
+
+   tpl.render({
+       'test_space_r' : RichText('          '),
+       'test_tabs_r': RichText(5*'\t'),
+   })
+
+And in your template, use the {{r notation::
+
+   {{r test_space_r}} Spaces will be preserved
+   {{r test_tabs_r}} Tabs will be displayed
+
 Tables
 ------
 

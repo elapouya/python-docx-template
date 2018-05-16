@@ -1,3 +1,7 @@
+0.4.11 (2018-05-16)
+-------------------
+- Better tabs and spaces management for MS Word 2016
+
 0.4.10 (2018-05-08)
 ------------------
 - Wheel distribution
