@@ -391,7 +391,7 @@ class RichText(object):
                         bold=False,
                         italic=False,
                         underline=False,
-                        strike=False
+                        strike=False,
                         font=None):
 
 
