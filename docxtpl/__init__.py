@@ -391,7 +391,8 @@ class RichText(object):
                         bold=False,
                         italic=False,
                         underline=False,
-                        strike=False):
+                        strike=False,
+                        font=None):
 
 
         if not isinstance(text, six.text_type):
@@ -423,6 +424,8 @@ class RichText(object):
             prop += u'<w:u w:val="%s"/>' % underline
         if strike:
             prop += u'<w:strike/>'
+        if font:
+            prop += u'<w:rFonts w:ascii="Courier New" w:hAnsi="{}" w:cs="{}"/>'.format(font, font)
 
         self.xml += u'<w:r>'
         if prop:
