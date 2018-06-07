@@ -1,3 +1,7 @@
+0.4.12 (2018-06-07)
+-------------------
+- Add font option in RichText
+
 0.4.11 (2018-05-16)
 -------------------
 - Better tabs and spaces management for MS Word 2016

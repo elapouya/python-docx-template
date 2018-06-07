@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.11'
+__version__ = '0.4.12'
 
 from lxml import etree
 from docx import Document
@@ -425,7 +425,7 @@ class RichText(object):
         if strike:
             prop += u'<w:strike/>'
         if font:
-            prop += u'<w:rFonts w:ascii="Courier New" w:hAnsi="{}" w:cs="{}"/>'.format(font, font)
+            prop += u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'.format(font=font)
 
         self.xml += u'<w:r>'
         if prop:
