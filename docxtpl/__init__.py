@@ -199,8 +199,8 @@ class DocxTemplate(object):
                         etree.SubElement(tblGrid, ns+'gridCol', {ns+'w': str(int(new_average))})
         return tree
 
-    def new_subdoc(self):
-        return Subdoc(self)
+    def new_subdoc(self,docpath=None):
+        return Subdoc(self,docpath)
 
     @staticmethod
     def get_file_crc(filename):
@@ -349,10 +349,10 @@ class DocxTemplate(object):
 
 class Subdoc(object):
     """ Class for subdocument to insert into master document """
-    def __init__(self, tpl):
+    def __init__(self, tpl,docpath=None):
         self.tpl = tpl
         self.docx = tpl.get_docx()
-        self.subdocx = Document()
+        self.subdocx = Document(docpath)
         self.subdocx._part = self.docx._part
 
     def __getattr__(self, name) :
