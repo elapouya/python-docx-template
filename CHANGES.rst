@@ -1,3 +1,7 @@
+0.4.13 (2018-06-21)
+-------------------
+- Subdocument can now be based on an existing docx
+
 0.4.12 (2018-06-07)
 -------------------
 - Add font option in RichText
