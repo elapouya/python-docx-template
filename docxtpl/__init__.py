@@ -13,6 +13,7 @@ from docx.opc.oxml import serialize_part_xml, parse_xml
 import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
+from jinja2.exceptions import TemplateError
 from cgi import escape
 import re
 import six
@@ -105,11 +106,19 @@ class DocxTemplate(object):
         return src_xml
 
     def render_xml(self,src_xml,context,jinja_env=None):
-        if jinja_env:
-            template = jinja_env.from_string(src_xml)
-        else:
-            template = Template(src_xml)
-        dst_xml = template.render(context)
+        src_xml = src_xml.replace(r'<w:p>', '\n<w:p>')
+        try:
+            if jinja_env:
+                template = jinja_env.from_string(src_xml)
+            else:
+                template = Template(src_xml)
+            dst_xml = template.render(context)
+        except TemplateError as exc:
+            if hasattr(exc, 'lineno') and exc.lineno is not None:
+                line_number = max(exc.lineno - 4, 0)
+                exc.docx_context = map(lambda x: re.sub(r'<[^>]+>', '', x), src_xml.splitlines()[line_number:(line_number + 7)])
+            raise exc
+        dst_xml = dst_xml.replace('\n<w:p>', '<w:p>')
         dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
         return dst_xml
 
