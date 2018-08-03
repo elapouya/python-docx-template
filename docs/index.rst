@@ -126,6 +126,17 @@ Instead of using ``RichText()``, one can use its shortcut : ``R()``
 you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
 This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
 
+Hyperlink with RichText
+.......................
+
+You can add an hyperlink to a text by using a Richtext with this syntax ::
+
+   tpl=DocxTemplate('your_template.docx')
+   rt = RichText('You can add an hyperlink, here to ')
+   rt.add('google',url_id=tpl.build_url_id('http://google.com'))
+
+Put ``rt`` in your context, then use ``{{r rt}}`` in your template
+
 Inline image
 ------------
 

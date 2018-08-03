@@ -1,3 +1,7 @@
+0.5.0 (2018-08-03)
+-------------------
+- An hyperlink can now be used in RichText
+
 0.4.13 (2018-06-21)
 -------------------
 - Subdocument can now be based on an existing docx

@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.4.13'
+__version__ = '0.5.0'
 
 from lxml import etree
 from docx import Document
@@ -350,6 +350,10 @@ class DocxTemplate(object):
 
         return part_map
 
+    def build_url_id(self,url):
+        return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
+                                         is_external=True)
+
     def save(self,filename,*args,**kwargs):
         self.pre_processing()
         self.docx.save(filename,*args,**kwargs)
@@ -382,7 +386,6 @@ class Subdoc(object):
     def __html__(self):
         return self._get_xml()
 
-
 class RichText(object):
     """ class to generate Rich Text when using templates variables
 
@@ -401,7 +404,8 @@ class RichText(object):
                         italic=False,
                         underline=False,
                         strike=False,
-                        font=None):
+                        font=None,
+                        url_id=None):
 
 
         if not isinstance(text, six.text_type):
@@ -436,10 +440,15 @@ class RichText(object):
         if font:
             prop += u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'.format(font=font)
 
-        self.xml += u'<w:r>'
+
+        xml = u'<w:r>'
         if prop:
-            self.xml += u'<w:rPr>%s</w:rPr>' % prop
-        self.xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
+            xml += u'<w:rPr>%s</w:rPr>' % prop
+        xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
+        if url_id:
+            xml = u'<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>' % (url_id, xml)
+        self.xml += xml
+
 
     def __unicode__(self):
         return self.xml
