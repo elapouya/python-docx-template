@@ -88,17 +88,28 @@ class DocxTemplate(object):
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
             src_xml = re.sub(pat, r'\1 \2',src_xml,flags=re.DOTALL)
-        
+
         # add vMerge
         # use {% vm %} to make this table cell and its copies be vertically merged within a {% for %}
-        pat_vm = r'(<\/w:tcPr>.*)(<\/w:tcPr>)(.*?){%\s*vm\s*%}.*?<w:t>(.*?)(<\/w:t>)'
-        def vMerge(m):
-            return m.group(1) + '<w:vMerge {% if loop.first %}w:val="restart"{% endif %}/>' + m.group(2) + m.group(3) + "{% if loop.first %}"+ m.group(4) +"{% endif %}" + m.group(5)
-        pat_num_vm = re.compile(r'{%\s*vm\s*%}')
-        num = len(pat_num_vm.findall(src_xml))
-        for i in range(0,num):
-            src_xml = re.sub(pat_vm,vMerge,src_xml)
-        
+        def tc(m):
+            def vMerge(m1):
+                return (
+                    '<w:vMerge w:val="{% if loop.first %}restart{% else %}continue{% endif %}"/>' +
+                    m1.group(1) +  # Everything between ``</w:tcPr>`` and ``<w:t>``.
+                    "{% if loop.first %}" +
+                    m1.group(2) +  # Everything before ``{% vm %}``.
+                    m1.group(3) +  # Everything after ``{% vm %}``.
+                    "{% endif %}" +
+                    m1.group(4)  # ``</w:t>``.
+                )
+            return re.sub(
+                r'(</w:tcPr>.*?<w:t>)(.*?)(?:{%\s*vm\s*%})(.*?)(</w:t>)',
+                vMerge,
+                m.group(),  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% vm %}`` inside.
+                flags=re.DOTALL,
+            )
+        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*vm\s*%}.*?</w:tc[ >]', tc, src_xml, flags=re.DOTALL)
+
         def clean_tags(m):
             return m.group(0).replace(r"&#8216;","'").replace('&lt;','<').replace('&gt;','>')
         src_xml = re.sub(r'(?<=\{[\{%])(.*?)(?=[\}%]})',clean_tags,src_xml)
