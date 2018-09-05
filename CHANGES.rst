@@ -1,3 +1,7 @@
+0.5.1 (2018-09-05)
+-------------------
+- Fix table vertical merge
+
 0.5.0 (2018-08-03)
 -------------------
 - An hyperlink can now be used in RichText
