@@ -13,7 +13,7 @@ try:
 except TemplateError as the_error:
     six.print_(six.text_type(the_error))
     if hasattr(the_error, 'docx_context'):
-        print "Context:"
+        six.print_("Context:")
         for line in the_error.docx_context:
             six.print_(line)
 tpl.save('test_files/template_error.docx')
