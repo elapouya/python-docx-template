@@ -1,3 +1,7 @@
+0.5.4 (2018-09-19)
+------------------
+- Declare package as python2 and python3 compatible for wheel distrib
+
 0.5.3 (2018-09-19)
 ------------------
 - Add sub/superscript in RichText
