@@ -411,6 +411,8 @@ class RichText(object):
                         color=None,
                         highlight=None,
                         size=None,
+                        subscript=None,
+                        superscript=None,
                         bold=False,
                         italic=False,
                         underline=False,
@@ -438,6 +440,10 @@ class RichText(object):
         if size:
             prop += u'<w:sz w:val="%s"/>' % size
             prop += u'<w:szCs w:val="%s"/>' % size
+        if subscript:
+            prop += u'<w:vertAlign w:val="subscript"/>'
+        if superscript:
+            prop += u'<w:vertAlign w:val="superscript"/>'
         if bold:
             prop += u'<w:b/>'
         if italic:
