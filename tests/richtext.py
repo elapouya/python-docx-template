@@ -33,6 +33,10 @@ rt.add('\nFonts :\n',underline=True)
 rt.add('Arial\n',font='Arial')
 rt.add('Courier New\n',font='Courier New')
 rt.add('Times New Roman\n',font='Times New Roman')
+rt.add('\n\nHere some')
+rt.add('superscript', superscript=True)
+rt.add(' and some')
+rt.add('subscript', subscript=True)
 
 context = {
     'example' : rt,

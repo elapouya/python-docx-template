@@ -1,9 +1,13 @@
+0.5.3 (2018-09-19)
+------------------
+- Add sub/superscript in RichText
+
 0.5.2 (2018-09-13)
--------------------
+------------------
 - Fix table vertical merge
 
 0.5.0 (2018-08-03)
--------------------
+------------------
 - An hyperlink can now be used in RichText
 
 0.4.13 (2018-06-21)
@@ -19,7 +23,7 @@
 - Better tabs and spaces management for MS Word 2016
 
 0.4.10 (2018-05-08)
-------------------
+-------------------
 - Wheel distribution
 
 0.4.9 (2018-05-08)
