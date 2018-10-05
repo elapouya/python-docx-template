@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.5.4'
+__version__ = '0.5.5'
 
 from lxml import etree
 from docx import Document
@@ -14,7 +14,11 @@ import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
 from jinja2.exceptions import TemplateError
-from cgi import escape
+try:
+    from html import escape
+except ImportError:
+    # cgi.escape is deprecated in python 3.7
+    from cgi import escape
 import re
 import six
 import binascii
@@ -421,6 +425,9 @@ class RichText(object):
                         url_id=None):
 
 
+        # If not a string : cast to string (ex: int, dict etc...)
+        if not isinstance(text, (six.text_type, six.binary_type)):
+            text = six.text_type(text)
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
         text = escape(text).replace('\n', NEWLINE_XML).replace('\a', NEWPARAGRAPH_XML).replace('\t',TAB_XML)
@@ -484,6 +491,9 @@ class Listing(object):
     use {{ mylisting }} in your template and context={ mylisting:Listing(the_listing_with_newlines) }
     """
     def __init__(self, text):
+        # If not a string : cast to string (ex: int, dict etc...)
+        if not isinstance(text, (six.text_type, six.binary_type)):
+            text = six.text_type(text)
         self.xml = escape(text).replace('\n', NEWLINE_XML).replace('\a', NEWPARAGRAPH_XML)
 
     def __unicode__(self):

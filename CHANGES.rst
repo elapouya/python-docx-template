@@ -1,3 +1,8 @@
+0.5.5 (2018-10-05)
+------------------
+- Cast to string non-string value given to RichText or Listing objects
+- Import html.escape instead of cgi.escape (deprecated)
+
 0.5.4 (2018-09-19)
 ------------------
 - Declare package as python2 and python3 compatible for wheel distrib
