@@ -189,7 +189,8 @@ class DocxTemplate(object):
     # using of TC tag in for cycle can cause that count of columns does not correspond to
     # real count of columns in row. This function is able to fix it.
     def fix_tables(self, xml):
-        tree = etree.fromstring(xml)
+        parser = etree.XMLParser(recover=True)
+        tree = etree.fromstring(xml, parser=parser)
         # get namespace
         ns = '{' + tree.nsmap['w'] + '}'
         # walk trough xml and find table
