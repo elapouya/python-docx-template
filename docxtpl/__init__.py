@@ -15,10 +15,12 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
 from jinja2.exceptions import TemplateError
 try:
-    from html import escape
+    from html import escape, unescape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape
+    import HTMLParser
+    unescape = HTMLParser.HTMLParser().unescape
 import re
 import six
 import binascii
