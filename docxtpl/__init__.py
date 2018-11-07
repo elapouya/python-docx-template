@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.5.6'
+__version__ = '0.5.7'
 
 from lxml import etree
 from docx import Document
@@ -200,8 +200,8 @@ class DocxTemplate(object):
 
         escape_recursively(context)
 
-    def render(self, context, jinja_env=None):
-        if sys.version_info >= (3, 0):
+    def render(self, context, jinja_env=None, autoescape=False):
+        if sys.version_info >= (3, 0) and autoescape:
             self.escape_values(context)
         else:
             # Sorry folk, use awesome Python3 such as 3.6

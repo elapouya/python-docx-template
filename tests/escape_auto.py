@@ -9,5 +9,5 @@ context = {'myvar': R('"less than" must be escaped : <, this can be done with Ri
            'autoescape': """These string should be auto escaped for an XML Word document which may contain <, >, &, ", and '."""
            }
 
-tpl.render(context)
+tpl.render(context, autoescape=True)
 tpl.save("test_files/escape_auto.docx")

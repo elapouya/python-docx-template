@@ -1,3 +1,7 @@
+0.5.7 (2018-11-07)
+------------------
+- Render can now autoescape context dict
+
 0.5.6 (2018-10-18)
 ------------------
 - Fix invalid xml parse because using {% vm %}
