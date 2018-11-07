@@ -15,7 +15,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Template
 from jinja2.exceptions import TemplateError
 try:
-    from html import escape
+    from html import escape, unescape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape
@@ -24,6 +24,7 @@ import six
 import binascii
 import os
 import zipfile
+import sys
 
 NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -169,7 +170,43 @@ class DocxTemplate(object):
     def map_headers_footers_xml(self, relKey, xml):
         self.docx._part._rels[relKey]._target._blob = xml
 
-    def render(self,context,jinja_env=None):
+    @staticmethod
+    def escape_values(context):
+        """Escape strings for an XML Word document
+        which may contain <, >, &, ', and ".
+        """
+        def escape_recursively(d):
+            """Escape string values of the passed :dict: `d` in-place
+            including nested dictionaries.
+            """
+            nonlocal hash_values
+
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    hash_value = id(v)
+                    if hash_value not in hash_values:
+                        hash_values.add(hash_value)
+                        escape_recursively(v)
+                else:
+                    # Avoid dict, Listing, InlineImage, RichText, etc. classes
+                    #  by comparing v to str. Do not use try-except.
+                    if isinstance(v, str):
+                        # Unescape at first to avoid secondary escaping
+                        d[k] = escape(unescape(v))
+
+        # Avoid RecursionError (if back edges, i.e. cycles, exist)
+        # by using a set of hash values of iterated dictionaries.
+        hash_values = {id(context), }
+
+        escape_recursively(context)
+
+    def render(self, context, jinja_env=None):
+        if sys.version_info >= (3, 0):
+            self.escape_values(context)
+        else:
+            # Sorry folk, use awesome Python3 such as 3.6
+            pass
+
         # Body
         xml_src = self.build_xml(context,jinja_env)
 
