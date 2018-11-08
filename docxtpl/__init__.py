@@ -18,7 +18,10 @@ try:
     from html import escape, unescape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
+    # import escape and unescape methods for Python 2.7
     from cgi import escape
+    import HTMLParser
+    unescape = HTMLParser.HTMLParser().unescape
 import re
 import six
 import binascii
