@@ -175,18 +175,16 @@ class DocxTemplate(object):
         """Escape strings for an XML Word document
         which may contain <, >, &, ', and ".
         """
-        def escape_recursively(d):
+        def escape_recursively(d, identities):
             """Escape string values of the passed :dict: `d` in-place
-            including nested dictionaries.
+            including nested dictionaries of any depth.
             """
-            nonlocal hash_values
-
             for k, v in d.items():
                 if isinstance(v, dict):
-                    hash_value = id(v)
-                    if hash_value not in hash_values:
-                        hash_values.add(hash_value)
-                        escape_recursively(v)
+                    identity = id(v)
+                    if identity not in identities:
+                        identities.add(identity)
+                        escape_recursively(v, identities)
                 else:
                     # Avoid dict, Listing, InlineImage, RichText, etc. classes
                     #  by comparing v to str. Do not use try-except.
@@ -195,10 +193,10 @@ class DocxTemplate(object):
                         d[k] = escape(unescape(v))
 
         # Avoid RecursionError (if back edges, i.e. cycles, exist)
-        # by using a set of hash values of iterated dictionaries.
-        hash_values = {id(context), }
+        # by using a set of identities of iterated dictionaries.
+        initial_identities = {id(context)}
 
-        escape_recursively(context)
+        escape_recursively(context, initial_identities)
 
     def render(self, context, jinja_env=None, autoescape=False):
         if sys.version_info >= (3, 0) and autoescape:
