@@ -18,13 +18,15 @@ try:
     from html import escape, unescape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
+    # import escape and unescape methods for Python 2.7
     from cgi import escape
+    import HTMLParser
+    unescape = HTMLParser.HTMLParser().unescape
 import re
 import six
 import binascii
 import os
 import zipfile
-import sys
 
 NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -175,40 +177,35 @@ class DocxTemplate(object):
         """Escape strings for an XML Word document
         which may contain <, >, &, ', and ".
         """
-        def escape_recursively(d):
+        def escape_recursively(d, identities):
             """Escape string values of the passed :dict: `d` in-place
-            including nested dictionaries.
+            including nested dictionaries of any depth.
             """
-            nonlocal hash_values
-
-            for k, v in d.items():
+            for k, v in six.iteritems(d):
                 if isinstance(v, dict):
-                    hash_value = id(v)
-                    if hash_value not in hash_values:
-                        hash_values.add(hash_value)
-                        escape_recursively(v)
+                    identity = id(v)
+                    if identity not in identities:
+                        identities.add(identity)
+                        escape_recursively(v, identities)
                 else:
                     # Avoid dict, Listing, InlineImage, RichText, etc. classes
-                    #  by comparing v to str. Do not use try-except.
+                    #  by comparing `v` to `str`. Do not use try-except.
                     if isinstance(v, str):
                         # Unescape at first to avoid secondary escaping
                         d[k] = escape(unescape(v))
 
         # Avoid RecursionError (if back edges, i.e. cycles, exist)
-        # by using a set of hash values of iterated dictionaries.
-        hash_values = {id(context), }
+        # by using a set of unique identities of iterated dictionaries.
+        initial_identities = {id(context)}
 
-        escape_recursively(context)
+        escape_recursively(context, initial_identities)
 
     def render(self, context, jinja_env=None, autoescape=False):
-        if sys.version_info >= (3, 0) and autoescape:
+        if autoescape:
             self.escape_values(context)
-        else:
-            # Sorry folk, use awesome Python3 such as 3.6
-            pass
 
         # Body
-        xml_src = self.build_xml(context,jinja_env)
+        xml_src = self.build_xml(context, jinja_env)
 
         # fix tables if needed
         tree = self.fix_tables(xml_src)
