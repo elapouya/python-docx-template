@@ -159,11 +159,12 @@ Escaping, newline, new paragraph, Listing
 -----------------------------------------
 
 When you use a ``{{ <var> }}``, you are modifying an **XML** word document, this means you cannot use all chars,
-especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. There are 3 ways :
+especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. There are 4 ways :
 
    *  ``context = { 'var':R('my text') }`` and ``{{r <var> }}`` in the template (note the ``r``),
    *  ``context = { 'var':'my text'}`` and ``{{ <var>|e }}`` in your word template
    *  ``context = { 'var':escape('my text')}`` and ``{{ <var> }}`` in the template.
+   *  enable autoescaping when calling render method: ``tpl.render(context, autoescape=True)`` (default is autoescape=False)
 
 The ``RichText()`` or ``R()`` offers newline and new paragraph feature : just use ``\n`` or ``\a`` in the
 text, they will be converted accordingly.
