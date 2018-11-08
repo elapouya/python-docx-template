@@ -27,7 +27,6 @@ import six
 import binascii
 import os
 import zipfile
-import sys
 
 NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -190,26 +189,23 @@ class DocxTemplate(object):
                         escape_recursively(v, identities)
                 else:
                     # Avoid dict, Listing, InlineImage, RichText, etc. classes
-                    #  by comparing v to str. Do not use try-except.
+                    #  by comparing `v` to `str`. Do not use try-except.
                     if isinstance(v, str):
                         # Unescape at first to avoid secondary escaping
                         d[k] = escape(unescape(v))
 
         # Avoid RecursionError (if back edges, i.e. cycles, exist)
-        # by using a set of identities of iterated dictionaries.
+        # by using a set of unique identities of iterated dictionaries.
         initial_identities = {id(context)}
 
         escape_recursively(context, initial_identities)
 
     def render(self, context, jinja_env=None, autoescape=False):
-        if sys.version_info >= (3, 0) and autoescape:
+        if autoescape:
             self.escape_values(context)
-        else:
-            # Sorry folk, use awesome Python3 such as 3.6
-            pass
 
         # Body
-        xml_src = self.build_xml(context,jinja_env)
+        xml_src = self.build_xml(context, jinja_env)
 
         # fix tables if needed
         tree = self.fix_tables(xml_src)
