@@ -181,7 +181,7 @@ class DocxTemplate(object):
             """Escape string values of the passed :dict: `d` in-place
             including nested dictionaries of any depth.
             """
-            for k, v in d.items():
+            for k, v in six.iteritems(d):
                 if isinstance(v, dict):
                     identity = id(v)
                     if identity not in identities:
