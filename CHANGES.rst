@@ -1,3 +1,8 @@
+0.5.8 (2018-11-08)
+------------------
+- autoescape support for python 2.7
+- fix issue #154
+
 0.5.7 (2018-11-07)
 ------------------
 - Render can now autoescape context dict
