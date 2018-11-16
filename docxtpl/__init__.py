@@ -98,8 +98,8 @@ class DocxTemplate(object):
 
         # add vMerge
         # use {% vm %} to make this table cell and its copies be vertically merged within a {% for %}
-        def tc(m):
-            def vMerge(m1):
+        def v_merge_tc(m):
+            def v_merge(m1):
                 return (
                     '<w:vMerge w:val="{% if loop.first %}restart{% else %}continue{% endif %}"/>' +
                     m1.group(1) +  # Everything between ``</w:tcPr>`` and ``<w:t>``.
@@ -111,11 +111,61 @@ class DocxTemplate(object):
                 )
             return re.sub(
                 r'(</w:tcPr[ >].*?<w:t(?:.*?)>)(.*?)(?:{%\s*vm\s*%})(.*?)(</w:t>)',
-                vMerge,
+                v_merge,
                 m.group(),  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% vm %}`` inside.
                 flags=re.DOTALL,
             )
-        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*vm\s*%}.*?</w:tc[ >]', tc, src_xml, flags=re.DOTALL)
+        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*vm\s*%}.*?</w:tc[ >]', v_merge_tc, src_xml, flags=re.DOTALL)
+
+        # Use ``{% hm %}`` to make table cell become horizontally merged within
+        # a ``{% for %}``.
+        def h_merge_tc(m):
+            xml_to_patch = m.group()  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
+
+            def with_gridspan(m1):
+                return (
+                    m1.group(1) +  # ``w:gridSpan w:val="``.
+                    '{{ ' + m1.group(2) + ' * loop.length }}' +  # Content of ``w:val``, multiplied by loop length.
+                    m1.group(3)  # Closing quotation mark.
+                )
+
+            def without_gridspan(m2):
+                return (
+                    '<w:gridSpan w:val="{{ loop.length }}"/>' +
+                    m2.group(1) +  # Everything between ``</w:tcPr>`` and ``<w:t>``.
+                    m2.group(2) +  # Everything before ``{% hm %}``.
+                    m2.group(3) +  # Everything after ``{% hm %}``.
+                    m2.group(4)  # ``</w:t>``.
+                )
+
+            if re.search(r'w:gridSpan', xml_to_patch):
+                # Simple case, there's already ``gridSpan``, multiply its value.
+
+                xml = re.sub(
+                    r'(w:gridSpan w:val=")(\d+)(")',
+                    with_gridspan,
+                    xml_to_patch,
+                    flags=re.DOTALL,
+                )
+                xml = re.sub(
+                    r'{%\s*hm\s*%}',
+                    '',
+                    xml,  # Patched xml.
+                    flags=re.DOTALL,
+                )
+            else:
+                # There're no ``gridSpan``, add one.
+                xml = re.sub(
+                    r'(</w:tcPr[ >].*?<w:t(?:.*?)>)(.*?)(?:{%\s*hm\s*%})(.*?)(</w:t>)',
+                    without_gridspan,
+                    xml_to_patch,
+                    flags=re.DOTALL,
+                )
+
+            # Discard every other cell generated in loop.
+            return "{% if loop.first %}" + xml + "{% endif %}"
+
+        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*hm\s*%}.*?</w:tc[ >]', h_merge_tc, src_xml, flags=re.DOTALL)
 
         def clean_tags(m):
             return m.group(0).replace(r"&#8216;","'").replace('&lt;','<').replace('&gt;','>')
