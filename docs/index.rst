@@ -252,11 +252,15 @@ And in your template, use the {{r notation::
 Tables
 ------
 
-You can span table cells in two ways, horizontally (see tests/dynamic_table.py) by using::
+You can span table cells horizontally in two ways, by using ``colspan`` tag (see tests/dynamic_table.py)::
 
    {% colspan <number of column to span> %}
 
-or vertically within a for loop (see tests/vertical_merge.py)::
+or within a for loop (see tests/horizontal_merge.py)::
+
+   {% hm %}
+
+You can also merge cells vertically within a for loop (see tests/vertical_merge.py)::
 
    {% vm %}
 
