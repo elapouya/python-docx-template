@@ -8,7 +8,7 @@ Created : 2015-03-12
 from docxtpl import DocxTemplate
 from docx.shared import Inches
 
-tpl=DocxTemplate('test_files/subdoc_tpl.docx')
+tpl=DocxTemplate('templates/subdoc_tpl.docx')
 
 sd = tpl.new_subdoc()
 p = sd.add_paragraph('This is a sub-document inserted into a bigger one')
@@ -22,7 +22,7 @@ sd.add_heading('Heading, level 1', level=1)
 sd.add_paragraph('This is an Intense quote', style='IntenseQuote')
 
 sd.add_paragraph('A picture :')
-sd.add_picture('test_files/python_logo.png', width=Inches(1.25))
+sd.add_picture('templates/python_logo.png', width=Inches(1.25))
 
 sd.add_paragraph('A Table :')
 table = sd.add_table(rows=1, cols=3)
@@ -44,4 +44,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/subdoc.docx')
+tpl.save('output/subdoc.docx')

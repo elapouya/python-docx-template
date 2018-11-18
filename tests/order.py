@@ -7,7 +7,7 @@ Created : 2015-03-12
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('test_files/order_tpl.docx')
+tpl=DocxTemplate('templates/order_tpl.docx')
 
 context = { 
     'customer_name' : 'Eric',
@@ -23,4 +23,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/order.docx')
+tpl.save('output/order.docx')

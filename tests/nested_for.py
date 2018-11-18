@@ -7,7 +7,7 @@ Created : 2016-03-26
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('test_files/nested_for_tpl.docx')
+tpl=DocxTemplate('templates/nested_for_tpl.docx')
 
 context = {
     'dishes' : [
@@ -30,4 +30,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/nested_for.docx')
+tpl.save('output/nested_for.docx')

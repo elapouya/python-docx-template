@@ -7,7 +7,7 @@ Created : 2017-10-15
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('test_files/vertical_merge_tpl.docx')
+tpl=DocxTemplate('templates/vertical_merge_tpl.docx')
 
 context = { 
     'items' : [
@@ -20,4 +20,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/vertical_merge.docx')
+tpl.save('output/vertical_merge.docx')

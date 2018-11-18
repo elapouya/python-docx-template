@@ -7,7 +7,7 @@ Created : 2015-03-26
 
 from docxtpl import DocxTemplate, RichText
 
-tpl=DocxTemplate('test_files/richtext_tpl.docx')
+tpl=DocxTemplate('templates/richtext_tpl.docx')
 
 rt = RichText('an exemple of ')
 rt.add('a rich text', style='myrichtextstyle')
@@ -43,4 +43,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/richtext.docx')
+tpl.save('output/richtext.docx')

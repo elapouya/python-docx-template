@@ -7,7 +7,7 @@ Created : 2015-03-12
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('test_files/header_footer_tpl.docx')
+tpl=DocxTemplate('templates/header_footer_tpl.docx')
 
 sd = tpl.new_subdoc()
 p = sd.add_paragraph('This is a sub-document to check it does not break header and footer')
@@ -20,4 +20,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/header_footer.docx')
+tpl.save('output/header_footer.docx')

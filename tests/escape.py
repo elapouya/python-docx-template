@@ -1,6 +1,6 @@
 from docxtpl import *
 
-tpl = DocxTemplate("test_files/escape_tpl.docx")
+tpl = DocxTemplate('templates/escape_tpl.docx')
 
 context = {'myvar': R('"less than" must be escaped : <, this can be done with RichText() or R()'),
            'myescvar':'It can be escaped with a "|e" jinja filter in the template too : < ',
@@ -9,4 +9,4 @@ context = {'myvar': R('"less than" must be escaped : <, this can be done with Ri
            }
 
 tpl.render(context)
-tpl.save("test_files/escape.docx")
+tpl.save('output/escape.docx')

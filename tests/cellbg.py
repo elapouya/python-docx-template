@@ -7,7 +7,7 @@ Created : 2015-03-12
 
 from docxtpl import DocxTemplate, RichText
 
-tpl=DocxTemplate('test_files/cellbg_tpl.docx')
+tpl=DocxTemplate('templates/cellbg_tpl.docx')
 
 context = {
     'alerts' : [
@@ -19,4 +19,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/cellbg.docx')
+tpl.save('output/cellbg.docx')

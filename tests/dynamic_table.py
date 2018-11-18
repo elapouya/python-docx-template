@@ -1,6 +1,6 @@
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('test_files/dynamic_table_tpl.docx')
+tpl=DocxTemplate('templates/dynamic_table_tpl.docx')
 
 context = {
     'col_labels' : ['fruit', 'vegetable', 'stone', 'thing'],
@@ -12,4 +12,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/dynamic_table.docx')
+tpl.save('output/dynamic_table.docx')

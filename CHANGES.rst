@@ -1,3 +1,8 @@
+0.5.9 (2018-11-18)
+------------------
+- Add {% hm %} tag for table columns horizontal merging (Thanks to nickgashkov)
+- Split tests/tests_files dir into templates and output dirs
+
 0.5.8 (2018-11-08)
 ------------------
 - autoescape support for python 2.7

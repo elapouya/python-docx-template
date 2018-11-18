@@ -7,7 +7,7 @@ Created : 2015-03-26
 
 from docxtpl import DocxTemplate, RichText
 
-tpl=DocxTemplate('test_files/richtext_and_if_tpl.docx')
+tpl=DocxTemplate('templates/richtext_and_if_tpl.docx')
 
 
 context = {
@@ -15,4 +15,4 @@ context = {
 }
 
 tpl.render(context)
-tpl.save('test_files/richtext_and_if.docx')
+tpl.save('output/richtext_and_if.docx')

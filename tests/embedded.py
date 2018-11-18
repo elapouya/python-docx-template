@@ -8,22 +8,22 @@ Created : 2017-09-09
 from docxtpl import DocxTemplate
 
 # rendering the "dynamic embedded docx":
-embedded_docx_tpl=DocxTemplate('test_files/embedded_embedded_docx_tpl.docx')
+embedded_docx_tpl=DocxTemplate('templates/embedded_embedded_docx_tpl.docx')
 context = {
     'name' : 'John Doe',
 }
 embedded_docx_tpl.render(context)
-embedded_docx_tpl.save('test_files/embedded_embedded_docx.docx')
+embedded_docx_tpl.save('output/embedded_embedded_docx.docx')
 
 
 # rendring the main document :
-tpl=DocxTemplate('test_files/embedded_main_tpl.docx')
+tpl=DocxTemplate('templates/embedded_main_tpl.docx')
 
 context = {
     'name' : 'John Doe',
 }
 
-tpl.replace_embedded('test_files/embedded_dummy.docx','test_files/embedded_static_docx.docx')
-tpl.replace_embedded('test_files/embedded_dummy2.docx','test_files/embedded_embedded_docx.docx')
+tpl.replace_embedded('templates/embedded_dummy.docx','templates/embedded_static_docx.docx')
+tpl.replace_embedded('templates/embedded_dummy2.docx','templates/embedded_embedded_docx.docx')
 tpl.render(context)
-tpl.save('test_files/embedded.docx')
+tpl.save('output/embedded.docx')

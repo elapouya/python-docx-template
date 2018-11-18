@@ -2,6 +2,6 @@
 
 from docxtpl import DocxTemplate
 
-tpl = DocxTemplate('test_files/horizontal_merge_tpl.docx')
+tpl = DocxTemplate('templates/horizontal_merge_tpl.docx')
 tpl.render({})
-tpl.save('test_files/horizontal_merge.docx')
+tpl.save('output/horizontal_merge.docx')
