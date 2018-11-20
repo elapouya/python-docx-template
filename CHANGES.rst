@@ -1,3 +1,9 @@
+0.5.10 (2018-11-20)
+-------------------
+- Smart quotes in jinja tags are now converted into simple quotes
+- Add custom jinja filter example in tests/
+- Reformat the code to be a little more PEP8 compliant
+
 0.5.9 (2018-11-18)
 ------------------
 - Add {% hm %} tag for table columns horizontal merging (Thanks to nickgashkov)

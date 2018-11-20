@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.5.9'
+__version__ = '0.5.10'
 
 from lxml import etree
 from docx import Document
@@ -49,7 +49,8 @@ class DocxTemplate(object):
         return getattr(self.docx, name)
 
     def xml_to_string(self, xml, encoding='unicode'):
-        # Be careful : pretty_print MUST be set to False, otherwise patch_xml() won't work properly
+        # Be careful : pretty_print MUST be set to False, otherwise patch_xml()
+        # won't work properly
         return etree.tostring(xml, encoding='unicode', pretty_print=False)
 
     def get_docx(self):
@@ -63,34 +64,47 @@ class DocxTemplate(object):
             fh.write(self.get_xml())
 
     def patch_xml(self,src_xml):
-        # strip all xml tags inside {% %} and {{ }} that MS word can insert into xml source
-        # also unescape html entities
-        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',src_xml,flags=re.DOTALL)
+        # strip all xml tags inside {% %} and {{ }} that MS word can insert
+        # into xml source also unescape html entities
+        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})','',
+                         src_xml,flags=re.DOTALL)
         def striptags(m):
-            return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',m.group(0),flags=re.DOTALL)
-        src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,src_xml,flags=re.DOTALL)
+            return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)','',
+                          m.group(0),flags=re.DOTALL)
+        src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*',striptags,
+                         src_xml,flags=re.DOTALL)
 
         # manage table cell colspan
         def colspan(m):
             cell_xml = m.group(1) + m.group(3)
-            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>','',cell_xml,flags=re.DOTALL)
+            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>',
+                              '', cell_xml,flags=re.DOTALL)
             cell_xml = re.sub(r'<w:gridSpan[^/]*/>','', cell_xml, count=1)
-            return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:gridSpan w:val="{{%s}}"/>' % m.group(2), cell_xml)
-        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*colspan\s+([^%]*)\s*%}(.*?</w:tc>)',colspan,src_xml,flags=re.DOTALL)
+            return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:gridSpan w:val="{{%s}}"/>'
+                          % m.group(2), cell_xml )
+        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*colspan\s+([^%]*)\s*%}(.*?</w:tc>)',
+                         colspan,src_xml,flags=re.DOTALL)
 
         # manage table cell background color
         def cellbg(m):
             cell_xml = m.group(1) + m.group(3)
-            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>','',cell_xml,flags=re.DOTALL)
+            cell_xml = re.sub(r'<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>',
+                              '',cell_xml,flags=re.DOTALL)
             cell_xml = re.sub(r'<w:shd[^/]*/>','', cell_xml, count=1)
-            return re.sub(r'(<w:tcPr[^>]*>)',r'\1<w:shd w:val="clear" w:color="auto" w:fill="{{%s}}"/>' % m.group(2), cell_xml)
-        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',cellbg,src_xml,flags=re.DOTALL)
+            return re.sub(r'(<w:tcPr[^>]*>)',
+                          r'\1<w:shd w:val="clear" w:color="auto" w:fill="{{%s}}"/>'
+                          % m.group(2), cell_xml)
+        src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',
+                         cellbg,src_xml,flags=re.DOTALL)
 
         # avoid {{r and {%r tags to strip MS xml tags too far
-        src_xml = re.sub(r'({{r\s.*?}}|{%r\s.*?%})',r'</w:t></w:r><w:r><w:t>\1</w:t></w:r><w:r><w:t>',src_xml,flags=re.DOTALL)
+        src_xml = re.sub(r'({{r\s.*?}}|{%r\s.*?%})',
+                         r'</w:t></w:r><w:r><w:t>\1</w:t></w:r><w:r><w:t>',
+                         src_xml,flags=re.DOTALL)
 
         for y in ['tr', 'tc', 'p', 'r']:
-            # replace into xml code the row/paragraph/run containing {%y xxx %} or {{y xxx}} template tag
+            # replace into xml code the row/paragraph/run containing
+            # {%y xxx %} or {{y xxx}} template tag
             # by {% xxx %} or {{ xx }} without any surronding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y':y}
@@ -115,7 +129,8 @@ class DocxTemplate(object):
                 m.group(),  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% vm %}`` inside.
                 flags=re.DOTALL,
             )
-        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*vm\s*%}.*?</w:tc[ >]', v_merge_tc, src_xml, flags=re.DOTALL)
+        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*vm\s*%}.*?</w:tc[ >]',
+                         v_merge_tc, src_xml, flags=re.DOTALL)
 
         # Use ``{% hm %}`` to make table cell become horizontally merged within
         # a ``{% for %}``.
@@ -165,10 +180,16 @@ class DocxTemplate(object):
             # Discard every other cell generated in loop.
             return "{% if loop.first %}" + xml + "{% endif %}"
 
-        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*hm\s*%}.*?</w:tc[ >]', h_merge_tc, src_xml, flags=re.DOTALL)
+        src_xml = re.sub(r'<w:tc[ >](?:(?!<w:tc[ >]).)*?{%\s*hm\s*%}.*?</w:tc[ >]',
+                         h_merge_tc, src_xml, flags=re.DOTALL)
 
         def clean_tags(m):
-            return m.group(0).replace(r"&#8216;","'").replace('&lt;','<').replace('&gt;','>')
+            return ( m.group(0)
+                     .replace(r"&#8216;","'")
+                     .replace('&lt;','<')
+                     .replace('&gt;','>')
+                     .replace(u"‘",u"'")
+                     .replace(u"’",u"'") )
         src_xml = re.sub(r'(?<=\{[\{%])(.*?)(?=[\}%]})',clean_tags,src_xml)
 
         return src_xml
@@ -184,10 +205,15 @@ class DocxTemplate(object):
         except TemplateError as exc:
             if hasattr(exc, 'lineno') and exc.lineno is not None:
                 line_number = max(exc.lineno - 4, 0)
-                exc.docx_context = map(lambda x: re.sub(r'<[^>]+>', '', x), src_xml.splitlines()[line_number:(line_number + 7)])
+                exc.docx_context = map(lambda x: re.sub(r'<[^>]+>', '', x),
+                                       src_xml.splitlines()[line_number:(line_number + 7)])
             raise exc
         dst_xml = dst_xml.replace('\n<w:p>', '<w:p>')
-        dst_xml = dst_xml.replace('{_{','{{').replace('}_}','}}').replace('{_%','{%').replace('%_}','%}')
+        dst_xml = ( dst_xml
+                    .replace('{_{','{{')
+                    .replace('}_}','}}')
+                    .replace('{_%','{%')
+                    .replace('%_}','%}') )
         return dst_xml
 
     def build_xml(self,context,jinja_env=None):
@@ -263,15 +289,19 @@ class DocxTemplate(object):
         self.map_tree(tree)
 
         # Headers
-        for relKey, xml in self.build_headers_footers_xml(context, self.HEADER_URI, jinja_env):
+        headers = self.build_headers_footers_xml(context, self.HEADER_URI,
+                                                 jinja_env)
+        for relKey, xml in headers:
             self.map_headers_footers_xml(relKey, xml)
 
         # Footers
-        for relKey, xml in self.build_headers_footers_xml(context, self.FOOTER_URI, jinja_env):
+        footers = self.build_headers_footers_xml(context, self.FOOTER_URI,
+                                                 jinja_env)
+        for relKey, xml in footers:
             self.map_headers_footers_xml(relKey, xml)
 
-    # using of TC tag in for cycle can cause that count of columns does not correspond to
-    # real count of columns in row. This function is able to fix it.
+    # using of TC tag in for cycle can cause that count of columns does not
+    # correspond to real count of columns in row. This function is able to fix it.
     def fix_tables(self, xml):
         parser = etree.XMLParser(recover=True)
         tree = etree.fromstring(xml, parser=parser)
@@ -302,10 +332,12 @@ class DocxTemplate(object):
                     new_average = width / (len(columns) + to_add)
                     # scale the old columns
                     for c in columns:
-                        c.set(ns+'w', str(int(float(c.get(ns+'w')) * new_average/old_average)))
+                        c.set(ns+'w', str(int(float(c.get(ns+'w')) *
+                                              new_average/old_average)))
                     # add new columns
                     for i in range(to_add):
-                        etree.SubElement(tblGrid, ns+'gridCol', {ns+'w': str(int(new_average))})
+                        etree.SubElement(tblGrid, ns+'gridCol',
+                                         {ns+'w': str(int(new_average))})
         return tree
 
     def new_subdoc(self,docpath=None):
@@ -321,13 +353,16 @@ class DocxTemplate(object):
     def replace_media(self,src_file,dst_file):
         """Replace one media by another one into a docx
 
-        This has been done mainly because it is not possible to add images in docx header/footer.
-        With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
+        This has been done mainly because it is not possible to add images in
+        docx header/footer.
+        With this function, put a dummy picture in your header/footer,
+        then specify it with its replacement in this function
 
         Syntax: tpl.replace_media('dummy_media_to_replace.png','media_to_paste.jpg')
 
         Note: for images, the aspect ratio will be the same as the replaced image
-        Note2 : it is important to have the source media file as it is required to calculate its CRC to find them in the docx
+        Note2 : it is important to have the source media file as it is required
+                to calculate its CRC to find them in the docx
         """
         with open(dst_file, 'rb') as fh:
             crc = self.get_file_crc(src_file)
@@ -344,7 +379,8 @@ class DocxTemplate(object):
                in case dst_file is a file-like object, no check is done on
                format compatibility
             2) the aspect ratio will be the same as the replaced image
-            3) There is no need to keep the original file (this is not the case for replace_embedded and replace_media)
+            3) There is no need to keep the original file (this is not the case
+               for replace_embedded and replace_media)
         """
 
         if hasattr(dst_file,'read'):
@@ -363,12 +399,15 @@ class DocxTemplate(object):
     def replace_embedded(self,src_file,dst_file):
         """Replace one embdded object by another one into a docx
 
-        This has been done mainly because it is not possible to add images in docx header/footer.
-        With this function, put a dummy picture in your header/footer, then specify it with its replacement in this function
+        This has been done mainly because it is not possible to add images
+        in docx header/footer.
+        With this function, put a dummy picture in your header/footer,
+        then specify it with its replacement in this function
 
         Syntax: tpl.replace_embedded('dummy_doc.docx','doc_to_paste.docx')
 
-        Note2 : it is important to have the source file as it is required to calculate its CRC to find them in the docx
+        Note2 : it is important to have the source file as it is required to
+                calculate its CRC to find them in the docx
         """
         with open(dst_file, 'rb') as fh:
             crc = self.get_file_crc(src_file)
@@ -383,9 +422,11 @@ class DocxTemplate(object):
                 with zipfile.ZipFile(docx_filename, 'w') as zout:
                     for item in zin.infolist():
                         buf = zin.read(item.filename)
-                        if item.filename.startswith('word/media/') and item.CRC in self.crc_to_new_media:
+                        if ( item.filename.startswith('word/media/') and
+                             item.CRC in self.crc_to_new_media ):
                             zout.writestr(item, self.crc_to_new_media[item.CRC])
-                        elif item.filename.startswith('word/embeddings/') and item.CRC in self.crc_to_new_embedded:
+                        elif ( item.filename.startswith('word/embeddings/')
+                               and item.CRC in self.crc_to_new_embedded ):
                             zout.writestr(item, self.crc_to_new_embedded[item.CRC])
                         else:
                             zout.writestr(item, buf)
@@ -400,11 +441,13 @@ class DocxTemplate(object):
             # Do the actual replacement
             for embedded_file,stream in six.iteritems(self.pic_to_replace):
                 if embedded_file not in self.pic_map:
-                    raise ValueError('Picture "%s" not found in the docx template' % embedded_file)
+                    raise ValueError('Picture "%s" not found in the docx template'
+                                     % embedded_file)
                 self.pic_map[embedded_file][1]._blob=stream
 
     def build_pic_map(self):
-        """Searches in docx template all the xml pictures tag and store them in pic_map dict"""
+        """Searches in docx template all the xml pictures tag and store them
+        in pic_map dict"""
         if self.pic_to_replace:
             # Main document
             part=self.docx.part
@@ -431,7 +474,8 @@ class DocxTemplate(object):
             try:
                 if gd.attrib['uri']==docx.oxml.ns.nsmap['pic']:
                     # Either PICTURE or LINKED_PICTURE image
-                    blip=gd.xpath('pic:pic/pic:blipFill/a:blip',namespaces=docx.oxml.ns.nsmap)[0]
+                    blip=gd.xpath('pic:pic/pic:blipFill/a:blip',
+                                  namespaces=docx.oxml.ns.nsmap)[0]
                     dest=blip.xpath('@r:embed',namespaces=docx.oxml.ns.nsmap)
                     if len(dest)>0:
                         rel=dest[0]
@@ -441,9 +485,11 @@ class DocxTemplate(object):
                     continue
 
                 #title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
-                name=gd.xpath('pic:pic/pic:nvPicPr/pic:cNvPr/@name',namespaces=docx.oxml.ns.nsmap)[0]
+                name=gd.xpath('pic:pic/pic:nvPicPr/pic:cNvPr/@name',
+                              namespaces=docx.oxml.ns.nsmap)[0]
 
-                part_map[name]=(doc_part.rels[rel].target_ref,doc_part.rels[rel].target_part)
+                part_map[name]=(doc_part.rels[rel].target_ref,
+                                doc_part.rels[rel].target_part)
 
             except:
                 continue
@@ -474,7 +520,8 @@ class Subdoc(object):
     def _get_xml(self):
         if self.subdocx._element.body.sectPr is not None:
             self.subdocx._element.body.remove(self.subdocx._element.body.sectPr)
-        xml = re.sub(r'</?w:body[^>]*>','',etree.tostring(self.subdocx._element.body, encoding='unicode', pretty_print=False))
+        xml = re.sub(r'</?w:body[^>]*>','',etree.tostring(
+            self.subdocx._element.body, encoding='unicode', pretty_print=False))
         return xml
 
     def __unicode__(self):
@@ -489,7 +536,8 @@ class Subdoc(object):
 class RichText(object):
     """ class to generate Rich Text when using templates variables
 
-    This is much faster than using Subdoc class, but this only for texts INSIDE an existing paragraph.
+    This is much faster than using Subdoc class,
+    but this only for texts INSIDE an existing paragraph.
     """
     def __init__(self, text=None, **text_prop):
         self.xml = ''
@@ -515,7 +563,10 @@ class RichText(object):
             text = six.text_type(text)
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
-        text = escape(text).replace('\n', NEWLINE_XML).replace('\a', NEWPARAGRAPH_XML).replace('\t',TAB_XML)
+        text = ( escape(text)
+                 .replace('\n', NEWLINE_XML)
+                 .replace('\a', NEWPARAGRAPH_XML)
+                 .replace('\t',TAB_XML) )
 
         prop = u''
 
@@ -547,7 +598,8 @@ class RichText(object):
         if strike:
             prop += u'<w:strike/>'
         if font:
-            prop += u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'.format(font=font)
+            prop += ( u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'
+                      .format(font=font) )
 
 
         xml = u'<w:r>'
@@ -555,7 +607,8 @@ class RichText(object):
             xml += u'<w:rPr>%s</w:rPr>' % prop
         xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
         if url_id:
-            xml = u'<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>' % (url_id, xml)
+            xml = ( u'<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>'
+                    % (url_id, xml) )
         self.xml += xml
 
 
@@ -571,15 +624,19 @@ class RichText(object):
 R = RichText
 
 class Listing(object):
-    r"""class to manage \n and \a without to use RichText, by this way you keep the current template styling
+    r"""class to manage \n and \a without to use RichText,
+    by this way you keep the current template styling
 
-    use {{ mylisting }} in your template and context={ mylisting:Listing(the_listing_with_newlines) }
+    use {{ mylisting }} in your template and
+    context={ mylisting:Listing(the_listing_with_newlines) }
     """
     def __init__(self, text):
         # If not a string : cast to string (ex: int, dict etc...)
         if not isinstance(text, (six.text_type, six.binary_type)):
             text = six.text_type(text)
-        self.xml = escape(text).replace('\n', NEWLINE_XML).replace('\a', NEWPARAGRAPH_XML)
+        self.xml = ( escape(text)
+                     .replace('\n', NEWLINE_XML)
+                     .replace('\a', NEWPARAGRAPH_XML) )
 
     def __unicode__(self):
         return self.xml
