@@ -5,7 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 
-__version__ = '0.5.10'
+__version__ = '0.5.11'
 
 from lxml import etree
 from docx import Document
@@ -188,6 +188,8 @@ class DocxTemplate(object):
                      .replace(r"&#8216;","'")
                      .replace('&lt;','<')
                      .replace('&gt;','>')
+                     .replace(u'“',u'"')
+                     .replace(u'”',u'"')
                      .replace(u"‘",u"'")
                      .replace(u"’",u"'") )
         src_xml = re.sub(r'(?<=\{[\{%])(.*?)(?=[\}%]})',clean_tags,src_xml)

@@ -1,3 +1,7 @@
+0.5.11 (2018-11-21)
+-------------------
+- Smart double quotes in jinja tags are now converted into simple double quotes
+
 0.5.10 (2018-11-20)
 -------------------
 - Smart quotes in jinja tags are now converted into simple quotes
