@@ -69,7 +69,7 @@ In order to manage paragraphs, table rows, table columns, runs, special syntax h
    {%r jinja2_tag %} for runs
 
 By using these tags, python-docx-template will take care to put the real jinja2 tags at the right place into the document's xml source code.
-In addition, these tags also tells python-docx-template to **remove**the paragraph, table row, table column or run where are located the begin and ending tags and only takes care about what is in between.
+In addition, these tags also tells python-docx-template to **remove** the paragraph, table row, table column or run where are located the begin and ending tags and only takes care about what is in between.
 
 **IMPORTANT** : Do not use 2 times ``{%p``, ``{%tr``,``{%tc``, ``{%r`` in the same
 paragraph, row, column or run. Example :
