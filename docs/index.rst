@@ -104,6 +104,11 @@ Note the ``r`` right after the openning braces.
 without variable specified. Nevertheless, you can use a bigger variable name starting
 with 'r'. For example ``{{render_color}}`` will be interpreted as ``{{ render_color }}`` not as ``{{r ender_color}}``.
 
+**IMPORTANT** : Do not use 2 times ``{{r`` in the same run. Use RichText.add()
+method to concatenate several strings and styles at python side and only one
+``{{r`` at template side.
+
+
 Cell color
 ..........
 
