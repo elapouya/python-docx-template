@@ -314,7 +314,7 @@ Examples
 --------
 
 The best way to see how it works is to read examples, they are located in `tests/` directory.
-Docx test templates are in `tests/templates/`. To generate final docx files ::
+Docx test templates are in `tests/templates/`. To generate final docx files::
 
    cd tests/
    python runtests.py
