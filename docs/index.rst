@@ -50,6 +50,7 @@ Restrictions
 ++++++++++++
 
 The usual jinja2 tags, are only to be used inside a same run of a same paragraph, it can not be used across several paragraphs, table rows, runs.
+If you want to manage paragraphs, table rows and a whole run with its style, you must use special tag syntax as explained in next chapter.
 
 Note : a 'run' for microsoft word is a sequence of characters with the same style. For example, if you create a paragraph with all characters the same style :
 word will create internally only one 'run' in the paragraph. Now, if you put in bold a text in the middle of this paragraph, word will transform the previous 'run' into 3 'runs' (normal - bold - normal).
@@ -68,7 +69,23 @@ In order to manage paragraphs, table rows, table columns, runs, special syntax h
    {%r jinja2_tag %} for runs
 
 By using these tags, python-docx-template will take care to put the real jinja2 tags at the right place into the document's xml source code.
-In addition, these tags also tells python-docx-template to remove the paragraph, table row, table column or run where are located the begin and ending tags and only takes care about what is in between.
+In addition, these tags also tells python-docx-template to **remove**the paragraph, table row, table column or run where are located the begin and ending tags and only takes care about what is in between.
+
+**IMPORTANT** : Do not use 2 times ``{%p``, ``{%tr``,``{%tc``, ``{%r`` in the same
+paragraph, row, column or run. Example :
+
+Do not use this ::
+
+   {%p if display_paragraph %}Here is my paragraph {%p endif %}
+
+But use this instead in your docx template ::
+
+   {%p if display_paragraph %}
+   Here is my paragraph
+   {%p endif %}
+
+This syntax is possible because msword consider each line as a new paragraph and
+``{%p`` tags are not in the same paragraph
 
 Display variables
 .................
@@ -84,7 +101,7 @@ But if ``<var>`` is an RichText object, you must specify that you are changing t
 Note the ``r`` right after the openning braces.
 
 **IMPORTANT** : Do not use the ``r`` variable in your template because ``{{r}}`` could be interpreted as a ``{{r``
-without variable specified. Nevertheless, in the lastest doxtpl version you can use a bigger variable name starting
+without variable specified. Nevertheless, you can use a bigger variable name starting
 with 'r'. For example ``{{render_color}}`` will be interpreted as ``{{ render_color }}`` not as ``{{r ender_color}}``.
 
 Cell color
@@ -122,7 +139,8 @@ If you want to add dynamically changeable style, you have to use both : the ``{{
 You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 Instead of using ``RichText()``, one can use its shortcut : ``R()``
-*Important* : When you use ``{{r }}`` it removes the current character styling from your docx template, this means that if
+
+**Important** : When you use ``{{r }}`` it removes the current character styling from your docx template, this means that if
 you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
 This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
 
@@ -273,12 +291,19 @@ By this way you will be able to add some custom jinja filters::
     from docxtpl import DocxTemplate
     import jinja2
 
+    def multiply_by(value, by):
+       return value * by
+
     doc = DocxTemplate("my_word_template.docx")
-    context = { 'company_name' : "World company" }
+    context = { 'price_dollars' : 5.00 }
     jinja_env = jinja2.Environment()
-    jinja_env.filters['myfilter'] = myfilterfunc
+    jinja_env.filters['multiply_by'] = multiply_by
     doc.render(context,jinja_env)
     doc.save("generated_doc.docx")
+
+Then in your template, you will be able to use ::
+
+    Euros price : {{ price_dollars|multiply_by(0.88) }}
 
 Examples
 --------
