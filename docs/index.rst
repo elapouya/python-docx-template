@@ -313,7 +313,13 @@ Then in your template, you will be able to use ::
 Examples
 --------
 
-The best way to see how it works is to read examples, they are located in `tests/` directory. Templates and generated .docx files are in `tests/test_files/`.
+The best way to see how it works is to read examples, they are located in `tests/` directory.
+Docx test templates are in `tests/templates/`. To generate final docx files ::
+
+   cd tests/
+   python runtests.py
+
+Generated files are located in `tests/output` directory.
 
 Share
 -----
