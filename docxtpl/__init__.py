@@ -4,6 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 '''
+import functools
 
 __version__ = '0.5.11'
 
@@ -340,6 +341,52 @@ class DocxTemplate(object):
                     for i in range(to_add):
                         etree.SubElement(tblGrid, ns+'gridCol',
                                          {ns+'w': str(int(new_average))})
+
+            # Refetch columns after columns addition.
+            columns = tblGrid.findall(ns + 'gridCol')
+            columns_len = len(columns)
+
+            cells_len_max = 0
+
+            def get_cell_len(total, cell):
+                tc_pr = cell.find(ns + 'tcPr')
+                grid_span = tc_pr is not None and tc_pr.find(ns + 'gridSpan')
+
+                if grid_span is not None:
+                    return total + int(grid_span.get(ns + 'val'))
+
+                return total + 1
+
+            # Calculate max of table cells to compare with `gridCol`.
+            for r in t.iter(ns + 'tr'):
+                cells = r.findall(ns + 'tc')
+                cells_len = functools.reduce(get_cell_len, cells, 0)
+                cells_len_max = max(cells_len_max, cells_len)
+
+            to_remove = columns_len - cells_len_max
+
+            # If after the loop, there're less columns, than
+            # originally was, remove extra `gridCol` declarations.
+            if to_remove > 0:
+                # Have to keep track of the removed width to scale the
+                # table back to its original width.
+                removed_width = 0.0
+
+                for c in columns[-to_remove:]:
+                    removed_width += float(c.get(ns + 'w'))
+
+                    tblGrid.remove(c)
+
+                columns_left = tblGrid.findall(ns + 'gridCol')
+
+                # Distribute `removed_width` across all columns that has
+                # left after extras removal.
+                extra_space = removed_width / len(columns_left)
+                extra_space = int(extra_space)
+
+                for c in columns_left:
+                    c.set(ns+'w', str(int(float(c.get(ns+'w')) + extra_space)))
+
         return tree
 
     def new_subdoc(self,docpath=None):
