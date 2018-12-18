@@ -1,3 +1,7 @@
+0.5.12 (2018-12-18)
+-------------------
+- Fix tables with gridSpan that have less cells after the tc forloop (#164)
+
 0.5.11 (2018-11-21)
 -------------------
 - Smart double quotes in jinja tags are now converted into simple double quotes
