@@ -1,3 +1,7 @@
+0.5.14 (2018-12-23)
+-------------------
+- Fixed issue #159: autoescaped values for both str and unicode.
+
 0.5.12 (2018-12-18)
 -------------------
 - Fix tables with gridSpan that have less cells after the tc forloop (#164)
