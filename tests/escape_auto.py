@@ -1,13 +1,28 @@
-from docxtpl import *
+"""
+@author: Max Podolskii
+"""
+
+import os
+from unicodedata import name
+
+from six import iteritems, text_type
+
+from docxtpl import DocxTemplate
+
+
+XML_RESERVED = """<"&'>"""
 
 tpl = DocxTemplate('templates/escape_tpl_auto.docx')
 
-context = {'myvar': R('"less than" must be escaped : <, this can be done with RichText() or R()'),
-           'myescvar': 'It can be escaped with a "|e" jinja filter in the template too : < ',
-           'nlnp': R('Here is a multiple\nlines\nstring\aand some\aother\aparagraphs\aNOTE: the current character styling is removed'),
-           'mylisting': Listing('the listing\nwith\nsome\nlines\nand special chars : <>&'),
-           'autoescape': """<, >, &, ", and '."""
+context = {'nested_dict': {name(text_type(c)): c for c in XML_RESERVED},
+           'autoescape': 'Escaped "str & ing"!',
+           'autoescape_unicode': u'This is an escaped <unicode> example \u4f60 & \u6211',
+           'iteritems': iteritems,
            }
 
 tpl.render(context, autoescape=True)
-tpl.save('output/escape_auto.docx')
+
+OUTPUT = 'output'
+if not os.path.exists(OUTPUT):
+    os.makedirs(OUTPUT)
+tpl.save(OUTPUT + '/escape_auto.docx')

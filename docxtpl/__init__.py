@@ -267,9 +267,9 @@ class DocxTemplate(object):
                         identities.add(identity)
                         escape_recursively(v, identities)
                 else:
-                    # Avoid dict, Listing, InlineImage, RichText, etc. classes
-                    #  by comparing `v` to `str`. Do not use try-except.
-                    if isinstance(v, str):
+                    # Avoid dict, Listing, InlineImage, RichText, etc classes
+                    # Do not use try-except.
+                    if isinstance(v, six.string_types):
                         # Unescape at first to avoid secondary escaping
                         d[k] = escape(unescape(v))
 
