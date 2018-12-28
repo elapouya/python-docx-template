@@ -189,12 +189,12 @@ especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. T
    *  ``context = { 'var':escape('my text')}`` and ``{{ <var> }}`` in the template.
    *  enable autoescaping when calling render method: ``tpl.render(context, autoescape=True)`` (default is autoescape=False)
 
-The ``RichText()`` or ``R()`` offers newline and new paragraph feature : just use ``\n`` or ``\a`` in the
+The ``RichText()`` or ``R()`` offers newline, new paragraph, and page break features : just use ``\n``, ``\a``, or ``\f`` in the
 text, they will be converted accordingly.
 
 See tests/escape.py example for more informations.
 
-Another solution, if you want to include a listing into your document, that is to escape the text and manage \n and \a,
+Another solution, if you want to include a listing into your document, that is to escape the text and manage \n, \a, and \f
 you can use the ``Listing`` class :
 
 in your python code ::

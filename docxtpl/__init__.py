@@ -32,6 +32,8 @@ import zipfile
 NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
 TAB_XML = '</w:t></w:r><w:r><w:tab/></w:r><w:r><w:t xml:space="preserve">'
+PAGE_BREAK = '</w:t><w:br w:type="page"/><w:t xml:space="preserve">'
+
 
 class DocxTemplate(object):
     """ Class for managing docx files as they were jinja2 templates """
@@ -582,6 +584,7 @@ class Subdoc(object):
     def __html__(self):
         return self._get_xml()
 
+
 class RichText(object):
     """ class to generate Rich Text when using templates variables
 
@@ -612,10 +615,11 @@ class RichText(object):
             text = six.text_type(text)
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8',errors='ignore')
-        text = ( escape(text)
-                 .replace('\n', NEWLINE_XML)
-                 .replace('\a', NEWPARAGRAPH_XML)
-                 .replace('\t',TAB_XML) )
+        text = (escape(text)
+                .replace('\n', NEWLINE_XML)
+                .replace('\a', NEWPARAGRAPH_XML)
+                .replace('\t', TAB_XML)
+                .replace('\f', PAGE_BREAK))
 
         prop = u''
 
@@ -670,7 +674,9 @@ class RichText(object):
     def __html__(self):
         return self.xml
 
+
 R = RichText
+
 
 class Listing(object):
     r"""class to manage \n and \a without to use RichText,
@@ -683,9 +689,11 @@ class Listing(object):
         # If not a string : cast to string (ex: int, dict etc...)
         if not isinstance(text, (six.text_type, six.binary_type)):
             text = six.text_type(text)
-        self.xml = ( escape(text)
-                     .replace('\n', NEWLINE_XML)
-                     .replace('\a', NEWPARAGRAPH_XML) )
+        self.xml = (escape(text)
+                    .replace('\n', NEWLINE_XML)
+                    .replace('\a', NEWPARAGRAPH_XML)
+                    .replace('\t', TAB_XML)
+                    .replace('\f', PAGE_BREAK))
 
     def __unicode__(self):
         return self.xml
