@@ -1,3 +1,7 @@
+0.5.15 (2019-01-02)
+-------------------
+- Added `PAGE_BREAK` feature (#168)
+
 0.5.14 (2018-12-23)
 -------------------
 - Fixed issue #159: autoescaped values for both str and unicode.
