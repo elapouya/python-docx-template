@@ -6,7 +6,7 @@ Created : 2015-03-12
 '''
 import functools
 
-__version__ = '0.5.15'
+__version__ = '0.5.16'
 
 from lxml import etree
 from docx import Document
@@ -40,14 +40,6 @@ class DocxTemplate(object):
 
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
-
-    @property
-    def undeclared_template_variables(self):
-        xml = self.get_xml()
-        xml = self.patch_xml(xml)
-        env = Environment()
-        parse_content = env.parse(xml)
-        return meta.find_undeclared_variables(parse_content)
 
     def __init__(self, docx):
         self.docx = Document(docx)
@@ -563,6 +555,14 @@ class DocxTemplate(object):
         self.pre_processing()
         self.docx.save(filename,*args,**kwargs)
         self.post_processing(filename)
+
+    @property
+    def undeclared_template_variables(self):
+        xml = self.get_xml()
+        xml = self.patch_xml(xml)
+        env = Environment()
+        parse_content = env.parse(xml)
+        return meta.find_undeclared_variables(parse_content)
 
 
 class Subdoc(object):

@@ -1,3 +1,8 @@
+0.5.16 (2019-01-11)
+-------------------
+- Force to use python-docx 0.8.7 (#170)
+- Add getting undeclared variables in the template (#171)
+
 0.5.15 (2019-01-02)
 -------------------
 - Added `PAGE_BREAK` feature (#168)
