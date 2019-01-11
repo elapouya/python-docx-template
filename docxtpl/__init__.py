@@ -13,7 +13,7 @@ from docx import Document
 from docx.opc.oxml import serialize_part_xml, parse_xml
 import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
-from jinja2 import Template
+from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 try:
     from html import escape, unescape
@@ -40,6 +40,14 @@ class DocxTemplate(object):
 
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
+
+    @property
+    def undeclared_template_variables(self):
+        xml = self.get_xml()
+        xml = self.patch_xml(xml)
+        env = Environment()
+        parse_content = env.parse(xml)
+        return meta.find_undeclared_variables(parse_content)
 
     def __init__(self, docx):
         self.docx = Document(docx)
