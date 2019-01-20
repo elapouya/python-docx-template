@@ -16,13 +16,10 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 try:
-    from html import escape, unescape
+    from html import escape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
-    # import escape and unescape methods for Python 2.7
     from cgi import escape
-    import HTMLParser
-    unescape = HTMLParser.HTMLParser().unescape
 import re
 import six
 import binascii
@@ -253,37 +250,12 @@ class DocxTemplate(object):
     def map_headers_footers_xml(self, relKey, xml):
         self.docx._part._rels[relKey]._target._blob = xml
 
-    @staticmethod
-    def escape_values(context):
-        """Escape strings for an XML Word document
-        which may contain <, >, &, ', and ".
-        """
-        def escape_recursively(d, identities):
-            """Escape string values of the passed :dict: `d` in-place
-            including nested dictionaries of any depth.
-            """
-            for k, v in six.iteritems(d):
-                if isinstance(v, dict):
-                    identity = id(v)
-                    if identity not in identities:
-                        identities.add(identity)
-                        escape_recursively(v, identities)
-                else:
-                    # Avoid dict, Listing, InlineImage, RichText, etc classes
-                    # Do not use try-except.
-                    if isinstance(v, six.string_types):
-                        # Unescape at first to avoid secondary escaping
-                        d[k] = escape(unescape(v))
-
-        # Avoid RecursionError (if back edges, i.e. cycles, exist)
-        # by using a set of unique identities of iterated dictionaries.
-        initial_identities = {id(context)}
-
-        escape_recursively(context, initial_identities)
-
     def render(self, context, jinja_env=None, autoescape=False):
         if autoescape:
-            self.escape_values(context)
+            if not jinja_env:
+                jinja_env = Environment(autoescape=autoescape)
+            else:
+                jinja_env.autoescape = autoescape
 
         # Body
         xml_src = self.build_xml(context, jinja_env)
