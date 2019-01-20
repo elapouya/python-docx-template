@@ -1,3 +1,7 @@
+0.5.17 (2019-01-20)
+-------------------
+- Delegated autoescaping to Jinja2 Environment (#175)
+
 0.5.16 (2019-01-11)
 -------------------
 - Force to use python-docx 0.8.7 (#170)
