@@ -324,7 +324,7 @@ class DocxTemplate(object):
 
             def get_cell_len(total, cell):
                 tc_pr = cell.find(ns + 'tcPr')
-                grid_span = tc_pr is not None and tc_pr.find(ns + 'gridSpan')
+                grid_span = None if tc_pr is None else tc_pr.find(ns + 'gridSpan')
 
                 if grid_span is not None:
                     return total + int(grid_span.get(ns + 'val'))
