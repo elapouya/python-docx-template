@@ -355,8 +355,11 @@ class DocxTemplate(object):
 
                 # Distribute `removed_width` across all columns that has
                 # left after extras removal.
-                extra_space = removed_width / len(columns_left)
-                extra_space = int(extra_space)
+                extra_space = 0
+                if len(columns_left) > 0:
+                    extra_space = removed_width / len(columns_left)
+                    extra_space = int(extra_space)
+
 
                 for c in columns_left:
                     c.set(ns+'w', str(int(float(c.get(ns+'w')) + extra_space)))
