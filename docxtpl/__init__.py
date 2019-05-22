@@ -391,7 +391,7 @@ class DocxTemplate(object):
 
         Syntax: tpl.replace_media('dummy_media_to_replace.png','media_to_paste.jpg')
             -- or --
-                tpl.replace-media(io.BytesIO(image_stream), io.BytesIO(new_image_stream))
+                tpl.replace_media(io.BytesIO(image_stream), io.BytesIO(new_image_stream))
 
         Note: for images, the aspect ratio will be the same as the replaced image
         Note2 : it is important to have the source media file as it is required
