@@ -29,7 +29,7 @@ News
 
 def get_version(pkg):
     path = os.path.join(os.path.dirname(__file__),pkg,'__init__.py')
-    with open(path) as fh:
+    with open(path, encoding='utf-8') as fh:
         m = re.search(r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]',fh.read(),re.M)
     if m:
         return m.group(1)
