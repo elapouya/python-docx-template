@@ -1,3 +1,7 @@
+0.5.19 (2019-05-23)
+-------------------
+- Add support for file-like objects for replace_media (#197)
+
 0.5.18 (2019-05-20)
 -------------------
 - Fix  #176
