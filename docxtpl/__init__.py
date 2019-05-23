@@ -370,10 +370,14 @@ class DocxTemplate(object):
         return Subdoc(self,docpath)
 
     @staticmethod
-    def get_file_crc(filename):
-        with open(filename, 'rb') as fh:
-            buf = fh.read()
-            crc = (binascii.crc32(buf) & 0xFFFFFFFF)
+    def get_file_crc(file_obj):
+        if hasattr(file_obj, 'read'):
+            buf = file_obj.read()
+        else:
+            with open(file_obj, 'rb') as fh:
+                buf = fh.read()
+
+        crc = (binascii.crc32(buf) & 0xFFFFFFFF)
         return crc
 
     def replace_media(self,src_file,dst_file):
@@ -382,17 +386,24 @@ class DocxTemplate(object):
         This has been done mainly because it is not possible to add images in
         docx header/footer.
         With this function, put a dummy picture in your header/footer,
-        then specify it with its replacement in this function
+        then specify it with its replacement in this function using the file path
+        or file-like objects.
 
         Syntax: tpl.replace_media('dummy_media_to_replace.png','media_to_paste.jpg')
+            -- or --
+                tpl.replace_media(io.BytesIO(image_stream), io.BytesIO(new_image_stream))
 
         Note: for images, the aspect ratio will be the same as the replaced image
         Note2 : it is important to have the source media file as it is required
                 to calculate its CRC to find them in the docx
         """
-        with open(dst_file, 'rb') as fh:
-            crc = self.get_file_crc(src_file)
-            self.crc_to_new_media[crc] = fh.read()
+
+        crc = self.get_file_crc(src_file)
+        if hasattr(dst_file, 'read'):
+            self.crc_to_new_media[crc] = dst_file.read()
+        else:
+            with open(dst_file, 'rb') as fh:
+                self.crc_to_new_media[crc] = fh.read()
 
     def replace_pic(self,embedded_file,dst_file):
         """Replace embedded picture with original-name given by embedded_file.
