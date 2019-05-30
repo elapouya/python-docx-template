@@ -9,6 +9,7 @@ from docxtpl import DocxTemplate
 import io
 
 DEST_FILE = 'output/header_footer_image_file_obj.docx'
+DEST_FILE2 = 'output/header_footer_image_file_obj2.docx'
 
 tpl=DocxTemplate('templates/header_footer_image_tpl.docx')
 
@@ -21,3 +22,14 @@ new_image = io.BytesIO(open('templates/python.png', 'rb').read())
 tpl.replace_media(dummy_pic, new_image)
 tpl.render(context)
 tpl.save(DEST_FILE)
+
+tpl = DocxTemplate('templates/header_footer_image_tpl.docx')
+dummy_pic.seek(0)
+new_image.seek(0)
+tpl.replace_media(dummy_pic, new_image)
+tpl.render(context)
+
+file_obj = io.BytesIO()
+tpl.save(file_obj)
+file_obj.seek(0)
+DocxTemplate(file_obj).save(DEST_FILE2)

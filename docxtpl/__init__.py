@@ -5,6 +5,7 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 '''
 import functools
+import io
 
 __version__ = '0.5.18'
 
@@ -450,13 +451,20 @@ class DocxTemplate(object):
             crc = self.get_file_crc(src_file)
             self.crc_to_new_embedded[crc] = fh.read()
 
-    def post_processing(self,docx_filename):
+    def post_processing(self, docx_file):
         if self.crc_to_new_media or self.crc_to_new_embedded:
-            backup_filename = '%s_docxtpl_before_replace_medias' % docx_filename
-            os.rename(docx_filename,backup_filename)
 
-            with zipfile.ZipFile(backup_filename) as zin:
-                with zipfile.ZipFile(docx_filename, 'w') as zout:
+            if hasattr(docx_file, 'read'):
+                tmp_file = io.BytesIO()
+                Document(docx_file).save(tmp_file)
+                tmp_file.seek(0)
+
+            else:
+                tmp_file = '%s_docxtpl_before_replace_medias' % docx_file
+                os.rename(docx_file, tmp_file)
+
+            with zipfile.ZipFile(tmp_file) as zin:
+                with zipfile.ZipFile(docx_file, 'w') as zout:
                     for item in zin.infolist():
                         buf = zin.read(item.filename)
                         if ( item.filename.startswith('word/media/') and
@@ -468,7 +476,10 @@ class DocxTemplate(object):
                         else:
                             zout.writestr(item, buf)
 
-            os.remove(backup_filename)
+            if not hasattr(tmp_file, 'read'):
+                os.remove(tmp_file)
+            if hasattr(docx_file, 'read'):
+                docx_file.seek(0)
 
     def pre_processing(self):
 
