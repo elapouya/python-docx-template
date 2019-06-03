@@ -24,6 +24,6 @@ context = {
 }
 
 tpl.replace_embedded('templates/embedded_dummy.docx','templates/embedded_static_docx.docx')
-tpl.replace_embedded('templates/embedded_dummy2.docx','templates/embedded_embedded_docx.docx')
+tpl.replace_embedded('templates/embedded_dummy2.docx','output/embedded_embedded_docx.docx')
 tpl.render(context)
 tpl.save('output/embedded.docx')

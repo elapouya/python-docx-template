@@ -1,3 +1,7 @@
+0.6.0 (2019-06-03)
+-------------------
+- DocxTemplate now accepts file-like objects (Thanks to edufresne)
+
 0.5.20 (2019-05-23)
 -------------------
 - Fix #199
