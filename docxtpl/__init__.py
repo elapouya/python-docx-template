@@ -456,8 +456,9 @@ class DocxTemplate(object):
 
             if hasattr(docx_file, 'read'):
                 tmp_file = io.BytesIO()
-                Document(docx_file).save(tmp_file)
+                DocxTemplate(docx_file).save(tmp_file)
                 tmp_file.seek(0)
+                docx_file.seek(0)
 
             else:
                 tmp_file = '%s_docxtpl_before_replace_medias' % docx_file

@@ -32,4 +32,6 @@ tpl.render(context)
 file_obj = io.BytesIO()
 tpl.save(file_obj)
 file_obj.seek(0)
-DocxTemplate(file_obj).save(DEST_FILE2)
+with open(DEST_FILE2, 'wb') as f:
+    f.write(file_obj.read())
+
