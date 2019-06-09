@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 from lxml import etree
 from docx import Document
@@ -99,8 +99,12 @@ class DocxTemplate(object):
                          cellbg,src_xml,flags=re.DOTALL)
 
         # avoid {{r and {%r tags to strip MS xml tags too far
+        # ensure space preservation when splitting
+        src_xml = re.sub(r'<w:t>((?:(?!<w:t>).)*)({{r\s.*?}}|{%r\s.*?%})',
+                         r'<w:t xml:space="preserve">\1\2',
+                         src_xml,flags=re.DOTALL)
         src_xml = re.sub(r'({{r\s.*?}}|{%r\s.*?%})',
-                         r'</w:t></w:r><w:r><w:t>\1</w:t></w:r><w:r><w:t>',
+                         r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
                          src_xml,flags=re.DOTALL)
 
         for y in ['tr', 'tc', 'p', 'r']:
