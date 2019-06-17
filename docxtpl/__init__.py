@@ -558,13 +558,17 @@ class DocxTemplate(object):
         self.docx.save(filename,*args,**kwargs)
         self.post_processing(filename)
 
-    @property
-    def undeclared_template_variables(self):
+    def get_undeclared_template_variables(self, jinja_env=None):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
-        env = Environment()
+        if jinja_env:
+            env = jinja_env
+        else:
+            env = Environment()
         parse_content = env.parse(xml)
         return meta.find_undeclared_variables(parse_content)
+
+    undeclared_template_variables = property(get_undeclared_template_variables)
 
 
 class Subdoc(object):
