@@ -1,3 +1,7 @@
+0.6.3 (2019-06-20)
+-------------------
+- PR #207 and #209
+
 0.6.2 (2019-06-09)
 -------------------
 - Handle spaces correctly when run are split by Jinja code (#205)
