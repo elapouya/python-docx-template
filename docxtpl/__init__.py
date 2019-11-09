@@ -625,6 +625,10 @@ class RichText(object):
                         font=None,
                         url_id=None):
 
+        # If a RichText is added
+        if isinstance(text, RichText):
+            self.xml += text.xml
+            return
 
         # If not a string : cast to string (ex: int, dict etc...)
         if not isinstance(text, (six.text_type, six.binary_type)):
