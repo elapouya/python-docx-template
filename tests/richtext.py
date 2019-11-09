@@ -9,7 +9,7 @@ from docxtpl import DocxTemplate, RichText
 
 tpl=DocxTemplate('templates/richtext_tpl.docx')
 
-rt = RichText('an exemple of ')
+rt = RichText()
 rt.add('a rich text', style='myrichtextstyle')
 rt.add(' with ')
 rt.add('some italic', italic=True)
@@ -38,8 +38,11 @@ rt.add('superscript', superscript=True)
 rt.add(' and some')
 rt.add('subscript', subscript=True)
 
+rt_embedded = RichText('an example of ')
+rt_embedded.add(rt)
+
 context = {
-    'example' : rt,
+    'example' : rt_embedded,
 }
 
 tpl.render(context)
