@@ -236,7 +236,7 @@ class DocxTemplate(object):
 
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
-            if val.reltype == uri:
+            if (val.reltype == uri) and (val._target._blob):
                 yield relKey, self.xml_to_string(parse_xml(val._target._blob))
 
     def get_headers_footers_encoding(self,xml):
