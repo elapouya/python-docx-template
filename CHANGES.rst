@@ -1,3 +1,8 @@
+0.6.4 (2020-04-06)
+-------------------
+- Add the possibility to add RichText to a Richtext
+- Prevent lxml from attempting to parse None
+
 0.6.3 (2019-06-20)
 -------------------
 - PR #207 and #209
