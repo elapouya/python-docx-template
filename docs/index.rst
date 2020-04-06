@@ -49,11 +49,13 @@ Nevertheless there are some restrictions and extensions to make it work inside a
 Restrictions
 ++++++++++++
 
-The usual jinja2 tags, are only to be used inside a same run of a same paragraph, it can not be used across several paragraphs, table rows, runs.
+The usual jinja2 tags, are only to be used inside the same run of a same paragraph, it can not be used across several paragraphs, table rows, runs.
 If you want to manage paragraphs, table rows and a whole run with its style, you must use special tag syntax as explained in next chapter.
 
-Note : a 'run' for microsoft word is a sequence of characters with the same style. For example, if you create a paragraph with all characters the same style :
-word will create internally only one 'run' in the paragraph. Now, if you put in bold a text in the middle of this paragraph, word will transform the previous 'run' into 3 'runs' (normal - bold - normal).
+**Note:**
+
+a 'run' for Microsoft Word is a sequence of characters with the same style. For example, if you create a paragraph with all characters of the same style, MS Word will create internally only one 'run' in the paragraph. Now, if you put in bold a text in the middle of this paragraph, word will transform the previous 'run' into 3 different 'runs' (normal - bold - normal).
+
 
 Extensions
 ++++++++++
@@ -69,9 +71,9 @@ In order to manage paragraphs, table rows, table columns, runs, special syntax h
    {%r jinja2_tag %} for runs
 
 By using these tags, python-docx-template will take care to put the real jinja2 tags at the right place into the document's xml source code.
-In addition, these tags also tells python-docx-template to **remove** the paragraph, table row, table column or run where are located the begin and ending tags and only takes care about what is in between.
+In addition, these tags also tell python-docx-template to **remove** the paragraph, table row, table column or run where the begin and ending tags are located and only takes care about what is in between.
 
-**IMPORTANT** : Do not use 2 times ``{%p``, ``{%tr``,``{%tc``, ``{%r`` in the same
+**IMPORTANT** : Do not use ``{%p``, ``{%tr``, ``{%tc`` or ``{%r`` twice in the same
 paragraph, row, column or run. Example :
 
 Do not use this ::
@@ -84,8 +86,8 @@ But use this instead in your docx template ::
    Here is my paragraph
    {%p endif %}
 
-This syntax is possible because msword consider each line as a new paragraph and
-``{%p`` tags are not in the same paragraph
+This syntax is possible because MS Word considers each line as a new paragraph and
+``{%p`` tags are not in the same paragraph in the second case.
 
 Display variables
 .................
