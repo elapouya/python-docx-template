@@ -94,7 +94,7 @@ As part of jinja2, one can used double braces::
 
    {{ <var> }}
 
-But if ``<var>`` is an RichText object, you must specify that you are changing the actual 'run' ::
+But if ``<var>`` is a RichText :ref:`RichText` object, you must specify that you are changing the actual 'run' ::
 
    {{r <var> }}
 
@@ -135,6 +135,7 @@ In order to display ``{%``, ``%}``, ``{{`` or ``}}``, one can use ::
 
    {_%, %_}, {_{ or  }_}
 
+.. _RichText:
 RichText
 --------
 
