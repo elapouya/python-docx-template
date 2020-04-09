@@ -7,12 +7,11 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.6.9'
+__version__ = '0.7.0'
 
 from lxml import etree
 from docx import Document
 from docx.opc.oxml import serialize_part_xml, parse_xml
-from docx.opc.part import XmlPart
 import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
@@ -238,8 +237,8 @@ class DocxTemplate(object):
 
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
-            if (val.reltype == uri) and (val.target_part.blob):
-                yield relKey, self.xml_to_string(parse_xml(val.target_part.blob))
+            if (val.reltype == uri) and (val._target._blob):
+                yield relKey, self.xml_to_string(parse_xml(val._target._blob))
 
     def get_headers_footers_encoding(self,xml):
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"',xml,re.I)
@@ -255,8 +254,7 @@ class DocxTemplate(object):
             yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
-        part = self.docx._part._rels[relKey].target_part
-        self.docx._part._rels[relKey]._target = XmlPart.load(part.partname, part.content_type, xml, part.package)
+        self.docx._part._rels[relKey]._target._blob = xml
 
     def render(self, context, jinja_env=None, autoescape=False):
         if autoescape:
@@ -510,8 +508,11 @@ class DocxTemplate(object):
                         if item.filename in self.zipname_to_replace:
                             zout.writestr(item, self.zipname_to_replace[item.filename])
                         elif ( item.filename.startswith('word/media/') and
-                             item.CRC in self.crc_to_new_media ):
+                               item.CRC in self.crc_to_new_media ):
                             zout.writestr(item, self.crc_to_new_media[item.CRC])
+                        elif ( item.filename.startswith('word/embeddings/') and
+                               item.CRC in self.crc_to_new_embedded):
+                            zout.writestr(item, self.crc_to_new_embedded[item.CRC])
                         else:
                             zout.writestr(item, buf)
 

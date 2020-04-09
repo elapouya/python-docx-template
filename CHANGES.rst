@@ -1,3 +1,7 @@
+0.7.0 (2020-04-09)
+-------------------
+- Add replace_zipname() method to replace Excel and PowerPoint embedded files
+
 0.6.4 (2020-04-06)
 -------------------
 - Add the possibility to add RichText to a Richtext
