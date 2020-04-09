@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.6.4'
+__version__ = '0.6.9'
 
 from lxml import etree
 from docx import Document
@@ -43,6 +43,7 @@ class DocxTemplate(object):
         self.docx = Document(docx)
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
+        self.zipname_to_replace = {}
         self.pic_to_replace = {}
         self.pic_map = {}
 
@@ -455,6 +456,36 @@ class DocxTemplate(object):
             crc = self.get_file_crc(src_file)
             self.crc_to_new_embedded[crc] = fh.read()
 
+    def replace_zipname(self,zipname,dst_file):
+        """Replace one file in the docx file
+
+        First note that a MSWord .docx file is in fact a zip file.
+
+        This method can be used to replace document embedded in the docx template.
+
+        Some embedded document may have been modified by MSWord while saving
+        the template : thus replace_embedded() cannot be used as CRC is not the
+        same as the original file.
+
+        This method works for embdded MSWord file like Excel or PowerPoint file,
+        but won't work for others like PDF, Python or even Text files :
+        For these ones, MSWord generate an oleObjectNNN.bin file which is no
+        use to be replaced as it is encoded.
+
+        Syntax:
+
+        tpl.replace_zipname(
+            'word/embeddings/Feuille_Microsoft_Office_Excel1.xlsx',
+            'my_excel_file.xlsx')
+
+        The zipname is the one you can find when you open docx with WinZip,
+        7zip (Windows) or unzip -l (Linux). The zipname starts with
+        "word/embeddings/". Note that the file is renamed by MSWord,
+        so you have to guess a little bit...
+        """
+        with open(dst_file, 'rb') as fh:
+            self.zipname_to_replace[zipname] = fh.read()
+
     def post_processing(self, docx_file):
         if self.crc_to_new_media or self.crc_to_new_embedded:
 
@@ -474,12 +505,11 @@ class DocxTemplate(object):
                 with zipfile.ZipFile(docx_file, 'w') as zout:
                     for item in zin.infolist():
                         buf = zin.read(item.filename)
-                        if ( item.filename.startswith('word/media/') and
+                        if item.filename in self.zipname_to_replace:
+                            zout.writestr(item, self.zipname_to_replace[item.filename])
+                        elif ( item.filename.startswith('word/media/') and
                              item.CRC in self.crc_to_new_media ):
                             zout.writestr(item, self.crc_to_new_media[item.CRC])
-                        elif ( item.filename.startswith('word/embeddings/')
-                               and item.CRC in self.crc_to_new_embedded ):
-                            zout.writestr(item, self.crc_to_new_embedded[item.CRC])
                         else:
                             zout.writestr(item, buf)
 
