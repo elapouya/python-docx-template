@@ -59,7 +59,7 @@ setup(name='docxtpl',
       license='LGPL 2.1',
       packages=['docxtpl'],
       install_requires=['six',
-                        'python-docx<=0.8.7', # newer docx package breaks header/footer management in docxtpl
+                        'python-docx',
                         'jinja2',
                         'lxml'],
       extras_require={'docs': ['Sphinx', 'sphinxcontrib-napoleon']},
