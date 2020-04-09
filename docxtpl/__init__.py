@@ -12,6 +12,7 @@ __version__ = '0.7.0'
 from lxml import etree
 from docx import Document
 from docx.opc.oxml import serialize_part_xml, parse_xml
+from docx.opc.part import XmlPart
 import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
@@ -237,8 +238,8 @@ class DocxTemplate(object):
 
     def get_headers_footers_xml(self, uri):
         for relKey, val in self.docx._part._rels.items():
-            if (val.reltype == uri) and (val._target._blob):
-                yield relKey, self.xml_to_string(parse_xml(val._target._blob))
+            if (val.reltype == uri) and (val.target_part.blob):
+                yield relKey, self.xml_to_string(parse_xml(val.target_part.blob))
 
     def get_headers_footers_encoding(self,xml):
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"',xml,re.I)
@@ -254,7 +255,11 @@ class DocxTemplate(object):
             yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
-        self.docx._part._rels[relKey]._target._blob = xml
+        part = self.docx._part._rels[relKey].target_part
+        new_part = XmlPart.load(part.partname, part.content_type, xml, part.package)
+        for rId, rel in part.rels.items():
+            new_part.load_rel(rel.reltype, rel.target_part, rel.rId, rel.is_external)
+        self.docx._part._rels[relKey]._target = new_part
 
     def render(self, context, jinja_env=None, autoescape=False):
         if autoescape:
