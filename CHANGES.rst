@@ -1,3 +1,7 @@
+0.8.1 (2020-04-14)
+-------------------
+- fix #266
+
 0.8.0 (2020-04-10)
 -------------------
 - docxtpl is now able to use latest python-docx (0.8.10). Thanks to Dutchy-@github.

@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 from lxml import etree
 from docx import Document
@@ -492,7 +492,9 @@ class DocxTemplate(object):
             self.zipname_to_replace[zipname] = fh.read()
 
     def post_processing(self, docx_file):
-        if self.crc_to_new_media or self.crc_to_new_embedded:
+        if ( self.crc_to_new_media or
+             self.crc_to_new_embedded or
+             self.zipname_to_replace ):
 
             if hasattr(docx_file, 'read'):
                 tmp_file = io.BytesIO()
