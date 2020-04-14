@@ -109,6 +109,11 @@ class DocxTemplate(object):
                          r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
                          src_xml,flags=re.DOTALL)
 
+        # {%- will merge with previous paragraph text
+        src_xml = re.sub(r'</w:t>(?:(?!</w:t>).)*?{%-','{%',src_xml,flags=re.DOTALL)
+        # -%} will merge with next paragraph text
+        src_xml = re.sub(r'-%}(?:(?!<w:t[ >]).)*?<w:t[^>]*?>','%}',src_xml,flags=re.DOTALL)
+
         for y in ['tr', 'tc', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing
             # {%y xxx %} or {{y xxx}} template tag
