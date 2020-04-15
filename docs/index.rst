@@ -89,6 +89,29 @@ But use this instead in your docx template ::
 This syntax is possible because MS Word considers each line as a new paragraph and
 ``{%p`` tags are not in the same paragraph in the second case.
 
+Split and merge text
+....................
+
+* You can merge a jinja2 tag with previous line by using  ``{%-``
+* You can merge a jinja2 tag with next line by using ``-%}``
+
+A text containing Jinja2 tags may be unreadable if too long::
+
+   My house is located {% if living_in_town %} in urban area {% else %} in countryside {% endif %} and I love it.
+
+One can use *ENTER* or *SHIFT+ENTER* to split a text like below, then use ``{%-`` and ``-%}`` to tell docxtpl to merge the whole thing::
+
+   My house is located
+   {%- if living_in_town -%}
+    in urban area
+   {%- else -%}
+    in countryside
+   {%- endif -%}
+    and I love it.
+
+**IMPORTANT :**  Use an unbreakable space (*CTRL+SHIFT+SPACE*) when a space is wanted at line beginning or ending.
+
+
 Display variables
 .................
 
@@ -96,7 +119,7 @@ As part of jinja2, one can used double braces::
 
    {{ <var> }}
 
-But if ``<var>`` is a RichText :ref:`RichText` object, you must specify that you are changing the actual 'run' ::
+But if ``<var>`` is a RichText_ object, you must specify that you are changing the actual 'run'::
 
    {{r <var> }}
 
@@ -114,7 +137,7 @@ method to concatenate several strings and styles at python side and only one
 Cell color
 ..........
 
-There is a special case when you want to change the background color of a table cell, you must put the following tag at the very beginning of the cell ::
+There is a special case when you want to change the background color of a table cell, you must put the following tag at the very beginning of the cell::
 
    {% cellbg <var> %}
 
@@ -124,7 +147,7 @@ Column spanning
 ...............
 
 If you want to dynamically span a table cell over many column (this is useful when you have a table with a dynamic column count),
-you must put the following tag at the very beginning of the cell to span ::
+you must put the following tag at the very beginning of the cell to span::
 
    {% colspan <var> %}
 
@@ -133,11 +156,13 @@ you must put the following tag at the very beginning of the cell to span ::
 Escaping
 ........
 
-In order to display ``{%``, ``%}``, ``{{`` or ``}}``, one can use ::
+In order to display ``{%``, ``%}``, ``{{`` or ``}}``, one can use::
 
    {_%, %_}, {_{ or  }_}
 
+
 .. _RichText:
+
 RichText
 --------
 
@@ -153,9 +178,9 @@ you do not specify a style in ``RichText()``, the style will go back to a micros
 This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
 
 Hyperlink with RichText
-.......................
++++++++++++++++++++++++
 
-You can add an hyperlink to a text by using a Richtext with this syntax ::
+You can add an hyperlink to a text by using a Richtext with this syntax::
 
    tpl=DocxTemplate('your_template.docx')
    rt = RichText('You can add an hyperlink, here to ')
@@ -167,7 +192,7 @@ Inline image
 ------------
 
 You can dynamically add one or many images into your document (tested with JPEG and PNG files).
-just add ``{{ <var> }}`` tag in your template where ``<var>`` is an instance of doxtpl.InlineImage ::
+just add ``{{ <var> }}`` tag in your template where ``<var>`` is an instance of doxtpl.InlineImage::
 
    myimage = InlineImage(tpl,'test_files/python_logo.png',width=Mm(20))
 
@@ -200,7 +225,7 @@ See tests/escape.py example for more informations.
 Another solution, if you want to include a listing into your document, that is to escape the text and manage \n, \a, and \f
 you can use the ``Listing`` class :
 
-in your python code ::
+in your python code::
 
    context = { 'mylisting':Listing('the listing\nwith\nsome\nlines \a and some paragraph \a and special chars : <>&') }
 
@@ -324,7 +349,7 @@ By this way you will be able to add some custom jinja filters::
     doc.render(context,jinja_env)
     doc.save("generated_doc.docx")
 
-Then in your template, you will be able to use ::
+Then in your template, you will be able to use::
 
     Euros price : {{ price_dollars|multiply_by(0.88) }}
 

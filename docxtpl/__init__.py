@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.8.1'
+__version__ = '0.9.0'
 
 from lxml import etree
 from docx import Document
@@ -410,7 +410,8 @@ class DocxTemplate(object):
                 tpl.replace_media(io.BytesIO(image_stream), io.BytesIO(new_image_stream))
 
         Note: for images, the aspect ratio will be the same as the replaced image
-        Note2 : it is important to have the source media file as it is required
+
+        Note2: it is important to have the source media file as it is required
                 to calculate its CRC to find them in the docx
         """
 
