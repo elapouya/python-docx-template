@@ -6,6 +6,7 @@ import sys
 # To register onto Pypi :
 # python setup.py sdist bdist_wheel upload
 
+
 def read(*names):
     values = dict()
     for name in names:
@@ -28,17 +29,19 @@ News
 %(CHANGES)s
 """ % read('README', 'CHANGES')
 
+
 def get_version(pkg):
-    path = os.path.join(os.path.dirname(__file__),pkg,'__init__.py')
+    path = os.path.join(os.path.dirname(__file__), pkg, '__init__.py')
     if sys.version_info >= (3, 0):
         fh = open(path, encoding='utf-8')   # required to read utf-8 file on windows
     else:
-        fh = open(path) # encoding parameter does not exist in python 2
+        fh = open(path)  # encoding parameter does not exist in python 2
     with fh:
-        m = re.search(r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]',fh.read(),re.M)
+        m = re.search(r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]', fh.read(), re.M)
     if m:
         return m.group(1)
     raise RuntimeError("Unable to find __version__ string in %s." % path)
+
 
 setup(name='docxtpl',
       version=get_version('docxtpl'),

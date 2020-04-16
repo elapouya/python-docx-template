@@ -7,10 +7,10 @@ Created : 2015-03-12
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('templates/header_footer_entities_tpl.docx')
+tpl = DocxTemplate('templates/header_footer_entities_tpl.docx')
 
 context = {
-    'title' : 'Header and footer test',
+    'title': 'Header and footer test',
 }
 
 tpl.render(context)

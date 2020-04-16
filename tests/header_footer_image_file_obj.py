@@ -11,10 +11,10 @@ import io
 DEST_FILE = 'output/header_footer_image_file_obj.docx'
 DEST_FILE2 = 'output/header_footer_image_file_obj2.docx'
 
-tpl=DocxTemplate('templates/header_footer_image_tpl.docx')
+tpl = DocxTemplate('templates/header_footer_image_tpl.docx')
 
 context = {
-    'mycompany' : 'The World Wide company',
+    'mycompany': 'The World Wide company',
 }
 
 dummy_pic = io.BytesIO(open('templates/dummy_pic_for_header.png', 'rb').read())
@@ -34,4 +34,3 @@ tpl.save(file_obj)
 file_obj.seek(0)
 with open(DEST_FILE2, 'wb') as f:
     f.write(file_obj.read())
-

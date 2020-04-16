@@ -7,10 +7,10 @@ Created : 2015-03-12
 
 from docxtpl import DocxTemplate
 
-tpl=DocxTemplate('templates/merge_paragraph_tpl.docx')
+tpl = DocxTemplate('templates/merge_paragraph_tpl.docx')
 
 context = {
-   'living_in_town' : True,
+    'living_in_town': True,
 }
 
 tpl.render(context)

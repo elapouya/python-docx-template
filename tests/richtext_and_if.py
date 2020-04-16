@@ -7,12 +7,10 @@ Created : 2015-03-26
 
 from docxtpl import DocxTemplate, RichText
 
-tpl=DocxTemplate('templates/richtext_and_if_tpl.docx')
+tpl = DocxTemplate('templates/richtext_and_if_tpl.docx')
 
 
-context = {
-    'foobar': RichText('Foobar!', color='ff0000')
-}
+context = {'foobar': RichText('Foobar!', color='ff0000')}
 
 tpl.render(context)
 tpl.save('output/richtext_and_if.docx')
