@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 from lxml import etree
 from docx import Document
