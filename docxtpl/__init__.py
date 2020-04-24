@@ -264,7 +264,7 @@ class DocxTemplate(object):
         part = self.docx._part._rels[relKey].target_part
         new_part = XmlPart.load(part.partname, part.content_type, xml, part.package)
         for rId, rel in part.rels.items():
-            new_part.load_rel(rel.reltype, rel.target_part, rel.rId, rel.is_external)
+            new_part.load_rel(rel.reltype, rel._target, rel.rId, rel.is_external)
         self.docx._part._rels[relKey]._target = new_part
 
     def render(self, context, jinja_env=None, autoescape=False):
