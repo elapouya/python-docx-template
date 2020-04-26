@@ -1,3 +1,8 @@
+0.9.2 (2020-04-26)
+-------------------
+- Fix #271
+- Code styling
+
 0.9.0 (2020-04-15)
 -------------------
 - New syntax : {%- and -%} to merge lines/paragraphs
