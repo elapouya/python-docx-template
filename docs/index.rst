@@ -111,6 +111,8 @@ One can use *ENTER* or *SHIFT+ENTER* to split a text like below, then use ``{%-`
 
 **IMPORTANT :**  Use an unbreakable space (*CTRL+SHIFT+SPACE*) when a space is wanted at line beginning or ending.
 
+**IMPORTANT 2 :** ``{%- xxx -%}`` tags must be alone in a line : do not add some text before or after on the same line.
+
 
 Display variables
 .................

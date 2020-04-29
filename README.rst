@@ -30,3 +30,12 @@ Documentation
 -------------
 
 Please, `read the doc <http://docxtpl.readthedocs.org>`_
+
+Other projects
+--------------
+
+Have a look at some of my other projects :
+
+- `python-textops3 <https://github.com/elapouya/python-textops3>`_ : Chainable text operations
+- `django-robohash-svg <https://github.com/elapouya/django-robohash-svg>`_ : Create svg robots avatars
+
