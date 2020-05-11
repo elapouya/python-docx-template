@@ -609,6 +609,9 @@ class DocxTemplate(object):
     def get_undeclared_template_variables(self, jinja_env=None):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
+        for uri in [self.HEADER_URI, self.FOOTER_URI]:
+            for relKey, _xml in self.get_headers_footers_xml(uri):
+                xml += self.patch_xml(_xml)
         if jinja_env:
             env = jinja_env
         else:
