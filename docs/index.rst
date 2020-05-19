@@ -302,7 +302,7 @@ For these ones, MSWord generate an oleObjectNNN.bin file which is no use to be r
 Microsoft Word 2016 special cases
 ---------------------------------
 
-MS Word 2016 will ingore ``\t`` tabulations. This is special to that version.
+MS Word 2016 will ignore ``\t`` tabulations. This is special to that version.
 Libreoffice or Wordpad do not have this problem. The same thing occurs for line
 beginning with a jinja2 tag provinding spaces : They will be ignored.
 To solve these problem, the solution is to use Richtext::
