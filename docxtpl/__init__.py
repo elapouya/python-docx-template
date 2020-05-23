@@ -72,11 +72,49 @@ class DocxTemplate(object):
         src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})', '',
                          src_xml, flags=re.DOTALL)
 
+        attrs_to_add_to_wt = {}
+
         def striptags(m):
-            return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)', '',
-                          m.group(0), flags=re.DOTALL)
+            """Remove all <w:t> tags in a {{ }}/{% %} block."""
+            def get_wt_attrs_that_will_be_removed():
+                """Save attributes of <w:t> that will be removed. The list of
+                attributes will then be added to the resulting <w:t> element.
+                """
+                # Only execute if there are text tags (w:t)
+                if not re.search("<w:t>", m.group(0)):
+                    return
+
+                attrs = []
+                wt_elements = re.findall("<w:t .*?>", m.group(0))
+                for wt_el in wt_elements:
+                    # Remove beginning of opening tag "<w:t "
+                    wt_attrs = wt_el.split(" ", 1)[1]
+                    # Remove trailing >
+                    wt_attrs = wt_attrs[:-1]
+                    attrs.extend(wt_attrs.split(" "))
+
+                return set(attrs)
+
+            attrs = get_wt_attrs_that_will_be_removed()
+
+            text_without_xml_tags = re.sub(
+                "</w:t>.*?(<w:t>|<w:t [^>]*>)", "", m.group(0), flags=re.DOTALL
+            )
+            if attrs:
+                attrs_to_add_to_wt[text_without_xml_tags] = attrs
+            return text_without_xml_tags
+
         src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*', striptags,
                          src_xml, flags=re.DOTALL)
+
+        for text_tag, missing_attrs in attrs_to_add_to_wt.items():
+            el_str = r"<w:t(?=>[^<>]*{text_tag}[\S\s]*?<\/w:t>)".format(
+                text_tag=text_tag
+            )
+            el_str_with_attrs = "<w:t {missing_attrs}".format(
+                missing_attrs=' '.join(missing_attrs)
+            )
+            src_xml = re.sub(el_str, el_str_with_attrs, src_xml)
 
         # manage table cell colspan
         def colspan(m):
