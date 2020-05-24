@@ -1,4 +1,4 @@
-from docxtpl import DocxTemplate, InlineImage
+from docxtpl import DocxTemplate
 
 # With old docxtpl version, "... for spicy ..." was replaced by "... forspicy..."
 # This test is for checking that is some cases the spaces are not lost anymore
