@@ -54,8 +54,25 @@ If you want to manage paragraphs, table rows and a whole run with its style, you
 
 **Note:**
 
-a 'run' for Microsoft Word is a sequence of characters with the same style. For example, if you create a paragraph with all characters of the same style, MS Word will create internally only one 'run' in the paragraph. Now, if you put in bold a text in the middle of this paragraph, word will transform the previous 'run' into 3 different 'runs' (normal - bold - normal).
+a 'run' for Microsoft Word is a sequence of characters with the same style.
+For example, if you create a paragraph with all characters of the same style,
+MS Word will create internally only one 'run' in the paragraph. Now,
+if you put in bold a text in the middle of this paragraph,
+word will transform the previous 'run' into 3 different 'runs' (normal - bold - normal).
 
+**Important:**
+
+Always put space after a jinja2 starting var/tag delimiter and a space before the ending one :
+
+Avoid::
+
+   {{myvariable}}
+   {%if something%}
+
+Use instead::
+
+   {{ myvariable }}
+   {% if something %}
 
 Extensions
 ++++++++++

@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.9.2'
+__version__ = '0.10.0'
 
 from lxml import etree
 from docx import Document
@@ -67,11 +67,17 @@ class DocxTemplate(object):
             fh.write(self.get_xml())
 
     def patch_xml(self, src_xml):
-        # strip all xml tags inside {% %} and {{ }} that MS word can insert
-        # into xml source also unescape html entities
+        """ Make a lots of cleanning to have a raw xml understandable by jinja2 :
+        strip all unnecessary xml tags, manage table cell background color and colspan,
+        unescape html entities, etc... """
+
+        # replace {<something>{ by {{   ( works with {{ }} {% and %} )
         src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})', '',
                          src_xml, flags=re.DOTALL)
 
+        # replace {{<some tags>jinja2 stuff<some other tags>}} by {{jinja2 stuff}}
+        # same thing with {% ... %}
+        # "jinja2 stuff" could a variable, a 'if' etc... anything jinja2 will understand
         def striptags(m):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)', '',
                           m.group(0), flags=re.DOTALL)
@@ -101,9 +107,8 @@ class DocxTemplate(object):
         src_xml = re.sub(r'(<w:tc[ >](?:(?!<w:tc[ >]).)*){%\s*cellbg\s+([^%]*)\s*%}(.*?</w:tc>)',
                          cellbg, src_xml, flags=re.DOTALL)
 
-        # avoid {{r and {%r tags to strip MS xml tags too far
-        # ensure space preservation when splitting
-        src_xml = re.sub(r'<w:t>((?:(?!<w:t>).)*)({{r\s.*?}}|{%r\s.*?%})',
+        # ensure space preservation
+        src_xml = re.sub(r'<w:t>((?:(?!<w:t>).)*)({{.*?}}|{%.*?%})',
                          r'<w:t xml:space="preserve">\1\2',
                          src_xml, flags=re.DOTALL)
         src_xml = re.sub(r'({{r\s.*?}}|{%r\s.*?%})',
