@@ -383,6 +383,16 @@ Docx test templates are in `tests/templates/`. To generate final docx files::
 
 Generated files are located in `tests/output` directory.
 
+If you are not sure about your python environment, python-docx-template provides Pipfiles
+for that::
+
+   pip install pipenv (if not already done)
+   cd python-docx-template (where Pipfiles are)
+   pipenv install --python 3.6 -d
+   pipenv shell
+   cd tests/
+   python runtests.py
+
 Share
 -----
 
