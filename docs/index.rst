@@ -188,7 +188,7 @@ RichText
 When you use ``{{ <var> }}`` tag in your template, it will be replaced by the string contained within `var` variable.
 BUT it will keep the current style.
 If you want to add dynamically changeable style, you have to use both : the ``{{r <var> }}`` tag AND a ``RichText`` object within `var` variable.
-You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
+You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *character* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 Instead of using ``RichText()``, one can use its shortcut : ``R()``
 
