@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.10.0'
+__version__ = '0.10.1'
 
 from lxml import etree
 from docx import Document
@@ -446,12 +446,6 @@ class DocxTemplate(object):
             # NOTE: file extension not checked
             self.pic_to_replace[embedded_file] = dst_file.read()
         else:
-            emp_path, emb_ext = os.path.splitext(embedded_file)
-            dst_path, dst_ext = os.path.splitext(dst_file)
-
-            if emb_ext != dst_ext:
-                raise ValueError('replace_pic: extensions must match')
-
             with open(dst_file, 'rb') as fh:
                 self.pic_to_replace[embedded_file] = fh.read()
 

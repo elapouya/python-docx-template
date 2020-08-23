@@ -1,3 +1,7 @@
+0.10.1 (2020-05-25)
+-------------------
+- Remove extension testing (#297)
+
 0.10.0 (2020-05-25)
 -------------------
 - Fix spaces missing in some cases (#116, #227)
