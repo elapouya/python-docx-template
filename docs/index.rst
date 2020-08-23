@@ -188,7 +188,7 @@ RichText
 When you use ``{{ <var> }}`` tag in your template, it will be replaced by the string contained within `var` variable.
 BUT it will keep the current style.
 If you want to add dynamically changeable style, you have to use both : the ``{{r <var> }}`` tag AND a ``RichText`` object within `var` variable.
-You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *caracter* style
+You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *character* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 Instead of using ``RichText()``, one can use its shortcut : ``R()``
 
@@ -382,6 +382,16 @@ Docx test templates are in `tests/templates/`. To generate final docx files::
    python runtests.py
 
 Generated files are located in `tests/output` directory.
+
+If you are not sure about your python environment, python-docx-template provides Pipfiles
+for that::
+
+   pip install pipenv (if not already done)
+   cd python-docx-template (where Pipfiles are)
+   pipenv install --python 3.6 -d
+   pipenv shell
+   cd tests/
+   python runtests.py
 
 Share
 -----
