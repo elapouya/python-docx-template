@@ -29,6 +29,9 @@ rt.add('\n1st line')
 rt.add('\n2nd line')
 rt.add('\n3rd line')
 rt.add('\n\n<cool>')
+
+for ul in ['single', 'double', 'thick', 'dotted', 'dash', 'dotDash', 'dotDotDash', 'wave']:
+    rt.add('\nUnderline : ' + ul + ' \n', underline=ul)
 rt.add('\nFonts :\n', underline=True)
 rt.add('Arial\n', font='Arial')
 rt.add('Courier New\n', font='Courier New')
