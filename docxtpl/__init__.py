@@ -7,7 +7,7 @@ Created : 2015-03-12
 import functools
 import io
 
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 
 from lxml import etree
 from docx import Document
@@ -714,7 +714,7 @@ class RichText(object):
         if italic:
             prop += u'<w:i/>'
         if underline:
-            if underline not in ['single', 'double']:
+            if underline not in ['single', 'double', 'thick', 'dotted', 'dash', 'dotDash', 'dotDotDash', 'wave']:
                 underline = 'single'
             prop += u'<w:u w:val="%s"/>' % underline
         if strike:
