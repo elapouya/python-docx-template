@@ -450,7 +450,7 @@ class DocxTemplate(object):
                 self.pic_to_replace[embedded_file] = fh.read()
 
     def replace_embedded(self, src_file, dst_file):
-        """Replace one embdded object by another one into a docx
+        """Replace one embedded object by another one into a docx
 
         This has been done mainly because it is not possible to add images
         in docx header/footer.
@@ -477,7 +477,7 @@ class DocxTemplate(object):
         the template : thus replace_embedded() cannot be used as CRC is not the
         same as the original file.
 
-        This method works for embdded MSWord file like Excel or PowerPoint file,
+        This method works for embedded MSWord file like Excel or PowerPoint file,
         but won't work for others like PDF, Python or even Text files :
         For these ones, MSWord generate an oleObjectNNN.bin file which is no
         use to be replaced as it is encoded.
