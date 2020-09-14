@@ -311,7 +311,7 @@ Instead, you should use zipname replacement::
 The zipname is the one you can find when you open docx with WinZip, 7zip (Windows) or unzip -l (Linux).
 The zipname starts with "word/embeddings/". Note that the file to be replaced is renamed by MSWord, so you have to guess a little bit...
 
-This works for embdded MSWord file like Excel or PowerPoint file, but won't work for others like PDF, Python or even Text files :
+This works for embedded MSWord file like Excel or PowerPoint file, but won't work for others like PDF, Python or even Text files :
 For these ones, MSWord generate an oleObjectNNN.bin file which is no use to be replaced as it is encoded.
 
 
