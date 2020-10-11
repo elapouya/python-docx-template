@@ -246,7 +246,7 @@ class DocxTemplate(object):
         def resolve_run(paragraph_properties, m):
             run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
             run_properties = run_properties[0] if run_properties else ''
-            return m[0].replace('\a', f'</w:t></w:r></w:p><w:p>{paragraph_properties}<w:r>{run_properties}<w:t>')
+            return m[0].replace('\a', '</w:t></w:r></w:p><w:p>%s<w:r>%s<w:t>' % (paragraph_properties, run_properties))
 
         def resolve_paragraph(m):
             paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
