@@ -27,7 +27,6 @@ import six
 import binascii
 import os
 import zipfile
-from functools import partial
 
 NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
 NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
@@ -235,30 +234,7 @@ class DocxTemplate(object):
                    .replace('}_}', '}}')
                    .replace('{_%', '{%')
                    .replace('%_}', '%}'))
-        dst_xml = self.resolve_listing(dst_xml)
         return dst_xml
-
-    def resolve_listing(self, xml):
-        xml = xml.replace('\n', NEWLINE_XML)
-        xml = xml.replace('\t', TAB_XML)
-        xml = xml.replace('\f', PAGE_BREAK)
-
-        def resolve_run(paragraph_properties, m):
-            run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
-            run_properties = run_properties[0] if run_properties else ''
-            return m[0].replace('\a', '</w:t></w:r></w:p><w:p>%s<w:r>%s<w:t>' % (paragraph_properties, run_properties))
-
-        def resolve_paragraph(m):
-            paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
-            paragraph_properties = paragraph_properties[0] if paragraph_properties else ''
-
-            p_resolve_run = partial(resolve_run, paragraph_properties)
-
-            return re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>', p_resolve_run, m[0])
-
-        xml = re.sub(r'<w:p(?: [^>]*)?>.*?</w:p>', resolve_paragraph, xml)
-
-        return xml
 
     def build_xml(self, context, jinja_env=None):
         xml = self.get_xml()
