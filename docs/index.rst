@@ -8,9 +8,13 @@ Welcome to python-docx-template's documentation!
 
 .. rubric:: Quickstart
 
-To install::
+To install using pip::
 
     pip install docxtpl
+
+or using conda::
+
+    conda install docxtpl --channel conda-forge
 
 Usage::
 
