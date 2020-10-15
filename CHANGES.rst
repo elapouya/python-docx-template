@@ -1,6 +1,6 @@
-0.10.3 (2020-10-15)
+0.10.4 (2020-10-15)
 -------------------
-- \n \t and \f are now accepted in simple context string (#307, #312)
+- \\n \\t and \\f are now accepted in simple context string (#307, #312)
 
 0.10.1 (2020-08-23)
 -------------------
