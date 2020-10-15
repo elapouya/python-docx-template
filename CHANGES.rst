@@ -1,3 +1,7 @@
+0.10.5 (2020-10-15)
+-------------------
+- Revert 0.10.4 as the XML code get corrupted
+
 0.10.4 (2020-10-15)
 -------------------
 - \\n \\t and \\f are now accepted in simple context string (#307, #312)
