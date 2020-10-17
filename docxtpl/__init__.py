@@ -239,16 +239,23 @@ class DocxTemplate(object):
         return dst_xml
 
     def resolve_listing(self, xml):
-        xml = xml.replace('\n', NEWLINE_XML)
-        xml = xml.replace('\f', PAGE_BREAK)
+
+        def resolve_text(run_properties, paragraph_properties, m):
+            xml = m[0].replace('\t', '</w:t></w:r>'
+                                     '<w:r>%s<w:tab/></w:r>'
+                                     '<w:r>%s<w:t xml:space="preserve">' % (run_properties, run_properties))
+            xml = xml.replace('\a', '</w:t></w:r></w:p>'
+                                    '<w:p>%s<w:r>%s<w:t xml:space="preserve">' % (paragraph_properties, run_properties))
+            xml = xml.replace('\n', NEWLINE_XML)
+            xml = xml.replace('\f', PAGE_BREAK)
+            return xml
 
         def resolve_run(paragraph_properties, m):
             run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
             run_properties = run_properties[0] if run_properties else ''
-            xml = m[0].replace('\t', '</w:t></w:r>'
-                                     '<w:r>%s<w:tab/></w:r>'
-                                     '<w:r>%s<w:t xml:space="preserve">' % (run_properties, run_properties))
-            return xml.replace('\a', '</w:t></w:r></w:p><w:p>%s<w:r>%s<w:t>' % (paragraph_properties, run_properties))
+
+            p_resolve_text = partial(partial(resolve_text, run_properties), paragraph_properties)
+            return re.sub(r'<w:t(?: [^>]*)?>.*?</w:t>', p_resolve_text, m[0], flags=re.DOTALL)
 
         def resolve_paragraph(m):
             paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
@@ -256,9 +263,9 @@ class DocxTemplate(object):
 
             p_resolve_run = partial(resolve_run, paragraph_properties)
 
-            return re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>', p_resolve_run, m[0])
+            return re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>', p_resolve_run, m[0], flags=re.DOTALL)
 
-        xml = re.sub(r'<w:p(?: [^>]*)?>.*?</w:p>', resolve_paragraph, xml)
+        xml = re.sub(r'<w:p(?: [^>]*)?>.*?</w:p>', resolve_paragraph, xml, flags=re.DOTALL)
 
         return xml
 
