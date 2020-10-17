@@ -818,8 +818,9 @@ class InlineImage(object):
             self.width,
             self.height
         ).xml
-        return '</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>' \
+        xml = '</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>' \
                '<w:t xml:space="preserve">' % pic
+        return re.sub(r'\n *', '', xml)
 
     def __unicode__(self):
         return self._insert_image()
