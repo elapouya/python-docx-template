@@ -142,6 +142,8 @@ As part of jinja2, one can used double braces::
 
    {{ <var> }}
 
+if ``<var>`` is a string, ``\n``, ``\a``, ``\t`` and ``\f`` will be translated respectively into newlines, new paragraphs, tabs and page breaks
+
 But if ``<var>`` is a RichText_ object, you must specify that you are changing the actual 'run'::
 
    {{r <var> }}
@@ -240,7 +242,7 @@ especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. T
    *  ``context = { 'var':escape('my text')}`` and ``{{ <var> }}`` in the template.
    *  enable autoescaping when calling render method: ``tpl.render(context, autoescape=True)`` (default is autoescape=False)
 
-The ``RichText()`` or ``R()`` offers newline, new paragraph, and page break features : just use ``\n``, ``\a``, or ``\f`` in the
+The ``RichText()`` or ``R()`` offers newline, new paragraph, and page break features : just use ``\n``, ``\a``, ``\t`` or ``\f`` in the
 text, they will be converted accordingly.
 
 See tests/escape.py example for more informations.

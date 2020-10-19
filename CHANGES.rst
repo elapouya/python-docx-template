@@ -1,17 +1,10 @@
+0.11.0 (2020-10-19)
+-------------------
+- \\n, \\a, \\t and \\f are now accepted in simple context string. Thanks to chabErch@github
+
 0.10.5 (2020-10-15)
 -------------------
-- Revert 0.10.4 as the XML code get corrupted
-
-0.10.4 (2020-10-15)
--------------------
-- \\n \\t and \\f are now accepted in simple context string (#307, #312)
-
-0.10.1 (2020-08-23)
--------------------
 - Remove extension testing (#297)
-
-0.10.0 (2020-05-25)
--------------------
 - Fix spaces missing in some cases (#116, #227)
 
 0.9.2 (2020-04-26)
@@ -19,16 +12,9 @@
 - Fix #271
 - Code styling
 
-0.9.0 (2020-04-15)
--------------------
-- New syntax : {%- and -%} to merge lines/paragraphs
-
 0.8.1 (2020-04-14)
 -------------------
 - fix #266
-
-0.8.0 (2020-04-10)
--------------------
 - docxtpl is now able to use latest python-docx (0.8.10). Thanks to Dutchy-@github.
 
 0.7.0 (2020-04-09)

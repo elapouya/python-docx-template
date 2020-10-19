@@ -4,11 +4,10 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 '''
+__version__ = '0.11.0'
+
 import functools
 import io
-
-__version__ = '0.10.5'
-
 from lxml import etree
 from docx import Document
 from docx.opc.oxml import parse_xml
@@ -27,11 +26,6 @@ import six
 import binascii
 import os
 import zipfile
-
-NEWLINE_XML = '</w:t><w:br/><w:t xml:space="preserve">'
-NEWPARAGRAPH_XML = '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">'
-TAB_XML = '</w:t></w:r><w:r><w:tab/></w:r><w:r><w:t xml:space="preserve">'
-PAGE_BREAK = '</w:t><w:br w:type="page"/><w:t xml:space="preserve">'
 
 
 class DocxTemplate(object):
@@ -234,7 +228,41 @@ class DocxTemplate(object):
                    .replace('}_}', '}}')
                    .replace('{_%', '{%')
                    .replace('%_}', '%}'))
+        dst_xml = self.resolve_listing(dst_xml)
         return dst_xml
+
+    def resolve_listing(self, xml):
+
+        def resolve_text(run_properties, paragraph_properties, m):
+            xml = m[0].replace('\t', '</w:t></w:r>'
+                                     '<w:r>%s<w:tab/></w:r>'
+                                     '<w:r>%s<w:t xml:space="preserve">' % (run_properties, run_properties))
+            xml = xml.replace('\a', '</w:t></w:r></w:p>'
+                                    '<w:p>%s<w:r>%s<w:t xml:space="preserve">' % (paragraph_properties, run_properties))
+            xml = xml.replace('\n', '</w:t><w:br/><w:t xml:space="preserve">')
+            xml = xml.replace('\f', '</w:t></w:r></w:p>'
+                                    '<w:p><w:r><w:br w:type="page"/></w:r></w:p>'
+                                    '<w:p>%s<w:r>%s<w:t xml:space="preserve">' % (paragraph_properties, run_properties))
+            return xml
+
+        def resolve_run(paragraph_properties, m):
+            run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
+            run_properties = run_properties[0] if run_properties else ''
+
+            p_resolve_text = lambda x:resolve_text(run_properties, paragraph_properties, x)
+            return re.sub(r'<w:t(?:[^>]*)?>.*?</w:t>', p_resolve_text, m[0], flags=re.DOTALL)
+
+        def resolve_paragraph(m):
+            paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
+            paragraph_properties = paragraph_properties[0] if paragraph_properties else ''
+
+            p_resolve_run = lambda x:resolve_run(paragraph_properties, x)
+
+            return re.sub(r'<w:r(?:[^>]*)?>.*?</w:r>', p_resolve_run, m[0], flags=re.DOTALL)
+
+        xml = re.sub(r'<w:p(?:[^>]*)?>.*?</w:p>', resolve_paragraph, xml, flags=re.DOTALL)
+
+        return xml
 
     def build_xml(self, context, jinja_env=None):
         xml = self.get_xml()
@@ -684,11 +712,7 @@ class RichText(object):
             text = six.text_type(text)
         if not isinstance(text, six.text_type):
             text = text.decode('utf-8', errors='ignore')
-        text = (escape(text)
-                .replace('\n', NEWLINE_XML)
-                .replace('\a', NEWPARAGRAPH_XML)
-                .replace('\t', TAB_XML)
-                .replace('\f', PAGE_BREAK))
+        text = escape(text)
 
         prop = u''
 
@@ -756,11 +780,7 @@ class Listing(object):
         # If not a string : cast to string (ex: int, dict etc...)
         if not isinstance(text, (six.text_type, six.binary_type)):
             text = six.text_type(text)
-        self.xml = (escape(text)
-                    .replace('\n', NEWLINE_XML)
-                    .replace('\a', NEWPARAGRAPH_XML)
-                    .replace('\t', TAB_XML)
-                    .replace('\f', PAGE_BREAK))
+        self.xml = escape(text)
 
     def __unicode__(self):
         return self.xml
