@@ -13,7 +13,7 @@ context = {
         'the listing\nwith\nsome\nlines\nand special chars : <>& ...'
     ),
     'page_break': R('\f'),
-    'new_listing':"""
+    'new_listing': """
 This is a new listing
 Now, does not require Listing() Object
 Here is a \t tab\a

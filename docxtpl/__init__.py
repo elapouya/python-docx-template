@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Created : 2015-03-12
 
 @author: Eric Lapouyade
-'''
+"""
 __version__ = '0.11.0'
 
 import functools
@@ -249,14 +249,14 @@ class DocxTemplate(object):
             run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
             run_properties = run_properties[0] if run_properties else ''
 
-            p_resolve_text = lambda x:resolve_text(run_properties, paragraph_properties, x)
+            p_resolve_text = lambda x: resolve_text(run_properties, paragraph_properties, x)
             return re.sub(r'<w:t(?:[^>]*)?>.*?</w:t>', p_resolve_text, m[0], flags=re.DOTALL)
 
         def resolve_paragraph(m):
             paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
             paragraph_properties = paragraph_properties[0] if paragraph_properties else ''
 
-            p_resolve_run = lambda x:resolve_run(paragraph_properties, x)
+            p_resolve_run = lambda x: resolve_run(paragraph_properties, x)
 
             return re.sub(r'<w:r(?:[^>]*)?>.*?</w:r>', p_resolve_run, m[0], flags=re.DOTALL)
 
