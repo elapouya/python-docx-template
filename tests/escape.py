@@ -19,7 +19,7 @@ Now, does not require Listing() Object
 Here is a \t tab\a
 Here is a new paragraph\a
 Here is a page break : \f
-That's it    
+That's it
 """,
 }
 
