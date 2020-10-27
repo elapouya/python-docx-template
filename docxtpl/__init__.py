@@ -4,7 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-__version__ = '0.11.0'
+__version__ = '0.11.1'
 
 import functools
 import io
@@ -234,7 +234,7 @@ class DocxTemplate(object):
     def resolve_listing(self, xml):
 
         def resolve_text(run_properties, paragraph_properties, m):
-            xml = m[0].replace('\t', '</w:t></w:r>'
+            xml = m.group(0).replace('\t', '</w:t></w:r>'
                                      '<w:r>%s<w:tab/></w:r>'
                                      '<w:r>%s<w:t xml:space="preserve">' % (run_properties, run_properties))
             xml = xml.replace('\a', '</w:t></w:r></w:p>'
@@ -246,18 +246,18 @@ class DocxTemplate(object):
             return xml
 
         def resolve_run(paragraph_properties, m):
-            run_properties = re.search(r'<w:rPr>.*</w:rPr>', m[0])
-            run_properties = run_properties[0] if run_properties else ''
+            run_properties = re.search(r'<w:rPr>.*</w:rPr>', m.group(0))
+            run_properties = run_properties.group(0) if run_properties else ''
             return re.sub(r'<w:t(?:[^>]*)?>.*?</w:t>',
-                          lambda x: resolve_text(run_properties, paragraph_properties, x), m[0],
+                          lambda x: resolve_text(run_properties, paragraph_properties, x), m.group(0),
                           flags=re.DOTALL)
 
         def resolve_paragraph(m):
-            paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m[0])
-            paragraph_properties = paragraph_properties[0] if paragraph_properties else ''
+            paragraph_properties = re.search(r'<w:pPr>.*</w:pPr>', m.group(0))
+            paragraph_properties = paragraph_properties.group(0) if paragraph_properties else ''
             return re.sub(r'<w:r(?:[^>]*)?>.*?</w:r>',
                           lambda x: resolve_run(paragraph_properties, x),
-                          m[0], flags=re.DOTALL)
+                          m.group(0), flags=re.DOTALL)
 
         xml = re.sub(r'<w:p(?:[^>]*)?>.*?</w:p>', resolve_paragraph, xml, flags=re.DOTALL)
 
