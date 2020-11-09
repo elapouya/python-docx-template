@@ -21,6 +21,7 @@ Here is a new paragraph\a
 Here is a page break : \f
 That's it
 """,
+    'some_html' : 'HTTP/1.1 200 OK\nServer: Apache-Coyote/1.1\nCache-Control: no-store\nExpires: Thu, 01 Jan 1970 00:00:00 GMT\nPragma: no-cache\nContent-Type: text/html;charset=UTF-8\nContent-Language: zh-CN\nDate: Thu, 22 Oct 2020 10:59:40 GMT\nContent-Length: 9866\n\n<html>\n<head>\n    <title>Struts Problem Report</title>\n    <style>\n    \tpre {\n\t    \tmargin: 0;\n\t        padding: 0;\n\t    }    \n    </style>\n</head>\n<body>\n...\n</body>\n</html>',
 }
 
 tpl.render(context)
