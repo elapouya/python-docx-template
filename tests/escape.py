@@ -21,7 +21,33 @@ Here is a new paragraph\a
 Here is a page break : \f
 That's it
 """,
-    'some_html': 'HTTP/1.1 200 OK\nServer: Apache-Coyote/1.1\nCache-Control: no-store\nExpires: Thu, 01 Jan 1970 00:00:00 GMT\nPragma: no-cache\nContent-Type: text/html;charset=UTF-8\nContent-Language: zh-CN\nDate: Thu, 22 Oct 2020 10:59:40 GMT\nContent-Length: 9866\n\n<html>\n<head>\n    <title>Struts Problem Report</title>\n    <style>\n    \tpre {\n\t    \tmargin: 0;\n\t        padding: 0;\n\t    }    \n    </style>\n</head>\n<body>\n...\n</body>\n</html>',
+    'some_html':  (
+        'HTTP/1.1 200 OK\n'
+        'Server: Apache-Coyote/1.1\n'
+        'Cache-Control: no-store\n'
+        'Expires: Thu, 01 Jan 1970 00:00:00 GMT\n'
+        'Pragma: no-cache\n'
+        'Content-Type: text/html;charset=UTF-8\n'
+        'Content-Language: zh-CN\n'
+        'Date: Thu, 22 Oct 2020 10:59:40 GMT\n'
+        'Content-Length: 9866\n'
+        '\n'
+        '<html>\n'
+        '<head>\n'
+        '    <title>Struts Problem Report</title>\n'
+        '    <style>\n'
+        '    \tpre {\n'
+        '\t    \tmargin: 0;\n'
+        '\t        padding: 0;\n'
+        '\t    }    '
+        '\n'
+        '    </style>\n'
+        '</head>\n'
+        '<body>\n'
+        '...\n'
+        '</body>\n'
+        '</html>'
+    ),
 }
 
 tpl.render(context)
