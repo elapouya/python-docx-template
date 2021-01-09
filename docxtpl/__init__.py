@@ -4,7 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-__version__ = '0.11.2'
+__version__ = '0.11.3'
 
 import functools
 import io
