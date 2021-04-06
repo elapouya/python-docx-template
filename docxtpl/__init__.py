@@ -4,7 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-__version__ = '0.11.3'
+__version__ = '0.11.4'
 
 import functools
 import io
@@ -41,6 +41,7 @@ class DocxTemplate(object):
         self.zipname_to_replace = {}
         self.pic_to_replace = {}
         self.pic_map = {}
+        self.current_rendering_part = None
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -208,9 +209,7 @@ class DocxTemplate(object):
 
         return src_xml
 
-    current_rendering_part = None
-
-    def render_xml(self, src_xml, part, context, jinja_env=None):
+    def render_xml_part(self, src_xml, part, context, jinja_env=None):
         src_xml = src_xml.replace(r'<w:p>', '\n<w:p>')
         try:
             self.current_rendering_part = part
@@ -219,7 +218,6 @@ class DocxTemplate(object):
             else:
                 template = Template(src_xml)
             dst_xml = template.render(context)
-            self.current_rendering_part = None
         except TemplateError as exc:
             if hasattr(exc, 'lineno') and exc.lineno is not None:
                 line_number = max(exc.lineno - 4, 0)
@@ -270,7 +268,7 @@ class DocxTemplate(object):
     def build_xml(self, context, jinja_env=None):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
-        xml = self.render_xml(xml, self.docx._part, context, jinja_env)
+        xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
         return xml
 
     def map_tree(self, tree):
@@ -297,7 +295,7 @@ class DocxTemplate(object):
             xml = self.get_part_xml(part)
             encoding = self.get_headers_footers_encoding(xml)
             xml = self.patch_xml(xml)
-            xml = self.render_xml(xml, part, context, jinja_env)
+            xml = self.render_xml_part(xml, part, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
