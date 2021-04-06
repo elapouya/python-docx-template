@@ -4,7 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-__version__ = '0.11.3'
+__version__ = '0.11.4'
 
 import functools
 import io
@@ -41,6 +41,7 @@ class DocxTemplate(object):
         self.zipname_to_replace = {}
         self.pic_to_replace = {}
         self.pic_map = {}
+        self.current_rendering_part = None
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -208,9 +209,10 @@ class DocxTemplate(object):
 
         return src_xml
 
-    def render_xml(self, src_xml, context, jinja_env=None):
+    def render_xml_part(self, src_xml, part, context, jinja_env=None):
         src_xml = src_xml.replace(r'<w:p>', '\n<w:p>')
         try:
+            self.current_rendering_part = part
             if jinja_env:
                 template = jinja_env.from_string(src_xml)
             else:
@@ -266,7 +268,7 @@ class DocxTemplate(object):
     def build_xml(self, context, jinja_env=None):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
-        xml = self.render_xml(xml, context, jinja_env)
+        xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
         return xml
 
     def map_tree(self, tree):
@@ -274,10 +276,13 @@ class DocxTemplate(object):
         body = root.body
         root.replace(body, tree)
 
-    def get_headers_footers_xml(self, uri):
+    def get_headers_footers(self, uri):
         for relKey, val in self.docx._part._rels.items():
             if (val.reltype == uri) and (val.target_part.blob):
-                yield relKey, self.xml_to_string(parse_xml(val.target_part.blob))
+                yield relKey, val.target_part
+
+    def get_part_xml(self, part):
+        return self.xml_to_string(parse_xml(part.blob))
 
     def get_headers_footers_encoding(self, xml):
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"', xml, re.I)
@@ -286,10 +291,11 @@ class DocxTemplate(object):
         return 'utf-8'
 
     def build_headers_footers_xml(self, context, uri, jinja_env=None):
-        for relKey, xml in self.get_headers_footers_xml(uri):
+        for relKey, part in self.get_headers_footers(uri):
+            xml = self.get_part_xml(part)
             encoding = self.get_headers_footers_encoding(xml)
             xml = self.patch_xml(xml)
-            xml = self.render_xml(xml, context, jinja_env)
+            xml = self.render_xml_part(xml, part, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
@@ -636,7 +642,8 @@ class DocxTemplate(object):
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         for uri in [self.HEADER_URI, self.FOOTER_URI]:
-            for relKey, _xml in self.get_headers_footers_xml(uri):
+            for relKey, part in self.get_headers_footers(uri):
+                _xml = self.get_part_xml(part)
                 xml += self.patch_xml(_xml)
         if jinja_env:
             env = jinja_env
@@ -806,7 +813,7 @@ class InlineImage(object):
         self.width, self.height = width, height
 
     def _insert_image(self):
-        pic = self.tpl.docx._part.new_pic_inline(
+        pic = self.tpl.current_rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
             self.height

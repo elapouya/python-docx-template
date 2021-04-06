@@ -1,3 +1,7 @@
+0.11.4 (2021-04-06)
+-------------------
+- It is now possible to put InlineImage in header/footer
+
 0.11.2 (2020-11-09)
 -------------------
 - fix #323
