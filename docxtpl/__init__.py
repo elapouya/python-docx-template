@@ -356,7 +356,7 @@ class DocxTemplate(object):
                     if anchor is not None:
                         docPr = anchor.find(nsp+'docPr')
                         id = docPr.attrib['id']
-                        if not id in ids:
+                        if id not in ids:
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
@@ -368,14 +368,14 @@ class DocxTemplate(object):
                     if anchor is not None:
                         docPr = anchor.find(nsp+'docPr')
                         id = docPr.attrib['id']
-                        if not id in ids:
+                        if id not in ids:
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
                     elif inline is not None:
                         docPr = inline.find(nsp+'docPr')
                         id = docPr.attrib['id']
-                        if not id in ids:
+                        if id not in ids:
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
