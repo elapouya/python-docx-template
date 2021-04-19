@@ -318,6 +318,9 @@ class DocxTemplate(object):
         # fix tables if needed
         tree = self.fix_tables(xml_src)
 
+        # fix shapes if needed
+        tree = self.fix_shapes(xml_src)
+
         self.map_tree(tree)
 
         # Headers
@@ -331,6 +334,52 @@ class DocxTemplate(object):
                                                  jinja_env)
         for relKey, xml in footers:
             self.map_headers_footers_xml(relKey, xml)
+
+    def fix_shapes(self, xml):
+        parser = etree.XMLParser(recover=True)
+        tree = etree.fromstring(xml, parser=parser)
+        # get namespace
+        ns = '{' + tree.nsmap['w'] + '}'
+        nsp = '{' + tree.nsmap['wp'] + '}'
+        mc = '{' + tree.nsmap['mc'] + '}'
+
+        # walk trough xml and fix docPr id duplicates
+        ids = []
+        amount = 2000
+        for p in tree.iter(ns+'p'):
+            rows = p.findall(ns+'r')
+            for r in rows:
+                drawing = r.find(ns+'drawing')
+                alternative = r.find(mc+'AlternateContent')
+                if drawing is not None:
+                    anchor = drawing.find(nsp+'anchor')
+                    if anchor is not None:
+                        docPr = anchor.find(nsp+'docPr')
+                        id = docPr.attrib['id']
+                        if not id in ids:
+                            ids.append(id)
+                        else:
+                            docPr.set('id', str(int(id)+amount))
+                elif alternative is not None:
+                    choice = alternative.find(mc+'Choice')
+                    drawing = choice.find(ns+'drawing')
+                    anchor = drawing.find(nsp+'anchor')
+                    inline = drawing.find(nsp+'inline')
+                    if anchor is not None:
+                        docPr = anchor.find(nsp+'docPr')
+                        id = docPr.attrib['id']
+                        if not id in ids:
+                            ids.append(id)
+                        else:
+                            docPr.set('id', str(int(id)+amount))
+                    elif inline is not None:
+                        docPr = inline.find(nsp+'docPr')
+                        id = docPr.attrib['id']
+                        if not id in ids:
+                            ids.append(id)
+                        else:
+                            docPr.set('id', str(int(id)+amount))
+        return tree
 
     # using of TC tag in for cycle can cause that count of columns does not
     # correspond to real count of columns in row. This function is able to fix it.
