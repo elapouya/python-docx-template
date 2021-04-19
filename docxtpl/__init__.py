@@ -360,6 +360,7 @@ class DocxTemplate(object):
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
+                            amount += 1000
                 elif alternative is not None:
                     choice = alternative.find(mc+'Choice')
                     drawing = choice.find(ns+'drawing')
@@ -372,6 +373,7 @@ class DocxTemplate(object):
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
+                            amount += 1000
                     elif inline is not None:
                         docPr = inline.find(nsp+'docPr')
                         id = docPr.attrib['id']
@@ -379,6 +381,7 @@ class DocxTemplate(object):
                             ids.append(id)
                         else:
                             docPr.set('id', str(int(id)+amount))
+                            amount += 1000
         return tree
 
     # using of TC tag in for cycle can cause that count of columns does not
