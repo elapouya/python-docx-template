@@ -39,7 +39,7 @@ class DocxTemplate(object):
         self.crc_to_new_media = {}
         self.crc_to_new_embedded = {}
         self.zipname_to_replace = {}
-        self.pic_to_replace = {}
+        self.pics_to_replace = {}
         self.pic_map = {}
         self.current_rendering_part = None
 
@@ -477,10 +477,10 @@ class DocxTemplate(object):
 
         if hasattr(dst_file, 'read'):
             # NOTE: file extension not checked
-            self.pic_to_replace[embedded_file] = dst_file.read()
+            self.pics_to_replace[embedded_file] = dst_file.read()
         else:
             with open(dst_file, 'rb') as fh:
-                self.pic_to_replace[embedded_file] = fh.read()
+                self.pics_to_replace[embedded_file] = fh.read()
 
     def replace_embedded(self, src_file, dst_file):
         """Replace one embedded object by another one into a docx
@@ -568,11 +568,11 @@ class DocxTemplate(object):
 
     def pre_processing(self):
 
-        if self.pic_to_replace:
+        if self.pics_to_replace:
             self.build_pic_map()
 
             # Do the actual replacement
-            for embedded_file, stream in six.iteritems(self.pic_to_replace):
+            for embedded_file, stream in six.iteritems(self.pics_to_replace):
                 if embedded_file not in self.pic_map:
                     raise ValueError('Picture "%s" not found in the docx template'
                                      % embedded_file)
@@ -581,7 +581,7 @@ class DocxTemplate(object):
     def build_pic_map(self):
         """Searches in docx template all the xml pictures tag and store them
         in pic_map dict"""
-        if self.pic_to_replace:
+        if self.pics_to_replace:
             # Main document
             part = self.docx.part
             self.pic_map.update(self._img_filename_to_part(part))
