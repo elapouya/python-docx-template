@@ -569,32 +569,33 @@ class DocxTemplate(object):
     def pre_processing(self):
 
         if self.pics_to_replace:
-            self.build_pic_map()
+            self._replace_pics()
 
-            # Do the actual replacement
-            for embedded_file, stream in six.iteritems(self.pics_to_replace):
-                if embedded_file not in self.pic_map:
-                    raise ValueError('Picture "%s" not found in the docx template'
-                                     % embedded_file)
-                self.pic_map[embedded_file][1]._blob = stream
+    def _replace_pics(self):
+        """Replaces pictures xml tags in the docx template with pictures provided by the user"""
 
-    def build_pic_map(self):
-        """Searches in docx template all the xml pictures tag and store them
-        in pic_map dict"""
-        if self.pics_to_replace:
-            # Main document
-            part = self.docx.part
-            self.pic_map.update(self._img_filename_to_part(part))
+        replaced_pics = {key: False for key in self.pics_to_replace}
 
-            # Header/Footer
-            for relid, rel in six.iteritems(self.docx.part.rels):
-                if rel.reltype in (REL_TYPE.HEADER, REL_TYPE.FOOTER):
-                    self.pic_map.update(self._img_filename_to_part(rel.target_part))
+        # Main document
+        part = self.docx.part
+        self._replace_docx_part_pics(part, replaced_pics)
+
+        # Header/Footer
+        for relid, rel in six.iteritems(part.rels):
+            if rel.reltype in (REL_TYPE.HEADER, REL_TYPE.FOOTER):
+                self._replace_docx_part_pics(rel.target_part, replaced_pics)
+
+        # make sure all template images defined by user were replaced
+        for img_id, replaced in replaced_pics.items():
+            if not replaced:
+                raise ValueError(
+                    "Picture %s not found in the docx template" % img_id
+                )
 
     def get_pic_map(self):
         return self.pic_map
 
-    def _img_filename_to_part(self, doc_part):
+    def _replace_docx_part_pics(self, doc_part, replaced_pics):
 
         et = etree.fromstring(doc_part.blob)
 
@@ -617,17 +618,37 @@ class DocxTemplate(object):
                 else:
                     continue
 
-                # title=inl.xpath('wp:docPr/@title',namespaces=docx.oxml.ns.nsmap)[0]
-                name = gd.xpath('pic:pic/pic:nvPicPr/pic:cNvPr/@name',
-                                namespaces=docx.oxml.ns.nsmap)[0]
+                non_visual_properties = 'pic:pic/pic:nvPicPr/pic:cNvPr/'
+                filename = gd.xpath('%s@name' % non_visual_properties,
+                                    namespaces=docx.oxml.ns.nsmap)[0]
+                titles = gd.xpath('%s@title' % non_visual_properties,
+                                  namespaces=docx.oxml.ns.nsmap)
+                if titles:
+                    title = titles[0]
+                else:
+                    title = ""
+                descriptions = gd.xpath('%s@descr' % non_visual_properties,
+                                        namespaces=docx.oxml.ns.nsmap)
+                if descriptions:
+                    description = descriptions[0]
+                else:
+                    description = ""
 
-                part_map[name] = (doc_part.rels[rel].target_ref,
-                                  doc_part.rels[rel].target_part)
+                part_map[filename] = (doc_part.rels[rel].target_ref,
+                                      doc_part.rels[rel].target_part)
+
+                # replace data
+                for img_id, img_data in six.iteritems(self.pics_to_replace):
+                    if img_id == filename or img_id == title or img_id == description:
+                        part_map[filename][1]._blob = img_data
+                        replaced_pics[img_id] = True
+                        break
+
             # FIXME: figure out what exceptions are thrown here and catch more specific exceptions
             except Exception:
                 continue
 
-        return part_map
+        self.pic_map.update(part_map)
 
     def build_url_id(self, url):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
