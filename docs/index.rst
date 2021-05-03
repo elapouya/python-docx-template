@@ -219,7 +219,7 @@ Inline image
 You can dynamically add one or many images into your document (tested with JPEG and PNG files).
 just add ``{{ <var> }}`` tag in your template where ``<var>`` is an instance of doxtpl.InlineImage::
 
-   myimage = InlineImage(tpl,image_descriptor='test_files/python_logo.png',width=Mm(20), height=Mm(10))
+   myimage = InlineImage(tpl, image_descriptor='test_files/python_logo.png', width=Mm(20), height=Mm(10))
 
 You just have to specify the template object, the image file path and optionnally width and/or height.
 For height and width you have to use millimeters (Mm), inches (Inches) or points(Pt) class.
