@@ -28,7 +28,8 @@ rt.add('\nEt voilà ! ')
 rt.add('\n1st line')
 rt.add('\n2nd line')
 rt.add('\n3rd line')
-rt.add('\n\n<cool>')
+rt.add('\aA new paragraph : <cool>\a')
+rt.add('--- A page break here (see next page) ---\f')
 
 for ul in ['single', 'double', 'thick', 'dotted', 'dash', 'dotDash', 'dotDotDash', 'wave']:
     rt.add('\nUnderline : ' + ul + ' \n', underline=ul)
