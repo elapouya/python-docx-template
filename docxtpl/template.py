@@ -18,10 +18,10 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 try:
-    from html import escape
+    from html import escape  # noqa: F401
 except ImportError:
     # cgi.escape is deprecated in python 3.7
-    from cgi import escape
+    from cgi import escape  # noqa: F401
 import re
 import six
 import binascii
