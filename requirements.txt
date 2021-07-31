@@ -1,0 +1,5 @@
+six
+python-docx
+docxcompose
+jinja2
+lxml
