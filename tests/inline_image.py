@@ -44,4 +44,4 @@ context = {
 # testing that it works also when autoescape has been forced to True
 jinja_env = jinja2.Environment(autoescape=True)
 tpl.render(context, jinja_env)
-tpl.save('output/inline_image.docx')
+tpl.save('templates/merge_docx_subdoc.docx')

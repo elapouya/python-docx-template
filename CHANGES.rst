@@ -1,3 +1,9 @@
+0.12.0 (2021-07-31)
+-------------------
+- Code has be split into many files for better readability
+- Use docxcomposer to attach parts when a docx file is given to create a subdoc
+  Images, styles etc... must now be taken in account in subdocs
+
 0.11.5 (2021-05-09)
 -------------------
 - PR #351
