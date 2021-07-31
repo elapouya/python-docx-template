@@ -11,6 +11,7 @@ except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape
 
+
 class RichText(object):
     """ class to generate Rich Text when using templates variables
 

@@ -5,6 +5,7 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
+
 class InlineImage(object):
     """Class to generate an inline image
 

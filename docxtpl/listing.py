@@ -11,6 +11,7 @@ except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape
 
+
 class Listing(object):
     r"""class to manage \n and \a without to use RichText,
     by this way you keep the current template styling

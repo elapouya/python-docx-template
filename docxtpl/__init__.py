@@ -11,4 +11,3 @@ from .listing import Listing
 from .richtext import RichText, R
 from .subdoc import Subdoc
 from .template import DocxTemplate
-
