@@ -34,7 +34,7 @@ class SubdocComposer(Composer):
         for element in doc.element.body:
             if isinstance(element, CT_SectPr):
                 continue
-            element = deepcopy(element)
+            # element = deepcopy(element)
             self.add_referenced_parts(doc.part, self.doc.part, element)
             self.add_styles(doc, element)
             self.add_numberings(doc, element)
@@ -74,19 +74,19 @@ class Subdoc(object):
         self.docx = tpl.get_docx()
         self.subdocx = Document(docpath)
         if docpath:
-            compose = SubdocComposer(tpl)
+            compose = SubdocComposer(self.docx)
             compose.attach_parts(self.subdocx)
         else:
             self.subdocx._part = self.docx._part
 
     def __getattr__(self, name):
-        return super().getattr(self.subdocx, name)
+        return getattr(self.subdocx, name)
 
     def _get_xml(self):
-        if self.subdocx._element.body.sectPr is not None:
-            self.subdocx._element.body.remove(self.subdocx._element.body.sectPr)
+        if self.subdocx.element.body.sectPr is not None:
+            self.subdocx.element.body.remove(self.subdocx.element.body.sectPr)
         xml = re.sub(r'</?w:body[^>]*>', '', etree.tostring(
-            self.subdocx._element.body, encoding='unicode', pretty_print=False))
+            self.subdocx.element.body, encoding='unicode', pretty_print=False))
         return xml
 
     def __unicode__(self):
