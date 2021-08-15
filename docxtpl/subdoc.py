@@ -4,7 +4,6 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-from copy import deepcopy
 
 from docx import Document
 from docx.oxml import CT_SectPr
@@ -34,7 +33,6 @@ class SubdocComposer(Composer):
         for element in doc.element.body:
             if isinstance(element, CT_SectPr):
                 continue
-            # element = deepcopy(element)
             self.add_referenced_parts(doc.part, self.doc.part, element)
             self.add_styles(doc, element)
             self.add_numberings(doc, element)

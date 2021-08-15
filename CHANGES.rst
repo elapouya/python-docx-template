@@ -1,8 +1,17 @@
-0.12.0 (2021-07-31)
+0.12.0 (2021-08-15)
 -------------------
 - Code has be split into many files for better readability
 - Use docxcomposer to attach parts when a docx file is given to create a subdoc
   Images, styles etc... must now be taken in account in subdocs
+- Some internal XML IDs are now renumbered to avoid collision, thus images are not randomly disapearing anymore.
+- fix #372
+- fix #374
+- fix #375
+- fix #369
+- fix #368
+- fix #347
+- fix #181
+- fix #61
 
 0.11.5 (2021-05-09)
 -------------------

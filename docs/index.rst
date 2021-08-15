@@ -229,7 +229,16 @@ Sub-documents
 -------------
 
 A template variable can contain a complex and built from scratch with python-docx word document.
-To do so, get first a sub-document object from template object and use it as a python-docx document object, see example in `tests/subdoc.py`.
+To do so, get first a sub-document object from template object and use it as a python-docx document object,
+see example in `tests/subdoc.py`.
+
+Since docxtpl V0.12.0, it is now possible to merge an exsting .docx as a subdoc, just specify its path when
+calling method `new_subdoc()` ::
+
+   tpl = DocxTemplate('templates/merge_docx_master_tpl.docx')
+   sd = tpl.new_subdoc('templates/merge_docx_subdoc.docx')
+
+see `tests/merge_docx.py` for full code
 
 Escaping, newline, new paragraph, Listing
 -----------------------------------------

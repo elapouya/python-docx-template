@@ -5,7 +5,6 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 """
 
-
 from .subdoc import Subdoc
 import functools
 import io
@@ -43,6 +42,7 @@ class DocxTemplate(object):
         self.pics_to_replace = {}
         self.pic_map = {}
         self.current_rendering_part = None
+        self.docx_ids_index = 1000
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -319,6 +319,10 @@ class DocxTemplate(object):
         # fix tables if needed
         tree = self.fix_tables(xml_src)
 
+        # fix docPr ID's
+        self.fix_docpr_ids(tree)
+
+        # Replace body xml tree
         self.map_tree(tree)
 
         # Headers
@@ -420,6 +424,12 @@ class DocxTemplate(object):
                     c.set(ns+'w', str(int(float(c.get(ns+'w')) + extra_space)))
 
         return tree
+
+    def fix_docpr_ids(self, tree):
+        # some Ids may have some collisions : so renumbering all of them :
+        for elt in tree.xpath('//wp:docPr', namespaces=docx.oxml.ns.nsmap):
+            self.docx_ids_index += 1
+            elt.attrib['id'] = str(self.docx_ids_index)
 
     def new_subdoc(self, docpath=None):
         return Subdoc(self, docpath)
