@@ -148,7 +148,7 @@ But if ``<var>`` is a RichText_ object, you must specify that you are changing t
 
    {{r <var> }}
 
-Note the ``r`` right after the openning braces.
+Note the ``r`` right after the opening braces.
 
 **IMPORTANT** : Do not use the ``r`` variable in your template because ``{{r}}`` could be interpreted as a ``{{r``
 without variable specified. Nevertheless, you can use a bigger variable name starting
