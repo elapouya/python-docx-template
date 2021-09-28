@@ -7,8 +7,7 @@ from argparse import ArgumentError
 def make_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         usage='docxtpl template_path json_path output_filename',
-        description='Make docx file from existing template docx and json data.',
-        add_help=True)
+        description='Make docx file from existing template docx and json data.')
     parser.add_argument('Template',
                         metavar='template_path',
                         type=str,
@@ -28,11 +27,8 @@ def get_args(parser: argparse.ArgumentParser) -> dict:
     try:
         parsed_args = vars(parser.parse_args())
         return parsed_args
-    # There is a bug that prevents argparser from catching ArgumentError
-    # manually. For more info: https://bugs.python.org/issue41255
-    # I know bare exceptions are wrong, could not find another way to catch
-    # wrong arguments.
-    except:
+    # Argument errors cause SystemExit error, not ArgumentError
+    except SystemExit:
         raise RuntimeError(f'Correct usage is:\n{parser.usage}')
 
 
@@ -63,7 +59,7 @@ def validate_all_args(parsed_args) -> None:
     try:
         for arg_name, arg_value in parsed_args.items():
             if not is_argument_valid(arg_name, arg_value):
-                raise AttributeError
+                raise ArgumentError
     except ArgumentError as e:
         raise RuntimeError(
             f'The specified {arg_name} "{arg_value}" is not valid.')
