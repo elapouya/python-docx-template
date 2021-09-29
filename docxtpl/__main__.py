@@ -65,12 +65,12 @@ def check_exists_ask_overwrite(arg_value:str) -> bool:
 
 
 def validate_all_args(parsed_args:dict) -> None:
-    # Raises ArgumentError if any of the arguments is not validated
+    # Raises AssertionError if any of the arguments is not validated
     try:
         for arg_name, arg_value in parsed_args.items():
             if not is_argument_valid(arg_name, arg_value):
-                raise argparse.ArgumentError
-    except argparse.ArgumentError as e:
+                raise AssertionError
+    except AssertionError as e:
         raise RuntimeError(
             f'The specified {arg_name} "{arg_value}" is not valid.') from e
 
