@@ -32,9 +32,9 @@ def get_args(parser: argparse.ArgumentParser) -> dict:
     # --help or -h flag raises a SystemExit with code 0.
     except SystemExit as e:
         if e.code == 0:
-            raise RuntimeError()
+            raise RuntimeError() from e
         else:
-            raise RuntimeError(f'Correct usage is:\n{parser.usage}')
+            raise RuntimeError(f'Correct usage is:\n{parser.usage}') from e
 
 
 def is_argument_valid(arg_name: str, arg_value: str) -> bool:
@@ -72,7 +72,7 @@ def validate_all_args(parsed_args:dict) -> None:
                 raise argparse.ArgumentError
     except argparse.ArgumentError as e:
         raise RuntimeError(
-            f'The specified {arg_name} "{arg_value}" is not valid.')
+            f'The specified {arg_name} "{arg_value}" is not valid.') from e
 
 
 def get_json_data(json_path: Path) -> dict:
@@ -83,7 +83,7 @@ def get_json_data(json_path: Path) -> dict:
         except json.JSONDecodeError as e:
             print(
                 f'There was an error on line {e.lineno}, column {e.colno} while trying to parse file {json_path}')
-            raise RuntimeError('Failed to get json data.')
+            raise RuntimeError('Failed to get json data.') from e
 
 
 def make_docxtemplate(template_path: Path) -> DocxTemplate:
@@ -91,6 +91,14 @@ def make_docxtemplate(template_path: Path) -> DocxTemplate:
         return DocxTemplate(template_path)
     except TemplateError as e:
         raise RuntimeError('Could not create docx template.') from e
+
+
+def render_docx(doc:DocxTemplate, json_data) -> DocxTemplate:
+    try:
+        doc.render(json_data)
+        return doc
+    except TemplateError as e:
+        raise RuntimeError(f'An error ocurred while trying to render the docx') from e
 
 
 def save_file(doc: DocxTemplate, output_path: Path) -> None:
@@ -112,7 +120,7 @@ def main() -> None:
         validate_all_args(parsed_args)
         json_data = get_json_data(Path(parsed_args['Json']).resolve())
         doc = make_docxtemplate(Path(parsed_args['Template']).resolve())
-        doc.render(json_data)
+        doc = render_docx(doc,json_data)
         save_file(doc, Path(parsed_args['Output']).resolve())
     except RuntimeError as e:
         print(e)
