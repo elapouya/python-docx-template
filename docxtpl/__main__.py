@@ -1,10 +1,11 @@
-from .template import DocxTemplate,TemplateError
 import argparse, json
 from pathlib import Path
-from argparse import ArgumentError
+
+from .template import DocxTemplate, TemplateError
 
 
 def make_arg_parser() -> argparse.ArgumentParser:
+    # TODO add flag for overwrite without asking if filename already exists
     parser = argparse.ArgumentParser(
         usage='docxtpl template_path json_path output_filename',
         description='Make docx file from existing template docx and json data.')
@@ -27,12 +28,17 @@ def get_args(parser: argparse.ArgumentParser) -> dict:
     try:
         parsed_args = vars(parser.parse_args())
         return parsed_args
-    # Argument errors cause SystemExit error, not ArgumentError
-    except SystemExit:
-        raise RuntimeError(f'Correct usage is:\n{parser.usage}')
+    # Argument errors raise a SystemExit with code 2. Normal usage of the
+    # --help or -h flag raises a SystemExit with code 0.
+    except SystemExit as e:
+        if e.code == 0:
+            raise RuntimeError()
+        else:
+            raise RuntimeError(f'Correct usage is:\n{parser.usage}')
 
 
 def is_argument_valid(arg_name: str, arg_value: str) -> bool:
+    # Basic checks for the three arguments
     if arg_name == 'Template':
         return Path(arg_value).is_file() and arg_value.endswith('.docx')
     elif arg_name == 'Json':
@@ -42,7 +48,10 @@ def is_argument_valid(arg_name: str, arg_value: str) -> bool:
             arg_value)
 
 
-def check_exists_ask_overwrite(arg_value) -> bool:
+def check_exists_ask_overwrite(arg_value:str) -> bool:
+    # If output file does not exist, returns True, else asks for overwrite
+    # confirmation. If overwrite confirmed returns True, else raises
+    # FileExistsError
     if Path(arg_value).exists():
         try:
             if input(f'File {arg_value} already exists, would you like to overwrite the existing file? (y/n)').lower() == 'y':
@@ -55,12 +64,13 @@ def check_exists_ask_overwrite(arg_value) -> bool:
         return True
 
 
-def validate_all_args(parsed_args) -> None:
+def validate_all_args(parsed_args:dict) -> None:
+    # Raises ArgumentError if any of the arguments is not validated
     try:
         for arg_name, arg_value in parsed_args.items():
             if not is_argument_valid(arg_name, arg_value):
-                raise ArgumentError
-    except ArgumentError as e:
+                raise argparse.ArgumentError
+    except argparse.ArgumentError as e:
         raise RuntimeError(
             f'The specified {arg_name} "{arg_value}" is not valid.')
 
@@ -94,6 +104,9 @@ def save_file(doc: DocxTemplate, output_path: Path) -> None:
 
 def main() -> None:
     parser = make_arg_parser()
+    # Everything is in a try-except block that cacthes a RuntimeError that is
+    # raised if any of the individual functions called cause an error
+    # themselves, terminating the main function.
     try:
         parsed_args = get_args(parser)
         validate_all_args(parsed_args)
