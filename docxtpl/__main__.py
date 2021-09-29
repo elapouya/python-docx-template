@@ -123,7 +123,7 @@ def main() -> None:
         doc = render_docx(doc,json_data)
         save_file(doc, Path(parsed_args['Output']).resolve())
     except RuntimeError as e:
-        print(e)
+        print('Error: '+e.__str__())
         return
     finally:
         print('Exiting program!')
