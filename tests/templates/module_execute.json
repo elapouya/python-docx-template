@@ -1,0 +1,8 @@
+{"json_dict_var" : {"json_dict_var":"successfully inserted"},
+"json_array_var": ["json","array","var","successfully", "inserted"],
+"json_string_var":"json_string_var successfully inserted",
+"json_int_var":123,
+"json_float_var":1.234,
+"json_true_var":true,
+"json_false_var":false,
+"json_none_var":null}
