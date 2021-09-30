@@ -3,24 +3,28 @@ from pathlib import Path
 
 from .template import DocxTemplate, TemplateError
 
+TEMPLATE_ARG = 'template_path'
+JSON_ARG = 'json_path'
+OUTPUT_ARG = 'output_filename'
+OVERWRITE_ARG = 'overwrite'
+
 
 def make_arg_parser() -> argparse.ArgumentParser:
-    # TODO add flag for overwrite without asking if filename already exists
     parser = argparse.ArgumentParser(
-        usage='docxtpl template_path json_path output_filename',
+        usage=f'docxtpl [-h] [-o] {TEMPLATE_ARG} {JSON_ARG} {OUTPUT_ARG}',
         description='Make docx file from existing template docx and json data.')
-    parser.add_argument('Template',
-                        metavar='template_path',
+    parser.add_argument(TEMPLATE_ARG,
                         type=str,
                         help='The path to the template docx file.')
-    parser.add_argument('Json',
-                        metavar='json_path',
+    parser.add_argument(JSON_ARG,
                         type=str,
                         help='The path to the json file with the data.')
-    parser.add_argument('Output',
-                        metavar='output_filename',
+    parser.add_argument(OUTPUT_ARG,
                         type=str,
                         help='The filename to save the generated docx.')
+    parser.add_argument('-' + OVERWRITE_ARG[0], '--' + OVERWRITE_ARG,
+                        action='store_true',
+                        help='If output file already exists, overwrites without asking for confirmation')
     return parser
 
 
@@ -32,27 +36,29 @@ def get_args(parser: argparse.ArgumentParser) -> dict:
     # --help or -h flag raises a SystemExit with code 0.
     except SystemExit as e:
         if e.code == 0:
-            raise RuntimeError() from e
+            raise SystemExit from e
         else:
             raise RuntimeError(f'Correct usage is:\n{parser.usage}') from e
 
 
-def is_argument_valid(arg_name: str, arg_value: str) -> bool:
-    # Basic checks for the three arguments
-    if arg_name == 'Template':
+def is_argument_valid(arg_name: str, arg_value: str,overwrite: bool) -> bool:
+    # Basic checks for the arguments
+    if arg_name == TEMPLATE_ARG:
         return Path(arg_value).is_file() and arg_value.endswith('.docx')
-    elif arg_name == 'Json':
+    elif arg_name == JSON_ARG:
         return Path(arg_value).is_file() and arg_value.endswith('.json')
-    elif arg_name == 'Output':
+    elif arg_name == OUTPUT_ARG:
         return arg_value.endswith('.docx') and check_exists_ask_overwrite(
-            arg_value)
+            arg_value, overwrite)
+    elif arg_name == OVERWRITE_ARG:
+        return arg_value in [True, False]
 
 
-def check_exists_ask_overwrite(arg_value:str) -> bool:
-    # If output file does not exist, returns True, else asks for overwrite
-    # confirmation. If overwrite confirmed returns True, else raises
-    # FileExistsError
-    if Path(arg_value).exists():
+def check_exists_ask_overwrite(arg_value:str, overwrite: bool) -> bool:
+    # If output file does not exist or command was run with overwrite option,
+    # returns True, else asks for overwrite confirmation. If overwrite is
+    # confirmed returns True, else raises FileExistsError.
+    if Path(arg_value).exists() and not overwrite:
         try:
             if input(f'File {arg_value} already exists, would you like to overwrite the existing file? (y/n)').lower() == 'y':
                 return True
@@ -65,10 +71,11 @@ def check_exists_ask_overwrite(arg_value:str) -> bool:
 
 
 def validate_all_args(parsed_args:dict) -> None:
+    overwrite = parsed_args[OVERWRITE_ARG]
     # Raises AssertionError if any of the arguments is not validated
     try:
         for arg_name, arg_value in parsed_args.items():
-            if not is_argument_valid(arg_name, arg_value):
+            if not is_argument_valid(arg_name, arg_value,overwrite):
                 raise AssertionError
     except AssertionError as e:
         raise RuntimeError(
@@ -93,7 +100,7 @@ def make_docxtemplate(template_path: Path) -> DocxTemplate:
         raise RuntimeError('Could not create docx template.') from e
 
 
-def render_docx(doc:DocxTemplate, json_data) -> DocxTemplate:
+def render_docx(doc:DocxTemplate, json_data: dict) -> DocxTemplate:
     try:
         doc.render(json_data)
         return doc
@@ -118,10 +125,10 @@ def main() -> None:
     try:
         parsed_args = get_args(parser)
         validate_all_args(parsed_args)
-        json_data = get_json_data(Path(parsed_args['Json']).resolve())
-        doc = make_docxtemplate(Path(parsed_args['Template']).resolve())
+        json_data = get_json_data(Path(parsed_args[JSON_ARG]).resolve())
+        doc = make_docxtemplate(Path(parsed_args[TEMPLATE_ARG]).resolve())
         doc = render_docx(doc,json_data)
-        save_file(doc, Path(parsed_args['Output']).resolve())
+        save_file(doc, Path(parsed_args[OUTPUT_ARG]).resolve())
     except RuntimeError as e:
         print('Error: '+e.__str__())
         return
