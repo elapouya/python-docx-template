@@ -7,11 +7,12 @@ TEMPLATE_ARG = 'template_path'
 JSON_ARG = 'json_path'
 OUTPUT_ARG = 'output_filename'
 OVERWRITE_ARG = 'overwrite'
+QUIET_ARG = 'quiet'
 
 
 def make_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        usage=f'docxtpl [-h] [-o] {TEMPLATE_ARG} {JSON_ARG} {OUTPUT_ARG}',
+        usage=f'python -m docxtpl [-h] [-o] [-q] {TEMPLATE_ARG} {JSON_ARG} {OUTPUT_ARG}',
         description='Make docx file from existing template docx and json data.')
     parser.add_argument(TEMPLATE_ARG,
                         type=str,
@@ -25,6 +26,9 @@ def make_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument('-' + OVERWRITE_ARG[0], '--' + OVERWRITE_ARG,
                         action='store_true',
                         help='If output file already exists, overwrites without asking for confirmation')
+    parser.add_argument('-' + QUIET_ARG[0], '--' + QUIET_ARG,
+                        action='store_true',
+                        help='Do not display unnecessary messages')
     return parser
 
 
@@ -50,7 +54,7 @@ def is_argument_valid(arg_name: str, arg_value: str,overwrite: bool) -> bool:
     elif arg_name == OUTPUT_ARG:
         return arg_value.endswith('.docx') and check_exists_ask_overwrite(
             arg_value, overwrite)
-    elif arg_name == OVERWRITE_ARG:
+    elif arg_name in [OVERWRITE_ARG, QUIET_ARG]:
         return arg_value in [True, False]
 
 
@@ -108,10 +112,12 @@ def render_docx(doc:DocxTemplate, json_data: dict) -> DocxTemplate:
         raise RuntimeError(f'An error ocurred while trying to render the docx') from e
 
 
-def save_file(doc: DocxTemplate, output_path: Path) -> None:
+def save_file(doc: DocxTemplate, parsed_args: dict) -> None:
     try:
+        output_path = parsed_args[OUTPUT_ARG]
         doc.save(output_path)
-        print(f'Document successfully generated and saved at {output_path}')
+        if not parsed_args[QUIET_ARG]:
+            print(f'Document successfully generated and saved at {output_path}')
     except PermissionError as e:
         print(f'{e.strerror}. Could not save file {e.filename}.')
         raise RuntimeError('Failed to save file.') from e
@@ -122,18 +128,19 @@ def main() -> None:
     # Everything is in a try-except block that cacthes a RuntimeError that is
     # raised if any of the individual functions called cause an error
     # themselves, terminating the main function.
+    parsed_args = get_args(parser)
     try:
-        parsed_args = get_args(parser)
         validate_all_args(parsed_args)
         json_data = get_json_data(Path(parsed_args[JSON_ARG]).resolve())
         doc = make_docxtemplate(Path(parsed_args[TEMPLATE_ARG]).resolve())
         doc = render_docx(doc,json_data)
-        save_file(doc, Path(parsed_args[OUTPUT_ARG]).resolve())
+        save_file(doc, parsed_args)
     except RuntimeError as e:
         print('Error: '+e.__str__())
         return
     finally:
-        print('Exiting program!')
+        if not parsed_args[QUIET_ARG]:
+            print('Exiting program!')
 
 
 if __name__ == '__main__':

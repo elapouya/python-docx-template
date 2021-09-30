@@ -387,6 +387,30 @@ Then in your template, you will be able to use::
 
     Euros price : {{ price_dollars|multiply_by(0.88) }}
 
+
+Command-line execution
+----------------------
+
+One can use `docxtpl` module directly on command line to generate a docx from a template and a json file as a context::
+
+   usage: python -m docxtpl [-h] [-o] [-q] template_path json_path output_filename
+
+   Make docx file from existing template docx and json data.
+
+   positional arguments:
+     template_path    The path to the template docx file.
+     json_path        The path to the json file with the data.
+     output_filename  The filename to save the generated docx.
+
+   optional arguments:
+     -h, --help       show this help message and exit
+     -o, --overwrite  If output file already exists, overwrites without asking
+                      for confirmation
+     -q, --quiet      Do not display unnecessary messages
+
+
+See tests/module_execute.py for an example.
+
 Examples
 --------
 
