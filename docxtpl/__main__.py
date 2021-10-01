@@ -62,15 +62,15 @@ def is_argument_valid(arg_name, arg_value, overwrite):
 def check_exists_ask_overwrite(arg_value, overwrite):
     # If output file does not exist or command was run with overwrite option,
     # returns True, else asks for overwrite confirmation. If overwrite is
-    # confirmed returns True, else raises FileExistsError.
+    # confirmed returns True, else raises OSError.
     if os.path.exists(arg_value) and not overwrite:
         try:
             msg = 'File %s already exists, would you like to overwrite the existing file? (y/n)' % arg_value
             if input(msg).lower() == 'y':
                 return True
             else:
-                raise FileExistsError
-        except FileExistsError:
+                raise OSError
+        except OSError:
             raise RuntimeError('File %s already exists, please choose a different name.' % arg_value)
     else:
         return True
@@ -124,7 +124,7 @@ def save_file(doc, parsed_args):
         doc.save(output_path)
         if not parsed_args[QUIET_ARG]:
             print('Document successfully generated and saved at {output_path}'.format(output_path=output_path))
-    except PermissionError as e:
+    except OSError as e:
         print('{e.strerror}. Could not save file {e.filename}.'.foramt(e=e))
         raise RuntimeError('Failed to save file.')
 
