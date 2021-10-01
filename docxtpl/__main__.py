@@ -125,7 +125,7 @@ def save_file(doc, parsed_args):
         if not parsed_args[QUIET_ARG]:
             print('Document successfully generated and saved at {output_path}'.format(output_path=output_path))
     except OSError as e:
-        print('{e.strerror}. Could not save file {e.filename}.'.foramt(e=e))
+        print('{e.strerror}. Could not save file {e.filename}.'.format(e=e))
         raise RuntimeError('Failed to save file.')
 
 
