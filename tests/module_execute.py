@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 TEMPLATE_PATH = 'templates/module_execute_tpl.docx'
 JSON_PATH = 'templates/module_execute.json'
@@ -8,14 +7,13 @@ OVERWRITE = '-o'
 QUIET = '-q'
 
 
-output_path = Path(OUTPUT_FILENAME)
-if output_path.exists():
-    output_path.unlink()
+if os.path.exists(OUTPUT_FILENAME):
+    os.unlink(OUTPUT_FILENAME)
 
-os.chdir(Path(__file__).parent)
-cmd = f'python -m docxtpl {TEMPLATE_PATH} {JSON_PATH} {OUTPUT_FILENAME} {OVERWRITE} {QUIET}'
-print(f'Executing "{cmd}" ...')
+os.chdir(os.path.dirname(__file__))
+cmd = 'python -m docxtpl %s %s %s %s %s' % (TEMPLATE_PATH, JSON_PATH, OUTPUT_FILENAME, OVERWRITE, QUIET)
+print('Executing "%s" ...' % cmd)
 os.system(cmd)
 
-if output_path.exists():
-    print(f'    --> File {output_path.resolve()} has been generated.')
+if os.path.exists(OUTPUT_FILENAME):
+    print(f'    --> File %s has been generated.' % OUTPUT_FILENAME)
