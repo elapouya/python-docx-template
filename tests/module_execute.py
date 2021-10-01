@@ -1,4 +1,4 @@
-import sys, os
+import os
 from pathlib import Path
 
 TEMPLATE_PATH = 'templates/module_execute_tpl.docx'
@@ -19,4 +19,3 @@ os.system(cmd)
 
 if output_path.exists():
     print(f'    --> File {output_path.resolve()} has been generated.')
-

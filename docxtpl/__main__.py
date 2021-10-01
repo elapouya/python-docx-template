@@ -1,4 +1,5 @@
-import argparse, json
+import argparse
+import json
 from pathlib import Path
 
 from .template import DocxTemplate, TemplateError
@@ -45,7 +46,7 @@ def get_args(parser: argparse.ArgumentParser) -> dict:
             raise RuntimeError(f'Correct usage is:\n{parser.usage}') from e
 
 
-def is_argument_valid(arg_name: str, arg_value: str,overwrite: bool) -> bool:
+def is_argument_valid(arg_name: str, arg_value: str, overwrite: bool) -> bool:
     # Basic checks for the arguments
     if arg_name == TEMPLATE_ARG:
         return Path(arg_value).is_file() and arg_value.endswith('.docx')
@@ -58,7 +59,7 @@ def is_argument_valid(arg_name: str, arg_value: str,overwrite: bool) -> bool:
         return arg_value in [True, False]
 
 
-def check_exists_ask_overwrite(arg_value:str, overwrite: bool) -> bool:
+def check_exists_ask_overwrite(arg_value: str, overwrite: bool) -> bool:
     # If output file does not exist or command was run with overwrite option,
     # returns True, else asks for overwrite confirmation. If overwrite is
     # confirmed returns True, else raises FileExistsError.
@@ -74,12 +75,12 @@ def check_exists_ask_overwrite(arg_value:str, overwrite: bool) -> bool:
         return True
 
 
-def validate_all_args(parsed_args:dict) -> None:
+def validate_all_args(parsed_args: dict) -> None:
     overwrite = parsed_args[OVERWRITE_ARG]
     # Raises AssertionError if any of the arguments is not validated
     try:
         for arg_name, arg_value in parsed_args.items():
-            if not is_argument_valid(arg_name, arg_value,overwrite):
+            if not is_argument_valid(arg_name, arg_value, overwrite):
                 raise AssertionError
     except AssertionError as e:
         raise RuntimeError(
@@ -104,12 +105,12 @@ def make_docxtemplate(template_path: Path) -> DocxTemplate:
         raise RuntimeError('Could not create docx template.') from e
 
 
-def render_docx(doc:DocxTemplate, json_data: dict) -> DocxTemplate:
+def render_docx(doc: DocxTemplate, json_data: dict) -> DocxTemplate:
     try:
         doc.render(json_data)
         return doc
     except TemplateError as e:
-        raise RuntimeError(f'An error ocurred while trying to render the docx') from e
+        raise RuntimeError('An error ocurred while trying to render the docx') from e
 
 
 def save_file(doc: DocxTemplate, parsed_args: dict) -> None:
@@ -133,7 +134,7 @@ def main() -> None:
         validate_all_args(parsed_args)
         json_data = get_json_data(Path(parsed_args[JSON_ARG]).resolve())
         doc = make_docxtemplate(Path(parsed_args[TEMPLATE_ARG]).resolve())
-        doc = render_docx(doc,json_data)
+        doc = render_docx(doc, json_data)
         save_file(doc, parsed_args)
     except RuntimeError as e:
         print('Error: '+e.__str__())
