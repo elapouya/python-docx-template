@@ -118,7 +118,7 @@ def render_docx(doc, json_data):
         raise RuntimeError('An error ocurred while trying to render the docx')
 
 
-def save_file(doc: DocxTemplate, parsed_args: dict) -> None:
+def save_file(doc, parsed_args):
     try:
         output_path = parsed_args[OUTPUT_ARG]
         doc.save(output_path)

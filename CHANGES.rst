@@ -1,4 +1,4 @@
-0.14.0 (2021-09-30)
+0.14.1 (2021-10-01)
 -------------------
 - One can now use python -m docxtpl on command line
   to generate a docx from a template and a json file as a context
