@@ -16,4 +16,4 @@ print('Executing "%s" ...' % cmd)
 os.system(cmd)
 
 if os.path.exists(OUTPUT_FILENAME):
-    print(f'    --> File %s has been generated.' % OUTPUT_FILENAME)
+    print('    --> File %s has been generated.' % OUTPUT_FILENAME)
