@@ -211,7 +211,7 @@ class DocxTemplate(object):
         return src_xml
 
     def render_xml_part(self, src_xml, part, context, jinja_env=None):
-        src_xml = src_xml.replace(r'<w:p ', '\n<w:p ')
+        src_xml = re.sub(r'<w:p([ >])', '\n<w:p\g<1>', src_xml)
         try:
             self.current_rendering_part = part
             if jinja_env:
@@ -225,7 +225,7 @@ class DocxTemplate(object):
                 exc.docx_context = map(lambda x: re.sub(r'<[^>]+>', '', x),
                                        src_xml.splitlines()[line_number:(line_number + 7)])
             raise exc
-        dst_xml = dst_xml.replace('\n<w:p ', '<w:p ')
+        dst_xml = re.sub(r'\n<w:p([ >])', '<w:p\g<1>', dst_xml)
         dst_xml = (dst_xml
                    .replace('{_{', '{{')
                    .replace('}_}', '}}')
