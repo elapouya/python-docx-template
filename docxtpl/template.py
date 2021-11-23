@@ -211,7 +211,7 @@ class DocxTemplate(object):
         return src_xml
 
     def render_xml_part(self, src_xml, part, context, jinja_env=None):
-        src_xml = src_xml.replace(r'<w:p>', '\n<w:p>')
+        src_xml = src_xml.replace(r'<w:p ', '\n<w:p ')
         try:
             self.current_rendering_part = part
             if jinja_env:
