@@ -225,7 +225,7 @@ class DocxTemplate(object):
                 exc.docx_context = map(lambda x: re.sub(r'<[^>]+>', '', x),
                                        src_xml.splitlines()[line_number:(line_number + 7)])
             raise exc
-        dst_xml = dst_xml.replace('\n<w:p>', '<w:p>')
+        dst_xml = dst_xml.replace('\n<w:p ', '<w:p ')
         dst_xml = (dst_xml
                    .replace('{_{', '{{')
                    .replace('}_}', '}}')
