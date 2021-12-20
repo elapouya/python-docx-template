@@ -34,15 +34,24 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, docx):
-        self.docx = Document(docx)
-        self.crc_to_new_media = {}
-        self.crc_to_new_embedded = {}
-        self.zipname_to_replace = {}
-        self.pics_to_replace = {}
+    def __init__(self, template_file):
+        self.template_file = template_file
+        self.reset_replacements()
+        self.docx = None
+        self.is_rendered = False
+        self.is_saved = False
+
+    def init_docx(self):
+        if not self.docx or self.is_rendered:
+            self.docx = Document(self.template_file)
+            self.is_rendered = False
+
+    def render_init(self):
+        self.init_docx()
         self.pic_map = {}
         self.current_rendering_part = None
         self.docx_ids_index = 1000
+        self.is_saved = False
 
     def __getattr__(self, name):
         return getattr(self.docx, name)
@@ -53,6 +62,7 @@ class DocxTemplate(object):
         return etree.tostring(xml, encoding='unicode', pretty_print=False)
 
     def get_docx(self):
+        self.init_docx()
         return self.docx
 
     def get_xml(self):
@@ -307,6 +317,9 @@ class DocxTemplate(object):
         self.docx._part._rels[relKey]._target = new_part
 
     def render(self, context, jinja_env=None, autoescape=False):
+        # init template working attributes
+        self.render_init()
+
         if autoescape:
             if not jinja_env:
                 jinja_env = Environment(autoescape=autoescape)
@@ -336,6 +349,9 @@ class DocxTemplate(object):
                                                  jinja_env)
         for relKey, xml in footers:
             self.map_headers_footers_xml(relKey, xml)
+
+        # set rendered flag
+        self.is_rendered = True
 
     # using of TC tag in for cycle can cause that count of columns does not
     # correspond to real count of columns in row. This function is able to fix it.
@@ -432,6 +448,7 @@ class DocxTemplate(object):
             elt.attrib['id'] = str(self.docx_ids_index)
 
     def new_subdoc(self, docpath=None):
+        self.init_docx()
         return Subdoc(self, docpath)
 
     @staticmethod
@@ -539,6 +556,27 @@ class DocxTemplate(object):
         """
         with open(dst_file, 'rb') as fh:
             self.zipname_to_replace[zipname] = fh.read()
+
+    def reset_replacements(self):
+        """Reset replacement dictionnaries
+
+        This will reset data for image/embedded/zipname replacement
+
+        This is useful when calling several times render() with different
+        image/embedded/zipname replacements without re-instantiating
+        DocxTemplate object.
+        In this case, the right sequence for each rendering will be :
+            - reset_replacements(...)
+            - replace_zipname(...), replace_media(...) and/or replace_embedded(...),
+            - render(...)
+
+        If you instantiate DocxTemplate object before each render(),
+        this method is useless.
+        """
+        self.crc_to_new_media = {}
+        self.crc_to_new_embedded = {}
+        self.zipname_to_replace = {}
+        self.pics_to_replace = {}
 
     def post_processing(self, docx_file):
         if (self.crc_to_new_media or
@@ -662,13 +700,19 @@ class DocxTemplate(object):
         self.pic_map.update(part_map)
 
     def build_url_id(self, url):
+        self.init_docx()
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
     def save(self, filename, *args, **kwargs):
+        # case where save() is called without doing rendering
+        # ( user wants only to replace image/embedded/zipname )
+        if not self.is_saved and not self.is_rendered:
+            self.docx = Document(self.template_file)
         self.pre_processing()
         self.docx.save(filename, *args, **kwargs)
         self.post_processing(filename)
+        self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env=None):
         xml = self.get_xml()

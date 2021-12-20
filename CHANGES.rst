@@ -1,3 +1,8 @@
+0.15.0 (2021-12-20)
+-------------------
+- Multi-rendering with same DocxTemplate object is now possible
+  see tests/multi_rendering.py
+
 0.14.1 (2021-10-01)
 -------------------
 - One can now use python -m docxtpl on command line
@@ -22,21 +27,9 @@
 0.11.5 (2021-05-09)
 -------------------
 - PR #351
-
-0.11.4 (2021-04-06)
--------------------
 - It is now possible to put InlineImage in header/footer
-
-0.11.2 (2020-11-09)
--------------------
 - fix #323
-
-0.11.1 (2020-10-27)
--------------------
 - fix #320
-
-0.11.0 (2020-10-19)
--------------------
 - \\n, \\a, \\t and \\f are now accepted in simple context string. Thanks to chabErch@github
 
 0.10.5 (2020-10-15)
