@@ -110,6 +110,15 @@ But use this instead in your docx template ::
 This syntax is possible because MS Word considers each line as a new paragraph and
 ``{%p`` tags are not in the same paragraph in the second case.
 
+Multiple rendering
+..................
+
+Since v0.15.0, it is possible to create ``DocxTemplate`` object once and call
+``render(context)`` several times. Note that if you want to use replacement
+methods like ``replace_media()``, ``replace_embedded()`` and/or ``replace_zipname()``
+during multiple rendering, you will have to call ``reset_replacements()``
+at rendering loop start.
+
 Split and merge text
 ....................
 
