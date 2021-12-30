@@ -78,6 +78,17 @@ Use instead::
    {{ myvariable }}
    {% if something %}
 
+Get Defined Variables
++++++++++++++++++++++
+
+In order to get the missing variables after rendering use ::
+
+   tpl=DocxTemplate('your_template.docx')
+   tpl.render(context_dict)
+   set_of_variables = tpl.get_undeclared_template_variables()
+
+**IMPORTANT** : You may use the method before rendering to get a set of keys you need, e.g. to be prompted to a user or written in a file for manual processing.
+
 Extensions
 ++++++++++
 
