@@ -715,6 +715,7 @@ class DocxTemplate(object):
         self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env=None):
+        self.init_docx()
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         for uri in [self.HEADER_URI, self.FOOTER_URI]:

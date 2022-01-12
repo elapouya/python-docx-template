@@ -1,3 +1,7 @@
+0.15.2 (2022-01-12)
+-------------------
+- fix #408
+
 0.15.1 (2021-12-20)
 -------------------
 - Multi-rendering with same DocxTemplate object is now possible
