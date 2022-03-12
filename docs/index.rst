@@ -222,6 +222,10 @@ Instead of using ``RichText()``, one can use its shortcut : ``R()``
 you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
 This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
 
+**Important** : ``RichText`` objects are rendered into xml *before* any filter is applied
+thus ``RichText`` are not compatible with Jinja2 filters. You cannot write in your template something like ``{{r <var>|lower }}``.
+Only solution is instead to do any filtering into your python code when creating the ``RichText`` object.
+
 Hyperlink with RichText
 +++++++++++++++++++++++
 
