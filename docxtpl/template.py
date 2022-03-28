@@ -77,17 +77,17 @@ class DocxTemplate(object):
         strip all unnecessary xml tags, manage table cell background color and colspan,
         unescape html entities, etc... """
 
-        # replace {<something>{ by {{   ( works with {{ }} {% and %} )
-        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%])|(?<=[%\}])(<[^>]*>)+(?=\})', '',
+        # replace {<something>{ by {{   ( works with {{ }} {% and %} {# and #})
+        src_xml = re.sub(r'(?<={)(<[^>]*>)+(?=[\{%\#])|(?<=[%\}\#])(<[^>]*>)+(?=\})', '',
                          src_xml, flags=re.DOTALL)
 
         # replace {{<some tags>jinja2 stuff<some other tags>}} by {{jinja2 stuff}}
-        # same thing with {% ... %}
+        # same thing with {% ... %} and {# #}
         # "jinja2 stuff" could a variable, a 'if' etc... anything jinja2 will understand
         def striptags(m):
             return re.sub('</w:t>.*?(<w:t>|<w:t [^>]*>)', '',
                           m.group(0), flags=re.DOTALL)
-        src_xml = re.sub(r'{%(?:(?!%}).)*|{{(?:(?!}}).)*', striptags,
+        src_xml = re.sub(r'{%(?:(?!%}).)*|{#(?:(?!#}).)*|{{(?:(?!}}).)*', striptags,
                          src_xml, flags=re.DOTALL)
 
         # manage table cell colspan
@@ -132,6 +132,12 @@ class DocxTemplate(object):
             # by {% xxx %} or {{ xx }} without any surronding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y': y}
+            src_xml = re.sub(pat, r'\1 \2', src_xml, flags=re.DOTALL)
+
+        for y in ['tr', 'tc', 'p']:
+            # same thing, but for {#y xxx #} (but not where y == 'r', since that
+            # makes less sense to use comments in that context
+            pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({#)%(y)s ([^}#]*(?:#})).*?</w:%(y)s>' % {'y': y}
             src_xml = re.sub(pat, r'\1 \2', src_xml, flags=re.DOTALL)
 
         # add vMerge
