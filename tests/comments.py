@@ -1,4 +1,3 @@
-import sys, os
 from docxtpl import DocxTemplate
 
 tpl = DocxTemplate('templates/comments.docx')
