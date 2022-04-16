@@ -121,6 +121,17 @@ But use this instead in your docx template ::
 This syntax is possible because MS Word considers each line as a new paragraph and
 ``{%p`` tags are not in the same paragraph in the second case.
 
+Comments
+........
+
+You can add jinja-like comments in your template ::
+
+   {#p this is a comment as a paragraph #}
+   {#tr this is a comment as a table row #}
+   {#tc this is a comment as a table cell #}
+
+See tests/templates/comments_tpl.docx for an example.
+
 Multiple rendering
 ..................
 
