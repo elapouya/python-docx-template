@@ -5,6 +5,8 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 """
 
+from os import PathLike
+from typing import Any, Optional, IO, Union, Dict
 from .subdoc import Subdoc
 import functools
 import io
@@ -34,8 +36,8 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, template_file):
-        self.template_file = template_file
+    def __init__(self, template_file_or_path: Union[IO[bytes], str, PathLike[str]]):
+        self.template_file_or_path = template_file_or_path
         self.reset_replacements()
         self.docx = None
         self.is_rendered = False
@@ -43,7 +45,7 @@ class DocxTemplate(object):
 
     def init_docx(self):
         if not self.docx or self.is_rendered:
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file_or_path)
             self.is_rendered = False
 
     def render_init(self):
@@ -322,7 +324,7 @@ class DocxTemplate(object):
             new_part.load_rel(rel.reltype, rel._target, rel.rId, rel.is_external)
         self.docx._part._rels[relKey]._target = new_part
 
-    def render(self, context, jinja_env=None, autoescape=False):
+    def render(self, context: Dict[str, Any], jinja_env: Optional[Environment]=None, autoescape: bool=False):
         # init template working attributes
         self.render_init()
 
@@ -710,14 +712,14 @@ class DocxTemplate(object):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
-    def save(self, filename, *args, **kwargs):
+    def save(self, output_file_or_path: Union[IO[bytes], str, PathLike[str]], *args, **kwargs):
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file_or_path)
         self.pre_processing()
-        self.docx.save(filename, *args, **kwargs)
-        self.post_processing(filename)
+        self.docx.save(output_file_or_path, *args, **kwargs)
+        self.post_processing(output_file_or_path)
         self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env=None):
