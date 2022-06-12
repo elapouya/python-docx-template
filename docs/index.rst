@@ -42,8 +42,6 @@ You save the document as a .docx file (xml format) : it will be your .docx templ
 
 Now you can use python-docx-template to generate as many word documents you want from this .docx template and context variables you will associate.
 
-Note : python-docx-template as been tested with MS Word 97, it may not work with other version.
-
 Jinja2-like syntax
 ------------------
 
