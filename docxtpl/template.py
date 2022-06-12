@@ -36,8 +36,8 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, template_file_or_path: Union[IO[bytes], str, PathLike[str]]) -> None:
-        self.template_file_or_path = template_file_or_path
+    def __init__(self, template_file: Union[IO[bytes], str, PathLike[str]]) -> None:
+        self.template_file = template_file
         self.reset_replacements()
         self.docx = None
         self.is_rendered = False
@@ -45,7 +45,7 @@ class DocxTemplate(object):
 
     def init_docx(self):
         if not self.docx or self.is_rendered:
-            self.docx = Document(self.template_file_or_path)
+            self.docx = Document(self.template_file)
             self.is_rendered = False
 
     def render_init(self):
@@ -712,14 +712,14 @@ class DocxTemplate(object):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
-    def save(self, output_file_or_path: Union[IO[bytes], str, PathLike[str]], *args, **kwargs):
+    def save(self, filename: Union[IO[bytes], str, PathLike[str]], *args, **kwargs):
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
-            self.docx = Document(self.template_file_or_path)
+            self.docx = Document(self.template_file)
         self.pre_processing()
-        self.docx.save(output_file_or_path, *args, **kwargs)
-        self.post_processing(output_file_or_path)
+        self.docx.save(filename, *args, **kwargs)
+        self.post_processing(filename)
         self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env: Optional[Environment]=None) -> Set[str]:
