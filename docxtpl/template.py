@@ -324,7 +324,12 @@ class DocxTemplate(object):
             new_part.load_rel(rel.reltype, rel._target, rel.rId, rel.is_external)
         self.docx._part._rels[relKey]._target = new_part
 
-    def render(self, context: Dict[str, Any], jinja_env: Optional[Environment]=None, autoescape: bool=False) -> None:
+    def render(
+        self,
+        context: Dict[str, Any],
+        jinja_env: Optional[Environment] = None,
+        autoescape: bool = False
+    ) -> None:
         # init template working attributes
         self.render_init()
 
@@ -722,7 +727,7 @@ class DocxTemplate(object):
         self.post_processing(filename)
         self.is_saved = True
 
-    def get_undeclared_template_variables(self, jinja_env: Optional[Environment]=None) -> Set[str]:
+    def get_undeclared_template_variables(self, jinja_env: Optional[Environment] = None) -> Set[str]:
         self.init_docx()
         xml = self.get_xml()
         xml = self.patch_xml(xml)

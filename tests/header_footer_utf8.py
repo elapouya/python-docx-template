@@ -13,7 +13,8 @@ tpl = DocxTemplate('templates/header_footer_tpl_utf8.docx')
 
 sd = tpl.new_subdoc()
 p = sd.add_paragraph(
-    u'This is a sub-document to check it does not break header and footer with utf-8 characters inside the template .docx'
+    u'This is a sub-document to check it does not break header and footer with utf-8 '
+    u'characters inside the template .docx'
 )
 
 context = {
