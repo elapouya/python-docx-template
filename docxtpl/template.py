@@ -712,7 +712,7 @@ class DocxTemplate(object):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
-    def save(self, filename: Union[IO[bytes], str, PathLike[str]], *args, **kwargs):
+    def save(self, filename: Union[IO[bytes], str, PathLike[str]], *args, **kwargs) -> None:
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
