@@ -5,6 +5,8 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 """
 
+from os import PathLike
+from typing import Any, Optional, IO, Union, Dict, Set
 from .subdoc import Subdoc
 import functools
 import io
@@ -34,7 +36,7 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, template_file):
+    def __init__(self, template_file: Union[IO[bytes], str, PathLike[str]]) -> None:
         self.template_file = template_file
         self.reset_replacements()
         self.docx = None
@@ -322,7 +324,7 @@ class DocxTemplate(object):
             new_part.load_rel(rel.reltype, rel._target, rel.rId, rel.is_external)
         self.docx._part._rels[relKey]._target = new_part
 
-    def render(self, context, jinja_env=None, autoescape=False):
+    def render(self, context: Dict[str, Any], jinja_env: Optional[Environment]=None, autoescape: bool=False) -> None:
         # init template working attributes
         self.render_init()
 
@@ -710,7 +712,7 @@ class DocxTemplate(object):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
-    def save(self, filename, *args, **kwargs):
+    def save(self, filename: Union[IO[bytes], str, PathLike[str]], *args, **kwargs) -> None:
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
@@ -720,7 +722,7 @@ class DocxTemplate(object):
         self.post_processing(filename)
         self.is_saved = True
 
-    def get_undeclared_template_variables(self, jinja_env=None):
+    def get_undeclared_template_variables(self, jinja_env: Optional[Environment]=None) -> Set[str]:
         self.init_docx()
         xml = self.get_xml()
         xml = self.patch_xml(xml)
