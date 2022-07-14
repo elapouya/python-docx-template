@@ -126,7 +126,7 @@ class DocxTemplate(object):
         # {%- will merge with previous paragraph text
         src_xml = re.sub(r'</w:t>(?:(?!</w:t>).)*?{%-', '{%', src_xml, flags=re.DOTALL)
         # -%} will merge with next paragraph text
-        src_xml = re.sub(r'-%}(?:(?!<w:t[ >]).)*?<w:t[^>]*?>', '%}', src_xml, flags=re.DOTALL)
+        src_xml = re.sub(r'-%}(?:(?!<w:t[ >]|{%|{{).)*?<w:t[^>]*?>', '%}', src_xml, flags=re.DOTALL)
 
         for y in ['tr', 'tc', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing
