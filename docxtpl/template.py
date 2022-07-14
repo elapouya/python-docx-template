@@ -36,7 +36,7 @@ class DocxTemplate(object):
     HEADER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/header"
     FOOTER_URI = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
 
-    def __init__(self, template_file: Union[IO[bytes], str, PathLike[str]]) -> None:
+    def __init__(self, template_file: Union[IO[bytes], str, PathLike]) -> None:
         self.template_file = template_file
         self.reset_replacements()
         self.docx = None
@@ -717,7 +717,7 @@ class DocxTemplate(object):
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK,
                                          is_external=True)
 
-    def save(self, filename: Union[IO[bytes], str, PathLike[str]], *args, **kwargs) -> None:
+    def save(self, filename: Union[IO[bytes], str, PathLike], *args, **kwargs) -> None:
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
