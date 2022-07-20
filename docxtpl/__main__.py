@@ -131,7 +131,7 @@ def save_file(doc, parsed_args):
 
 def main():
     parser = make_arg_parser()
-    # Everything is in a try-except block that cacthes a RuntimeError that is
+    # Everything is in a try-except block that catches a RuntimeError that is
     # raised if any of the individual functions called cause an error
     # themselves, terminating the main function.
     parsed_args = get_args(parser)
