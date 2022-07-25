@@ -254,7 +254,7 @@ just add ``{{ <var> }}`` tag in your template where ``<var>`` is an instance of 
 
    myimage = InlineImage(tpl, image_descriptor='test_files/python_logo.png', width=Mm(20), height=Mm(10))
 
-You just have to specify the template object, the image file path and optionnally width and/or height.
+You just have to specify the template object, the image file path and optionally width and/or height.
 For height and width you have to use millimeters (Mm), inches (Inches) or points(Pt) class.
 Please see tests/inline_image.py for an example.
 
@@ -265,7 +265,7 @@ A template variable can contain a complex and built from scratch with python-doc
 To do so, get first a sub-document object from template object and use it as a python-docx document object,
 see example in `tests/subdoc.py`.
 
-Since docxtpl V0.12.0, it is now possible to merge an exsting .docx as a subdoc, just specify its path when
+Since docxtpl V0.12.0, it is now possible to merge an existing .docx as a subdoc, just specify its path when
 calling method `new_subdoc()` ::
 
    tpl = DocxTemplate('templates/merge_docx_master_tpl.docx')
@@ -342,10 +342,10 @@ It works like medias replacement, except it is for embedded objects like embedde
 
 Syntax to replace embedded_dummy.docx::
 
-   tpl.replace_embedded('embdded_dummy.docx','embdded_docx_i_want.docx')
+   tpl.replace_embedded('embedded_dummy.docx','embedded_docx_i_want.docx')
 
 
-WARNING : unlike replace_pic() method, embdded_dummy.docx MUST exist in the template directory when rendering and saving the generated docx. It must be the same
+WARNING : unlike replace_pic() method, embedded_dummy.docx MUST exist in the template directory when rendering and saving the generated docx. It must be the same
 file as the one inserted manually in the docx template.
 The replacement occurs in headers, footers and the whole document's body.
 
@@ -369,7 +369,7 @@ Microsoft Word 2016 special cases
 
 MS Word 2016 will ignore ``\t`` tabulations. This is special to that version.
 Libreoffice or Wordpad do not have this problem. The same thing occurs for line
-beginning with a jinja2 tag provinding spaces : They will be ignored.
+beginning with a jinja2 tag providing spaces : They will be ignored.
 To solve these problem, the solution is to use Richtext::
 
    tpl.render({
@@ -400,7 +400,7 @@ You can also merge cells vertically within a for loop (see tests/vertical_merge.
 Jinja custom filters
 --------------------
 
-``render()`` accepts ``jinja_env`` optionnal argument : you may pass a jinja environment object.
+``render()`` accepts ``jinja_env`` optional argument : you may pass a jinja environment object.
 By this way you will be able to add some custom jinja filters::
 
     from docxtpl import DocxTemplate

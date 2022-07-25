@@ -75,7 +75,7 @@ class DocxTemplate(object):
             fh.write(self.get_xml())
 
     def patch_xml(self, src_xml):
-        """ Make a lots of cleanning to have a raw xml understandable by jinja2 :
+        """ Make a lots of cleaning to have a raw xml understandable by jinja2 :
         strip all unnecessary xml tags, manage table cell background color and colspan,
         unescape html entities, etc... """
 
@@ -131,7 +131,7 @@ class DocxTemplate(object):
         for y in ['tr', 'tc', 'p', 'r']:
             # replace into xml code the row/paragraph/run containing
             # {%y xxx %} or {{y xxx}} template tag
-            # by {% xxx %} or {{ xx }} without any surronding <w:y> tags :
+            # by {% xxx %} or {{ xx }} without any surrounding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = r'<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>' % {'y': y}
             src_xml = re.sub(pat, r'\1 \2', src_xml, flags=re.DOTALL)
@@ -383,7 +383,7 @@ class DocxTemplate(object):
                 cells = r.findall(ns+'tc')
                 if (len(columns) + to_add) < len(cells):
                     to_add = len(cells) - len(columns)
-            # is neccessary to add columns?
+            # is necessary to add columns?
             if to_add > 0:
                 # at first, calculate width of table according to columns
                 # (we want to preserve it)
@@ -571,7 +571,7 @@ class DocxTemplate(object):
             self.zipname_to_replace[zipname] = fh.read()
 
     def reset_replacements(self):
-        """Reset replacement dictionnaries
+        """Reset replacement dictionaries
 
         This will reset data for image/embedded/zipname replacement
 

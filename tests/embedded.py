@@ -16,7 +16,7 @@ embedded_docx_tpl.render(context)
 embedded_docx_tpl.save('output/embedded_embedded_docx.docx')
 
 
-# rendring the main document :
+# rendering the main document :
 tpl = DocxTemplate('templates/embedded_main_tpl.docx')
 
 context = {
