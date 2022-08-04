@@ -79,7 +79,7 @@ class RichText(object):
         if strike:
             prop += u'<w:strike/>'
         if font:
-            prop += (u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'
+            prop += (u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}" w:eastAsia="{font}"/>'
                      .format(font=font))
 
         xml = u'<w:r>'
