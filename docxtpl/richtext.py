@@ -79,8 +79,14 @@ class RichText(object):
         if strike:
             prop += u'<w:strike/>'
         if font:
-            prop += (u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"/>'
-                     .format(font=font))
+            regional_font = u''
+            if ':' in font:
+                region, font = font.split(':', 1)
+                regional_font = u' w:{region}="{font}"'.format(font=font, region=region)
+            prop += (
+                u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'
+                .format(font=font, regional_font=regional_font)
+            )
 
         xml = u'<w:r>'
         if prop:

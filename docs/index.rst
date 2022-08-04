@@ -223,9 +223,15 @@ RichText
 When you use ``{{ <var> }}`` tag in your template, it will be replaced by the string contained within `var` variable.
 BUT it will keep the current style.
 If you want to add dynamically changeable style, you have to use both : the ``{{r <var> }}`` tag AND a ``RichText`` object within `var` variable.
-You can change color, bold, italic, size and so on, but the best way is to use Microsoft Word to define your own *character* style
+You can change color, bold, italic, size, font and so on, but the best way is to use Microsoft Word to define your own *character* style
 ( Home tab -> modify style -> manage style button -> New style, select ‘Character style’ in the form ), see example in `tests/richtext.py`
 Instead of using ``RichText()``, one can use its shortcut : ``R()``
+
+There is a specific case for font: if your font is not displayed correctly, it may be because it is defined
+only for a region. To know your region, it requires a little work by analyzing the document.xml inside the docx template (this is a zip file).
+To specify a region, you have to prefix your font name this that region and a column::
+
+   ch = RichText('测试TEST', font='eastAsia:微软雅黑')
 
 **Important** : When you use ``{{r }}`` it removes the current character styling from your docx template, this means that if
 you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
