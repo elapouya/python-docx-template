@@ -1,6 +1,7 @@
 0.16.4 (2022-08-04)
 -------------------
 - Regional fonts for RichText
+- Reorganize documentation
 
 0.16.3 (2022-07-14)
 -------------------
