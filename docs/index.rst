@@ -117,7 +117,7 @@ But use this instead in your docx template::
    Here is my paragraph
    {%p endif %}
 
-This syntax is possible because MS Word considers each line as a new paragraph (if you do not use CTRL-RETURN).
+This syntax is possible because MS Word considers each line as a new paragraph (if you do not use SHIFT-RETURN).
 
 Display variables
 .................
@@ -147,10 +147,6 @@ Use instead::
 
    {{ myvariable }}
    {{r myrichtext }}
-
-**IMPORTANT** : Do not use 2 times ``{{r`` in the same run. Use RichText.add()
-method to concatenate several strings and styles at python side and only one
-``{{r`` at template side.
 
 Comments
 ........
@@ -247,6 +243,10 @@ To specify a region, you have to prefix your font name this that region and a co
 **Important** : When you use ``{{r }}`` it removes the current character styling from your docx template, this means that if
 you do not specify a style in ``RichText()``, the style will go back to a microsoft word default style.
 This will affect only character styles, not the paragraph styles (MSWord manages this 2 kind of styles).
+
+**IMPORTANT** : Do not use 2 times ``{{r`` in the same run. Use RichText.add()
+method to concatenate several strings and styles at python side and only one
+``{{r`` at template side.
 
 **Important** : ``RichText`` objects are rendered into xml *before* any filter is applied
 thus ``RichText`` are not compatible with Jinja2 filters. You cannot write in your template something like ``{{r <var>|lower }}``.
