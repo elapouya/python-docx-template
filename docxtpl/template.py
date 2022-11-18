@@ -44,7 +44,7 @@ class DocxTemplate(object):
         self.is_saved = False
 
     def init_docx(self):
-        if not self.docx or self.is_rendered:
+        if not self.docx or not self.is_rendered:
             self.docx = Document(self.template_file)
             self.is_rendered = False
 
