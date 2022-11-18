@@ -252,6 +252,31 @@ class DocxTemplate(object):
         dst_xml = self.resolve_listing(dst_xml)
         return dst_xml
 
+    def render_properties(self, context: Dict[str, Any], jinja_env: Optional[Environment] = None) -> None:
+        # List of string attributes of docx.opc.coreprops.CoreProperties which are strings.
+        # It seems that some attributes cannot be written as strings. Those are commented out.
+        properties = [
+            'author',
+            # 'category',
+            'comments',
+            # 'content_status',
+            'identifier',
+            # 'keywords',
+            'language',
+            # 'last_modified_by',
+            'subject',
+            'title',
+            # 'version',
+        ]
+        if jinja_env is None:
+            jinja_env = Environment()
+
+        for prop in properties:
+            initial = getattr(self.docx.core_properties, prop)
+            template = jinja_env.from_string(initial)
+            rendered = template.render(context)
+            setattr(self.docx.core_properties, prop, rendered)
+
     def resolve_listing(self, xml):
 
         def resolve_text(run_properties, paragraph_properties, m):
@@ -362,6 +387,8 @@ class DocxTemplate(object):
                                                  jinja_env)
         for relKey, xml in footers:
             self.map_headers_footers_xml(relKey, xml)
+
+        self.render_properties(context, jinja_env)
 
         # set rendered flag
         self.is_rendered = True
