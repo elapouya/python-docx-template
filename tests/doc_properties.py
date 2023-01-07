@@ -1,7 +1,4 @@
-import os.path
-
-import jinja2
-from docxtpl import DocxTemplate, InlineImage
+from docxtpl import DocxTemplate
 
 doctemplate = r'templates/doc_properties_tpl.docx'
 
