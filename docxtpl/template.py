@@ -43,8 +43,8 @@ class DocxTemplate(object):
         self.is_rendered = False
         self.is_saved = False
 
-    def init_docx(self):
-        if not self.docx or self.is_rendered:
+    def init_docx(self, reload: bool = True):
+        if not self.docx or (self.is_rendered and reload):
             self.docx = Document(self.template_file)
             self.is_rendered = False
 
@@ -755,7 +755,7 @@ class DocxTemplate(object):
         self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env: Optional[Environment] = None) -> Set[str]:
-        self.init_docx()
+        self.init_docx(reload=False)
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         for uri in [self.HEADER_URI, self.FOOTER_URI]:
