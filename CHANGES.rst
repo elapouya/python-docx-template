@@ -1,3 +1,9 @@
+0.16.5 (2023-01-07)
+-------------------
+- PR #467 - thanks to Slarag
+- fix #465
+- fix #464
+
 0.16.4 (2022-08-04)
 -------------------
 - Regional fonts for RichText
@@ -23,9 +29,6 @@
 0.15.2 (2022-01-12)
 -------------------
 - fix #408
-
-0.15.1 (2021-12-20)
--------------------
 - Multi-rendering with same DocxTemplate object is now possible
   see tests/multi_rendering.py
 - fix #392

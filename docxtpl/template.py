@@ -43,8 +43,8 @@ class DocxTemplate(object):
         self.is_rendered = False
         self.is_saved = False
 
-    def init_docx(self):
-        if not self.docx or self.is_rendered:
+    def init_docx(self, reload: bool = True):
+        if not self.docx or (self.is_rendered and reload):
             self.docx = Document(self.template_file)
             self.is_rendered = False
 
@@ -252,6 +252,31 @@ class DocxTemplate(object):
         dst_xml = self.resolve_listing(dst_xml)
         return dst_xml
 
+    def render_properties(self, context: Dict[str, Any], jinja_env: Optional[Environment] = None) -> None:
+        # List of string attributes of docx.opc.coreprops.CoreProperties which are strings.
+        # It seems that some attributes cannot be written as strings. Those are commented out.
+        properties = [
+            'author',
+            # 'category',
+            'comments',
+            # 'content_status',
+            'identifier',
+            # 'keywords',
+            'language',
+            # 'last_modified_by',
+            'subject',
+            'title',
+            # 'version',
+        ]
+        if jinja_env is None:
+            jinja_env = Environment()
+
+        for prop in properties:
+            initial = getattr(self.docx.core_properties, prop)
+            template = jinja_env.from_string(initial)
+            rendered = template.render(context)
+            setattr(self.docx.core_properties, prop, rendered)
+
     def resolve_listing(self, xml):
 
         def resolve_text(run_properties, paragraph_properties, m):
@@ -362,6 +387,8 @@ class DocxTemplate(object):
                                                  jinja_env)
         for relKey, xml in footers:
             self.map_headers_footers_xml(relKey, xml)
+
+        self.render_properties(context, jinja_env)
 
         # set rendered flag
         self.is_rendered = True
@@ -728,7 +755,7 @@ class DocxTemplate(object):
         self.is_saved = True
 
     def get_undeclared_template_variables(self, jinja_env: Optional[Environment] = None) -> Set[str]:
-        self.init_docx()
+        self.init_docx(reload=False)
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         for uri in [self.HEADER_URI, self.FOOTER_URI]:
