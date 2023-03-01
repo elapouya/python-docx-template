@@ -60,7 +60,7 @@ class RichText(object):
         if highlight:
             if highlight[0] == '#':
                 highlight = highlight[1:]
-            prop += u'<w:highlight w:val="%s"/>' % highlight
+            prop += u'<w:shd w:fill="%s"/>' % highlight
         if size:
             prop += u'<w:sz w:val="%s"/>' % size
             prop += u'<w:szCs w:val="%s"/>' % size
