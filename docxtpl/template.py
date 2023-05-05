@@ -294,18 +294,18 @@ class DocxTemplate(object):
         def resolve_run(paragraph_properties, m):
             run_properties = re.search(r'<w:rPr>.*?</w:rPr>', m.group(0))
             run_properties = run_properties.group(0) if run_properties else ''
-            return re.sub(r'<w:t(?:[^>]*)?>.*?</w:t>',
+            return re.sub(r'<w:t(?: [^>]*)?>.*?</w:t>',
                           lambda x: resolve_text(run_properties, paragraph_properties, x), m.group(0),
                           flags=re.DOTALL)
 
         def resolve_paragraph(m):
             paragraph_properties = re.search(r'<w:pPr>.*?</w:pPr>', m.group(0))
             paragraph_properties = paragraph_properties.group(0) if paragraph_properties else ''
-            return re.sub(r'<w:r(?:[^>]*)?>.*?</w:r>',
+            return re.sub(r'<w:r(?: [^>]*)?>.*?</w:r>',
                           lambda x: resolve_run(paragraph_properties, x),
                           m.group(0), flags=re.DOTALL)
 
-        xml = re.sub(r'<w:p(?:[^>]*)?>.*?</w:p>', resolve_paragraph, xml, flags=re.DOTALL)
+        xml = re.sub(r'<w:p(?: [^>]*)?>.*?</w:p>', resolve_paragraph, xml, flags=re.DOTALL)
 
         return xml
 
