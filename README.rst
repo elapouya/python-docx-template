@@ -21,10 +21,6 @@ You save the document as a .docx file (xml format) : it will be your .docx templ
 
 Now you can use python-docx-template to generate as many word documents you want from this .docx template and context variables you will associate.
 
-Share
------
-
-If you like this project, please rate and share it here : http://rate.re/github/elapouya/python-docx-template
 
 Documentation
 -------------
@@ -34,8 +30,9 @@ Please, `read the doc <http://docxtpl.readthedocs.org>`_
 Other projects
 --------------
 
-Have a look at some of my other projects :
+If you like python-docx-template, please have a look at some of my other projects :
 
+- `django-listing <https://github.com/elapouya/django-listing>`_ : A listing/table library on steroid for Djano
 - `python-textops3 <https://github.com/elapouya/python-textops3>`_ : Chainable text operations
 - `django-robohash-svg <https://github.com/elapouya/django-robohash-svg>`_ : Create svg robots avatars
 
