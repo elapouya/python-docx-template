@@ -1,3 +1,7 @@
+0.16.7 (2023-05-08)
+-------------------
+- PR #493 - thanks to AdrianVorobel
+
 0.16.6 (2023-03-12)
 -------------------
 - PR #482 - thanks to dreizehnutters
