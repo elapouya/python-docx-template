@@ -15,7 +15,7 @@ p = sd.add_paragraph('This is a sub-document inserted into a bigger one')
 p = sd.add_paragraph('It has been ')
 p.add_run('dynamically').style = 'dynamic'
 p.add_run(' generated with python by using ')
-p.add_run('python-docx').italic = True
+p.add_run('python-docx-oss').italic = True
 p.add_run(' library')
 
 sd.add_heading('Heading, level 1', level=1)

@@ -1,5 +1,5 @@
 six
-python-docx
+python-docx-oss
 docxcompose
 jinja2
 lxml
