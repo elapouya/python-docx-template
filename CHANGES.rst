@@ -1,8 +1,6 @@
 0.17.0 (2024-05-01)
 -------------------
 - Add support to python-docx 1.1.1
-  Note : docxtpl 0.17.0 requires python-docx 1.1.1+ and
-         is incompatible with previous python-docx versions.
 
 0.16.8 (2024-02-23)
 -------------------
