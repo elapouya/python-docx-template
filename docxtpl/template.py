@@ -321,7 +321,7 @@ class DocxTemplate(object):
         root.replace(body, tree)
 
     def get_headers_footers(self, uri):
-        for relKey, val in self.docx._part._rels.items():
+        for relKey, val in self.docx._part.rels.items():
             if (val.reltype == uri) and (val.target_part.blob):
                 yield relKey, val.target_part
 
@@ -343,11 +343,11 @@ class DocxTemplate(object):
             yield relKey, xml.encode(encoding)
 
     def map_headers_footers_xml(self, relKey, xml):
-        part = self.docx._part._rels[relKey].target_part
+        part = self.docx._part.rels[relKey].target_part
         new_part = XmlPart.load(part.partname, part.content_type, xml, part.package)
         for rId, rel in part.rels.items():
             new_part.load_rel(rel.reltype, rel._target, rel.rId, rel.is_external)
-        self.docx._part._rels[relKey]._target = new_part
+        self.docx._part.rels[relKey]._target = new_part
 
     def render(
         self,
