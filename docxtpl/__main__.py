@@ -41,9 +41,9 @@ def get_args(parser):
     # --help or -h flag raises a SystemExit with code 0.
     except SystemExit as e:
         if e.code == 0:
-            raise SystemExit
+            raise SystemExit from e
         else:
-            raise RuntimeError('Correct usage is:\n{parser.usage}'.format(parser=parser))
+            raise RuntimeError(f'Correct usage is:\n{parser.usage}') from e
 
 
 def is_argument_valid(arg_name, arg_value, overwrite):
@@ -70,8 +70,8 @@ def check_exists_ask_overwrite(arg_value, overwrite):
                 return True
             else:
                 raise OSError
-        except OSError:
-            raise RuntimeError('File %s already exists, please choose a different name.' % arg_value)
+        except OSError as exc:
+            raise RuntimeError('File %s already exists, please choose a different name.' % arg_value) from exc
     else:
         return True
 
@@ -82,12 +82,12 @@ def validate_all_args(parsed_args):
     try:
         for arg_name, arg_value in parsed_args.items():
             if not is_argument_valid(arg_name, arg_value, overwrite):
-                raise AssertionError
-    except AssertionError:
+                raise AssertionError(f'The specified {arg_name} "{arg_value}" is not valid.')
+    except AssertionError as exc:
         raise RuntimeError(
             'The specified {arg_name} "{arg_value}" is not valid.'.format(
                 arg_name=arg_name, arg_value=arg_value
-            ))
+            )) from exc
 
 
 def get_json_data(json_path):
@@ -100,22 +100,22 @@ def get_json_data(json_path):
                 'There was an error on line {e.lineno}, column {e.colno} while trying to parse file {json_path}'.format(
                     e=e, json_path=json_path
                 ))
-            raise RuntimeError('Failed to get json data.')
+            raise RuntimeError('Failed to get json data.') from e
 
 
 def make_docxtemplate(template_path):
     try:
         return DocxTemplate(template_path)
-    except TemplateError:
-        raise RuntimeError('Could not create docx template.')
+    except TemplateError as exc:
+        raise RuntimeError('Could not create docx template.') from exc
 
 
 def render_docx(doc, json_data):
     try:
         doc.render(json_data)
         return doc
-    except TemplateError:
-        raise RuntimeError('An error ocurred while trying to render the docx')
+    except TemplateError as exc:
+        raise RuntimeError('An error ocurred while trying to render the docx') from exc
 
 
 def save_file(doc, parsed_args):
@@ -126,7 +126,7 @@ def save_file(doc, parsed_args):
             print('Document successfully generated and saved at {output_path}'.format(output_path=output_path))
     except OSError as e:
         print('{e.strerror}. Could not save file {e.filename}.'.format(e=e))
-        raise RuntimeError('Failed to save file.')
+        raise RuntimeError('Failed to save file.') from e
 
 
 def main():
