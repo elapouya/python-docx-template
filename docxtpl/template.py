@@ -311,8 +311,9 @@ class DocxTemplate(object):
                 line_number = max(exc.lineno - 4, 0)
                 exc.docx_context = map(
                     lambda x: re.sub(r"<[^>]+>", "", x),
-                    src_xml.splitlines()[line_number : (line_number + 7)],
+                    src_xml.splitlines()[line_number:(line_number + 7)],
                 )
+
             raise exc
         dst_xml = re.sub(r"\n<w:p([ >])", r"<w:p\1", dst_xml)
         dst_xml = (
