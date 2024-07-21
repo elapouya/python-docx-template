@@ -7,11 +7,13 @@ Created : 2021-07-30
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
 
+
 class InlineImage(object):
     """Class to generate an inline image
 
     This is much faster than using Subdoc class.
     """
+
     tpl = None
     image_descriptor = None
     width = None
@@ -25,17 +27,21 @@ class InlineImage(object):
 
     def _add_hyperlink(self, run, url, part):
         # Create a relationship for the hyperlink
-        r_id = part.relate_to(url, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink', is_external=True)
+        r_id = part.relate_to(
+            url,
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+            is_external=True,
+        )
 
         # Find the <wp:docPr> and <pic:cNvPr> element
-        docPr = run.xpath('.//wp:docPr')[0]
-        cNvPr = run.xpath('.//pic:cNvPr')[0]
+        docPr = run.xpath(".//wp:docPr")[0]
+        cNvPr = run.xpath(".//pic:cNvPr")[0]
 
         # Create the <a:hlinkClick> element
-        hlinkClick1 = OxmlElement('a:hlinkClick')
-        hlinkClick1.set(qn('r:id'), r_id)
-        hlinkClick2 = OxmlElement('a:hlinkClick')
-        hlinkClick2.set(qn('r:id'), r_id)
+        hlinkClick1 = OxmlElement("a:hlinkClick")
+        hlinkClick1.set(qn("r:id"), r_id)
+        hlinkClick2 = OxmlElement("a:hlinkClick")
+        hlinkClick2.set(qn("r:id"), r_id)
 
         # Insert the <a:hlinkClick> element right after the <wp:docPr> element
         docPr.append(hlinkClick1)
@@ -51,12 +57,16 @@ class InlineImage(object):
         ).xml
         if self.anchor:
             run = parse_xml(pic)
-            if run.xpath('.//a:blip'):
-                hyperlink = self._add_hyperlink(run, self.anchor, self.tpl.current_rendering_part)
+            if run.xpath(".//a:blip"):
+                hyperlink = self._add_hyperlink(
+                    run, self.anchor, self.tpl.current_rendering_part
+                )
                 pic = hyperlink.xml
 
-        return '</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>' \
-               '<w:t xml:space="preserve">' % pic
+        return (
+            "</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>"
+            '<w:t xml:space="preserve">' % pic
+        )
 
     def __unicode__(self):
         return self._insert_image()

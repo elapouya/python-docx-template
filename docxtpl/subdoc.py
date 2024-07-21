@@ -18,8 +18,8 @@ import re
 
 class SubdocComposer(Composer):
     def attach_parts(self, doc, remove_property_fields=True):
-        """ Attach docx parts instead of appending the whole document
-        thus subdoc insertion can be delegated to jinja2 """
+        """Attach docx parts instead of appending the whole document
+        thus subdoc insertion can be delegated to jinja2"""
         self.reset_reference_mapping()
 
         # Remove custom property fields but keep the values
@@ -51,22 +51,23 @@ class SubdocComposer(Composer):
 
     def add_diagrams(self, doc, element):
         # While waiting docxcompose 1.3.3
-        dgm_rels = xpath(element, './/dgm:relIds[@r:dm]')
+        dgm_rels = xpath(element, ".//dgm:relIds[@r:dm]")
         for dgm_rel in dgm_rels:
             for item, rt_type in (
-                    ('dm', RT.DIAGRAM_DATA),
-                    ('lo', RT.DIAGRAM_LAYOUT),
-                    ('qs', RT.DIAGRAM_QUICK_STYLE),
-                    ('cs', RT.DIAGRAM_COLORS)
+                ("dm", RT.DIAGRAM_DATA),
+                ("lo", RT.DIAGRAM_LAYOUT),
+                ("qs", RT.DIAGRAM_QUICK_STYLE),
+                ("cs", RT.DIAGRAM_COLORS),
             ):
-                dm_rid = dgm_rel.get('{%s}%s' % (NS['r'], item))
+                dm_rid = dgm_rel.get("{%s}%s" % (NS["r"], item))
                 dm_part = doc.part.rels[dm_rid].target_part
                 new_rid = self.doc.part.relate_to(dm_part, rt_type)
-                dgm_rel.set('{%s}%s' % (NS['r'], item), new_rid)
+                dgm_rel.set("{%s}%s" % (NS["r"], item), new_rid)
 
 
 class Subdoc(object):
-    """ Class for subdocument to insert into master document """
+    """Class for subdocument to insert into master document"""
+
     def __init__(self, tpl, docpath=None):
         self.tpl = tpl
         self.docx = tpl.get_docx()
@@ -83,8 +84,13 @@ class Subdoc(object):
     def _get_xml(self):
         if self.subdocx.element.body.sectPr is not None:
             self.subdocx.element.body.remove(self.subdocx.element.body.sectPr)
-        xml = re.sub(r'</?w:body[^>]*>', '', etree.tostring(
-            self.subdocx.element.body, encoding='unicode', pretty_print=False))
+        xml = re.sub(
+            r"</?w:body[^>]*>",
+            "",
+            etree.tostring(
+                self.subdocx.element.body, encoding="unicode", pretty_print=False
+            ),
+        )
         return xml
 
     def __unicode__(self):

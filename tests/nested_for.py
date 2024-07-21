@@ -1,45 +1,45 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Created : 2016-03-26
 
 @author: Eric Lapouyade
-'''
+"""
 
 from docxtpl import DocxTemplate
 
-tpl = DocxTemplate('templates/nested_for_tpl.docx')
+tpl = DocxTemplate("templates/nested_for_tpl.docx")
 
 context = {
-    'dishes': [
-        {'name': 'Pizza', 'ingredients': ['bread', 'tomato', 'ham', 'cheese']},
+    "dishes": [
+        {"name": "Pizza", "ingredients": ["bread", "tomato", "ham", "cheese"]},
         {
-            'name': 'Hamburger',
-            'ingredients': ['bread', 'chopped steak', 'cheese', 'sauce'],
+            "name": "Hamburger",
+            "ingredients": ["bread", "chopped steak", "cheese", "sauce"],
         },
         {
-            'name': 'Apple pie',
-            'ingredients': ['flour', 'apples', 'suggar', 'quince jelly'],
+            "name": "Apple pie",
+            "ingredients": ["flour", "apples", "suggar", "quince jelly"],
         },
     ],
-    'authors': [
+    "authors": [
         {
-            'name': 'Saint-Exupery',
-            'books': [
-                {'title': 'Le petit prince'},
-                {'title': "L'aviateur"},
-                {'title': 'Vol de nuit'},
+            "name": "Saint-Exupery",
+            "books": [
+                {"title": "Le petit prince"},
+                {"title": "L'aviateur"},
+                {"title": "Vol de nuit"},
             ],
         },
         {
-            'name': 'Barjavel',
-            'books': [
-                {'title': 'Ravage'},
-                {'title': "La nuit des temps"},
-                {'title': 'Le grand secret'},
+            "name": "Barjavel",
+            "books": [
+                {"title": "Ravage"},
+                {"title": "La nuit des temps"},
+                {"title": "Le grand secret"},
             ],
         },
     ],
 }
 
 tpl.render(context)
-tpl.save('output/nested_for.docx')
+tpl.save("output/nested_for.docx")

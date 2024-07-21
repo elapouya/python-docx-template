@@ -4,32 +4,41 @@ import os
 
 from .template import DocxTemplate, TemplateError
 
-TEMPLATE_ARG = 'template_path'
-JSON_ARG = 'json_path'
-OUTPUT_ARG = 'output_filename'
-OVERWRITE_ARG = 'overwrite'
-QUIET_ARG = 'quiet'
+TEMPLATE_ARG = "template_path"
+JSON_ARG = "json_path"
+OUTPUT_ARG = "output_filename"
+OVERWRITE_ARG = "overwrite"
+QUIET_ARG = "quiet"
 
 
 def make_arg_parser():
     parser = argparse.ArgumentParser(
-        usage='python -m docxtpl [-h] [-o] [-q] {} {} {}'.format(TEMPLATE_ARG, JSON_ARG, OUTPUT_ARG),
-        description='Make docx file from existing template docx and json data.')
-    parser.add_argument(TEMPLATE_ARG,
-                        type=str,
-                        help='The path to the template docx file.')
-    parser.add_argument(JSON_ARG,
-                        type=str,
-                        help='The path to the json file with the data.')
-    parser.add_argument(OUTPUT_ARG,
-                        type=str,
-                        help='The filename to save the generated docx.')
-    parser.add_argument('-' + OVERWRITE_ARG[0], '--' + OVERWRITE_ARG,
-                        action='store_true',
-                        help='If output file already exists, overwrites without asking for confirmation')
-    parser.add_argument('-' + QUIET_ARG[0], '--' + QUIET_ARG,
-                        action='store_true',
-                        help='Do not display unnecessary messages')
+        usage="python -m docxtpl [-h] [-o] [-q] {} {} {}".format(
+            TEMPLATE_ARG, JSON_ARG, OUTPUT_ARG
+        ),
+        description="Make docx file from existing template docx and json data.",
+    )
+    parser.add_argument(
+        TEMPLATE_ARG, type=str, help="The path to the template docx file."
+    )
+    parser.add_argument(
+        JSON_ARG, type=str, help="The path to the json file with the data."
+    )
+    parser.add_argument(
+        OUTPUT_ARG, type=str, help="The filename to save the generated docx."
+    )
+    parser.add_argument(
+        "-" + OVERWRITE_ARG[0],
+        "--" + OVERWRITE_ARG,
+        action="store_true",
+        help="If output file already exists, overwrites without asking for confirmation",
+    )
+    parser.add_argument(
+        "-" + QUIET_ARG[0],
+        "--" + QUIET_ARG,
+        action="store_true",
+        help="Do not display unnecessary messages",
+    )
     return parser
 
 
@@ -43,18 +52,21 @@ def get_args(parser):
         if e.code == 0:
             raise SystemExit
         else:
-            raise RuntimeError('Correct usage is:\n{parser.usage}'.format(parser=parser))
+            raise RuntimeError(
+                "Correct usage is:\n{parser.usage}".format(parser=parser)
+            )
 
 
 def is_argument_valid(arg_name, arg_value, overwrite):
     # Basic checks for the arguments
     if arg_name == TEMPLATE_ARG:
-        return os.path.isfile(arg_value) and arg_value.endswith('.docx')
+        return os.path.isfile(arg_value) and arg_value.endswith(".docx")
     elif arg_name == JSON_ARG:
-        return os.path.isfile(arg_value) and arg_value.endswith('.json')
+        return os.path.isfile(arg_value) and arg_value.endswith(".json")
     elif arg_name == OUTPUT_ARG:
-        return arg_value.endswith('.docx') and check_exists_ask_overwrite(
-            arg_value, overwrite)
+        return arg_value.endswith(".docx") and check_exists_ask_overwrite(
+            arg_value, overwrite
+        )
     elif arg_name in [OVERWRITE_ARG, QUIET_ARG]:
         return arg_value in [True, False]
 
@@ -65,13 +77,18 @@ def check_exists_ask_overwrite(arg_value, overwrite):
     # confirmed returns True, else raises OSError.
     if os.path.exists(arg_value) and not overwrite:
         try:
-            msg = 'File %s already exists, would you like to overwrite the existing file? (y/n)' % arg_value
-            if input(msg).lower() == 'y':
+            msg = (
+                "File %s already exists, would you like to overwrite the existing file? (y/n)"
+                % arg_value
+            )
+            if input(msg).lower() == "y":
                 return True
             else:
                 raise OSError
         except OSError:
-            raise RuntimeError('File %s already exists, please choose a different name.' % arg_value)
+            raise RuntimeError(
+                "File %s already exists, please choose a different name." % arg_value
+            )
     else:
         return True
 
@@ -87,7 +104,8 @@ def validate_all_args(parsed_args):
         raise RuntimeError(
             'The specified {arg_name} "{arg_value}" is not valid.'.format(
                 arg_name=arg_name, arg_value=arg_value
-            ))
+            )
+        )
 
 
 def get_json_data(json_path):
@@ -97,17 +115,18 @@ def get_json_data(json_path):
             return json_data
         except json.JSONDecodeError as e:
             print(
-                'There was an error on line {e.lineno}, column {e.colno} while trying to parse file {json_path}'.format(
+                "There was an error on line {e.lineno}, column {e.colno} while trying to parse file {json_path}".format(
                     e=e, json_path=json_path
-                ))
-            raise RuntimeError('Failed to get json data.')
+                )
+            )
+            raise RuntimeError("Failed to get json data.")
 
 
 def make_docxtemplate(template_path):
     try:
         return DocxTemplate(template_path)
     except TemplateError:
-        raise RuntimeError('Could not create docx template.')
+        raise RuntimeError("Could not create docx template.")
 
 
 def render_docx(doc, json_data):
@@ -115,7 +134,7 @@ def render_docx(doc, json_data):
         doc.render(json_data)
         return doc
     except TemplateError:
-        raise RuntimeError('An error ocurred while trying to render the docx')
+        raise RuntimeError("An error ocurred while trying to render the docx")
 
 
 def save_file(doc, parsed_args):
@@ -123,10 +142,14 @@ def save_file(doc, parsed_args):
         output_path = parsed_args[OUTPUT_ARG]
         doc.save(output_path)
         if not parsed_args[QUIET_ARG]:
-            print('Document successfully generated and saved at {output_path}'.format(output_path=output_path))
+            print(
+                "Document successfully generated and saved at {output_path}".format(
+                    output_path=output_path
+                )
+            )
     except OSError as e:
-        print('{e.strerror}. Could not save file {e.filename}.'.format(e=e))
-        raise RuntimeError('Failed to save file.')
+        print("{e.strerror}. Could not save file {e.filename}.".format(e=e))
+        raise RuntimeError("Failed to save file.")
 
 
 def main():
@@ -142,12 +165,12 @@ def main():
         doc = render_docx(doc, json_data)
         save_file(doc, parsed_args)
     except RuntimeError as e:
-        print('Error: '+e.__str__())
+        print("Error: " + e.__str__())
         return
     finally:
         if not parsed_args[QUIET_ARG]:
-            print('Exiting program!')
+            print("Exiting program!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

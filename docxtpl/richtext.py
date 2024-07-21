@@ -5,6 +5,7 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 import six
+
 try:
     from html import escape
 except ImportError:
@@ -13,29 +14,33 @@ except ImportError:
 
 
 class RichText(object):
-    """ class to generate Rich Text when using templates variables
+    """class to generate Rich Text when using templates variables
 
     This is much faster than using Subdoc class,
     but this only for texts INSIDE an existing paragraph.
     """
+
     def __init__(self, text=None, **text_prop):
-        self.xml = ''
+        self.xml = ""
         if text:
             self.add(text, **text_prop)
 
-    def add(self, text,
-            style=None,
-            color=None,
-            highlight=None,
-            size=None,
-            subscript=None,
-            superscript=None,
-            bold=False,
-            italic=False,
-            underline=False,
-            strike=False,
-            font=None,
-            url_id=None):
+    def add(
+        self,
+        text,
+        style=None,
+        color=None,
+        highlight=None,
+        size=None,
+        subscript=None,
+        superscript=None,
+        bold=False,
+        italic=False,
+        underline=False,
+        strike=False,
+        font=None,
+        url_id=None,
+    ):
 
         # If a RichText is added
         if isinstance(text, RichText):
@@ -46,55 +51,65 @@ class RichText(object):
         if not isinstance(text, (six.text_type, six.binary_type)):
             text = six.text_type(text)
         if not isinstance(text, six.text_type):
-            text = text.decode('utf-8', errors='ignore')
+            text = text.decode("utf-8", errors="ignore")
         text = escape(text)
 
-        prop = u''
+        prop = ""
 
         if style:
-            prop += u'<w:rStyle w:val="%s"/>' % style
+            prop += '<w:rStyle w:val="%s"/>' % style
         if color:
-            if color[0] == '#':
+            if color[0] == "#":
                 color = color[1:]
-            prop += u'<w:color w:val="%s"/>' % color
+            prop += '<w:color w:val="%s"/>' % color
         if highlight:
-            if highlight[0] == '#':
+            if highlight[0] == "#":
                 highlight = highlight[1:]
-            prop += u'<w:shd w:fill="%s"/>' % highlight
+            prop += '<w:shd w:fill="%s"/>' % highlight
         if size:
-            prop += u'<w:sz w:val="%s"/>' % size
-            prop += u'<w:szCs w:val="%s"/>' % size
+            prop += '<w:sz w:val="%s"/>' % size
+            prop += '<w:szCs w:val="%s"/>' % size
         if subscript:
-            prop += u'<w:vertAlign w:val="subscript"/>'
+            prop += '<w:vertAlign w:val="subscript"/>'
         if superscript:
-            prop += u'<w:vertAlign w:val="superscript"/>'
+            prop += '<w:vertAlign w:val="superscript"/>'
         if bold:
-            prop += u'<w:b/>'
+            prop += "<w:b/>"
         if italic:
-            prop += u'<w:i/>'
+            prop += "<w:i/>"
         if underline:
-            if underline not in ['single', 'double', 'thick', 'dotted', 'dash', 'dotDash', 'dotDotDash', 'wave']:
-                underline = 'single'
-            prop += u'<w:u w:val="%s"/>' % underline
+            if underline not in [
+                "single",
+                "double",
+                "thick",
+                "dotted",
+                "dash",
+                "dotDash",
+                "dotDotDash",
+                "wave",
+            ]:
+                underline = "single"
+            prop += '<w:u w:val="%s"/>' % underline
         if strike:
-            prop += u'<w:strike/>'
+            prop += "<w:strike/>"
         if font:
-            regional_font = u''
-            if ':' in font:
-                region, font = font.split(':', 1)
-                regional_font = u' w:{region}="{font}"'.format(font=font, region=region)
-            prop += (
-                u'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'
-                .format(font=font, regional_font=regional_font)
+            regional_font = ""
+            if ":" in font:
+                region, font = font.split(":", 1)
+                regional_font = ' w:{region}="{font}"'.format(font=font, region=region)
+            prop += '<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'.format(
+                font=font, regional_font=regional_font
             )
 
-        xml = u'<w:r>'
+        xml = "<w:r>"
         if prop:
-            xml += u'<w:rPr>%s</w:rPr>' % prop
-        xml += u'<w:t xml:space="preserve">%s</w:t></w:r>' % text
+            xml += "<w:rPr>%s</w:rPr>" % prop
+        xml += '<w:t xml:space="preserve">%s</w:t></w:r>' % text
         if url_id:
-            xml = (u'<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>'
-                   % (url_id, xml))
+            xml = '<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>' % (
+                url_id,
+                xml,
+            )
         self.xml += xml
 
     def __unicode__(self):
