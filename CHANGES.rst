@@ -1,3 +1,11 @@
+0.18.0 (2024-07-21)
+-------------------
+- IMPORTANT : Remove Python 2.x support
+- Add hyperlink option in InlineImage (thanks to Jean Marcos da Rosa)
+- Update index.rst (Thanks to jkpet)
+- Add poetry env
+- Black all files
+
 0.17.0 (2024-05-01)
 -------------------
 - Add support to python-docx 1.1.1
