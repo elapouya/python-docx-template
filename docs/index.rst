@@ -288,6 +288,16 @@ calling method `new_subdoc()` ::
    tpl = DocxTemplate('templates/merge_docx_master_tpl.docx')
    sd = tpl.new_subdoc('templates/merge_docx_subdoc.docx')
 
+   context = {
+       'mysubdoc': sd,
+   }
+
+   tpl.render(context)
+   tpl.save('output/merge_docx.docx')
+
+In the above example, the content of 'templates/merge_docx_subdoc.docx' will be inserted into the parent document in place of the declared
+variable `{{ mysubdoc }}`.
+
 See `tests/merge_docx.py` for full code.
 
 .. _Escaping:
