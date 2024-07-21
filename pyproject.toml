@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "docxtpl"
+version = "0.17.0"
+description = "Python docx template engine"
+authors = ["Eric Lapouyade"]
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+six = "^1.16.0"
+python-docx = "^1.1.2"
+docxcompose = "^1.4.0"
+jinja2 = "^3.1.4"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
