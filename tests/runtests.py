@@ -1,6 +1,5 @@
 import subprocess
 import glob
-import six
 import os
 
 tests = sorted(glob.glob("[A-Za-z]*.py"))
@@ -12,7 +11,7 @@ if not os.path.exists(output_dir):
 
 for test in tests:
     if test not in excludes:
-        six.print_("%s ..." % test)
+        print("%s ..." % test)
         subprocess.call(["python", "./%s" % test])
 
-six.print_("Done.")
+print("Done.")

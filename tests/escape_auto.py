@@ -5,8 +5,6 @@
 import os
 from unicodedata import name
 
-from six import iteritems, text_type
-
 from docxtpl import DocxTemplate
 
 
@@ -15,10 +13,10 @@ XML_RESERVED = """<"&'>"""
 tpl = DocxTemplate("templates/escape_tpl_auto.docx")
 
 context = {
-    "nested_dict": {name(text_type(c)): c for c in XML_RESERVED},
+    "nested_dict": {name(str(c)): c for c in XML_RESERVED},
     "autoescape": 'Escaped "str & ing"!',
     "autoescape_unicode": "This is an escaped <unicode> example \u4f60 & \u6211",
-    "iteritems": iteritems,
+    "iteritems": lambda x: x.items(),
 }
 
 tpl.render(context, autoescape=True)

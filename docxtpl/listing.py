@@ -4,8 +4,6 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-import six
-
 try:
     from html import escape
 except ImportError:
@@ -23,8 +21,8 @@ class Listing(object):
 
     def __init__(self, text):
         # If not a string : cast to string (ex: int, dict etc...)
-        if not isinstance(text, (six.text_type, six.binary_type)):
-            text = six.text_type(text)
+        if not isinstance(text, (str, bytes)):
+            text = str(text)
         self.xml = escape(text)
 
     def __unicode__(self):

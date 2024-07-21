@@ -25,7 +25,6 @@ except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape  # noqa: F401
 import re
-import six
 import binascii
 import os
 import zipfile
@@ -771,7 +770,7 @@ class DocxTemplate(object):
         self._replace_docx_part_pics(part, replaced_pics)
 
         # Header/Footer
-        for relid, rel in six.iteritems(part.rels):
+        for relid, rel in part.rels.items():
             if rel.reltype in (REL_TYPE.HEADER, REL_TYPE.FOOTER):
                 self._replace_docx_part_pics(rel.target_part, replaced_pics)
 
@@ -832,7 +831,7 @@ class DocxTemplate(object):
                 )
 
                 # replace data
-                for img_id, img_data in six.iteritems(self.pics_to_replace):
+                for img_id, img_data in self.pics_to_replace.items():
                     if img_id == filename or img_id == title or img_id == description:
                         part_map[filename][1]._blob = img_data
                         replaced_pics[img_id] = True

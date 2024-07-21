@@ -4,8 +4,6 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-import six
-
 try:
     from html import escape
 except ImportError:
@@ -48,9 +46,9 @@ class RichText(object):
             return
 
         # If not a string : cast to string (ex: int, dict etc...)
-        if not isinstance(text, (six.text_type, six.binary_type)):
-            text = six.text_type(text)
-        if not isinstance(text, six.text_type):
+        if not isinstance(text, (str, bytes)):
+            text = str(text)
+        if not isinstance(text, str):
             text = text.decode("utf-8", errors="ignore")
         text = escape(text)
 
