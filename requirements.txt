@@ -1,4 +1,3 @@
-six
 python-docx
 docxcompose
 jinja2
