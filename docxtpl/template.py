@@ -357,16 +357,13 @@ class DocxTemplate(object):
         if jinja_env is None:
             jinja_env = Environment()
 
-        for k, v in self.docx.sections[0].part.related_parts.items():
-            if v.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
-                from lxml import etree as ET
-                tree = ET.fromstring(v.blob)
+        for part in self.docx.sections[0].part.package.parts:
+            if part.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
+                tree = etree.fromstring(part.blob)
                 for footnote in tree.findall('.//w:t', docx.oxml.ns.nsmap):
                     if hasattr(footnote, 'text'):
                         footnote.text = jinja_env.from_string(footnote.text).render(context)
-                for part in self.docx.sections[0].part.related_parts[k].package.parts:
-                    if part.partname == v.partname:
-                        part._blob = ET.tostring(tree, encoding='unicode').encode('utf8')
+                part._blob = etree.tostring(tree)
 
     def resolve_listing(self, xml):
 
