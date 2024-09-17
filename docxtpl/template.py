@@ -359,7 +359,7 @@ class DocxTemplate(object):
 
         for k, v in self.docx.sections[0].part.related_parts.items():
             if v.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
-                import xml.etree.ElementTree as ET
+                from lxml import etree as ET
                 tree = ET.fromstring(v.blob)
                 for footnote in tree.findall('.//w:t', docx.oxml.ns.nsmap):
                     if hasattr(footnote, 'text'):
