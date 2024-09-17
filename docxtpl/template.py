@@ -350,6 +350,23 @@ class DocxTemplate(object):
             template = jinja_env.from_string(initial)
             rendered = template.render(context)
             setattr(self.docx.core_properties, prop, rendered)
+    
+    def render_footnotes(
+            self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+   ) -> None:
+        if jinja_env is None:
+            jinja_env = Environment()
+
+        for k, v in self.docx.sections[0].part.related_parts.items():
+            if v.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
+                import xml.etree.ElementTree as ET
+                tree = ET.fromstring(v.blob)
+                for footnote in tree.findall('.//w:t', docx.oxml.ns.nsmap):
+                    if hasattr(footnote, 'text'):
+                        footnote.text = jinja_env.from_string(footnote.text).render(context)
+                for part in self.docx.sections[0].part.related_parts[k].package.parts:
+                    if part.partname == v.partname:
+                        part._blob = ET.tostring(tree, encoding='unicode').encode('utf8')
 
     def resolve_listing(self, xml):
 
@@ -482,6 +499,8 @@ class DocxTemplate(object):
             self.map_headers_footers_xml(relKey, xml)
 
         self.render_properties(context, jinja_env)
+
+        self.render_footnotes(context, jinja_env)
 
         # set rendered flag
         self.is_rendered = True
