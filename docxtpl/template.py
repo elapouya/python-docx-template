@@ -350,10 +350,10 @@ class DocxTemplate(object):
             template = jinja_env.from_string(initial)
             rendered = template.render(context)
             setattr(self.docx.core_properties, prop, rendered)
-    
+
     def render_footnotes(
             self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
-   ) -> None:
+    ) -> None:
         if jinja_env is None:
             jinja_env = Environment()
 
