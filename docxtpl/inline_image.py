@@ -61,7 +61,7 @@ class InlineImage(object):
             self.width,
             self.height,
         )
-        if self.spacing_left or self.spacing_right or self.spacing_top or self.spacing_bottom:
+        if self.spacing_left is not None or self.spacing_right is not None or self.spacing_top is not None or self.spacing_bottom is not None:
             if self.spacing_top:
                 pic.set('distT', str(self.spacing_top))
             if self.spacing_bottom:
