@@ -4,7 +4,7 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-from docx.oxml import OxmlElement, parse_xml
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 
@@ -29,7 +29,6 @@ class InlineImage(object):
         self.width, self.height = width, height
         self.anchor = anchor
         self.spacing_left, self.spacing_right, self.spacing_top, self.spacing_bottom = spacing_left, spacing_right, spacing_top, spacing_bottom
-
 
     def _add_hyperlink(self, run, url, part):
         # Create a relationship for the hyperlink
