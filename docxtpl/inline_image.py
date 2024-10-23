@@ -24,11 +24,15 @@ class InlineImage(object):
     spacing_top = None
     spacing_bottom = None
 
-    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None, spacing_left=None, spacing_right=None, spacing_top=None, spacing_bottom=None):
+    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None, 
+                 spacing_left=None, spacing_right=None, spacing_top=None, spacing_bottom=None):
         self.tpl, self.image_descriptor = tpl, image_descriptor
         self.width, self.height = width, height
         self.anchor = anchor
-        self.spacing_left, self.spacing_right, self.spacing_top, self.spacing_bottom = spacing_left, spacing_right, spacing_top, spacing_bottom
+        self.spacing_left = spacing_left
+        self.spacing_right = spacing_right
+        self.spacing_top = spacing_top
+        self.spacing_bottom = spacing_bottom
 
     def _add_hyperlink(self, run, url, part):
         # Create a relationship for the hyperlink
