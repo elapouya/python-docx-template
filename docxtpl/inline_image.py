@@ -19,11 +19,17 @@ class InlineImage(object):
     width = None
     height = None
     anchor = None
+    spacing_left = None
+    spacing_right = None
+    spacing_top = None
+    spacing_bottom = None
 
-    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None):
+    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None, spacing_left=None, spacing_right=None, spacing_top=None, spacing_bottom=None):
         self.tpl, self.image_descriptor = tpl, image_descriptor
         self.width, self.height = width, height
         self.anchor = anchor
+        self.spacing_left, self.spacing_right, self.spacing_top, self.spacing_bottom = spacing_left, spacing_right, spacing_top, spacing_bottom
+
 
     def _add_hyperlink(self, run, url, part):
         # Create a relationship for the hyperlink
@@ -54,18 +60,25 @@ class InlineImage(object):
             self.image_descriptor,
             self.width,
             self.height,
-        ).xml
+        )
+        if self.spacing_left or self.spacing_right or self.spacing_top or self.spacing_bottom:
+            if self.spacing_top:
+                pic.set('distT', str(self.spacing_top))
+            if self.spacing_bottom:
+                pic.set('distB', str(self.spacing_bottom))
+            if self.spacing_left:
+                pic.set('distL', str(self.spacing_left))
+            if self.spacing_right:
+                pic.set('distR', str(self.spacing_right))
         if self.anchor:
-            run = parse_xml(pic)
-            if run.xpath(".//a:blip"):
+            if pic.xpath(".//a:blip"):
                 hyperlink = self._add_hyperlink(
-                    run, self.anchor, self.tpl.current_rendering_part
+                    pic, self.anchor, self.tpl.current_rendering_part
                 )
-                pic = hyperlink.xml
-
+                pic = hyperlink
         return (
             "</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>"
-            '<w:t xml:space="preserve">' % pic
+            '<w:t xml:space="preserve">' % pic.xml
         )
 
     def __unicode__(self):
