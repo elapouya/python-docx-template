@@ -62,13 +62,13 @@ class InlineImage(object):
             self.height,
         )
         if self.spacing_left is not None or self.spacing_right is not None or self.spacing_top is not None or self.spacing_bottom is not None:
-            if self.spacing_top:
+            if self.spacing_top is not None:
                 pic.set('distT', str(self.spacing_top))
-            if self.spacing_bottom:
+            if self.spacing_bottom is not None:
                 pic.set('distB', str(self.spacing_bottom))
-            if self.spacing_left:
+            if self.spacing_left is not None:
                 pic.set('distL', str(self.spacing_left))
-            if self.spacing_right:
+            if self.spacing_right is not None:
                 pic.set('distR', str(self.spacing_right))
         if self.anchor:
             if pic.xpath(".//a:blip"):
