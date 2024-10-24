@@ -360,7 +360,7 @@ class DocxTemplate(object):
         for section in self.docx.sections:
             for part in section.part.package.parts:
                 if part.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
-                    xml = self.patch_xml(part.blob.decode('utf8'))
+                    xml = self.patch_xml(part.blob.decode('utf-8') if type(part.blob) is bytes else part.blob)
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml
 
