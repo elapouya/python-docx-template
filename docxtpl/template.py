@@ -351,6 +351,19 @@ class DocxTemplate(object):
             rendered = template.render(context)
             setattr(self.docx.core_properties, prop, rendered)
 
+    def render_footnotes(
+            self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+    ) -> None:
+        if jinja_env is None:
+            jinja_env = Environment()
+
+        for section in self.docx.sections:
+            for part in section.part.package.parts:
+                if part.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
+                    xml = self.patch_xml(part.blob.decode('utf-8') if isinstance(part.blob, bytes) else part.blob)
+                    xml = self.render_xml_part(xml, part, context, jinja_env)
+                    part._blob = xml
+
     def resolve_listing(self, xml):
 
         def resolve_text(run_properties, paragraph_properties, m):
@@ -482,6 +495,8 @@ class DocxTemplate(object):
             self.map_headers_footers_xml(relKey, xml)
 
         self.render_properties(context, jinja_env)
+
+        self.render_footnotes(context, jinja_env)
 
         # set rendered flag
         self.is_rendered = True
