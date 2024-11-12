@@ -210,7 +210,8 @@ class DocxTemplate(object):
             return re.sub(
                 r"(</w:tcPr[ >].*?<w:t(?:.*?)>)(.*?)(?:{%\s*vm\s*%})(.*?)(</w:t>)",
                 v_merge,
-                m.group(),  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% vm %}`` inside.
+                m.group(),
+                # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% vm %}`` inside.
                 flags=re.DOTALL,
             )
 
@@ -310,7 +311,7 @@ class DocxTemplate(object):
                 line_number = max(exc.lineno - 4, 0)
                 exc.docx_context = map(
                     lambda x: re.sub(r"<[^>]+>", "", x),
-                    src_xml.splitlines()[line_number:(line_number + 7)],
+                    src_xml.splitlines()[line_number : (line_number + 7)],
                 )
 
             raise exc
@@ -352,15 +353,22 @@ class DocxTemplate(object):
             setattr(self.docx.core_properties, prop, rendered)
 
     def render_footnotes(
-            self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
     ) -> None:
         if jinja_env is None:
             jinja_env = Environment()
 
         for section in self.docx.sections:
             for part in section.part.package.parts:
-                if part.content_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml':
-                    xml = self.patch_xml(part.blob.decode('utf-8') if isinstance(part.blob, bytes) else part.blob)
+                if part.content_type == (
+                    "application/vnd.openxmlformats-officedocument"
+                    ".wordprocessingml.footnotes+xml"
+                ):
+                    xml = self.patch_xml(
+                        part.blob.decode("utf-8")
+                        if isinstance(part.blob, bytes)
+                        else part.blob
+                    )
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml
 

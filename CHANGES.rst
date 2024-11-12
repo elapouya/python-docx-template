@@ -1,7 +1,11 @@
+0.19.0 (2024-11-12)
+-------------------
+- Support rendering variables in footnotes (Thanks to Bart Broere)
+
 0.18.0 (2024-07-21)
 -------------------
 - IMPORTANT : Remove Python 2.x support
-- Add hyperlink option in InlineImage (thanks to Jean Marcos da Rosa)
+- Add hyperlink option in InlineImage (Thanks to Jean Marcos da Rosa)
 - Update index.rst (Thanks to jkpet)
 - Add poetry env
 - Black all files
