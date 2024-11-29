@@ -370,7 +370,7 @@ class DocxTemplate(object):
                         else part.blob
                     )
                     xml = self.render_xml_part(xml, part, context, jinja_env)
-                    part._blob = xml
+                    part._blob = xml.encode("utf-8")
 
     def resolve_listing(self, xml):
 
