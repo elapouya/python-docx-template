@@ -1,3 +1,7 @@
+0.19.1 (2024-12-29)
+-------------------
+- PR #575 : fix unicode in footnotes (Thanks to Jonathan Pyle)
+
 0.19.0 (2024-11-12)
 -------------------
 - Support rendering variables in footnotes (Thanks to Bart Broere)
