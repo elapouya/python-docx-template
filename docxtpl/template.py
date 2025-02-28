@@ -160,7 +160,7 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
         src_xml = re.sub(
-            r"({{r\s.*?}}|{%r\s.*?%})",
+            r"({{r.\s.*?}}|{%r.\s.*?%})",
             r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
             src_xml,
             flags=re.DOTALL,
@@ -173,13 +173,25 @@ class DocxTemplate(object):
             r"-%}(?:(?!<w:t[ >]|{%|{{).)*?<w:t[^>]*?>", "%}", src_xml, flags=re.DOTALL
         )
 
-        for y in ["tr", "tc", "p", "r"]:
+        for y in ["tr", "tc", "p"]:
             # replace into xml code the row/paragraph/run containing
             # {%y xxx %} or {{y xxx}} template tag
             # by {% xxx %} or {{ xx }} without any surrounding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = (
                 r"<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>"
+                % {"y": y}
+            )
+            src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
+        
+        for y in ["p", "r"]: 
+            # replace into xml paragraph or run containing
+            # {%rp xxx %} or {{rp xxx}} template tag
+            # by {% xxx %} or {{ xx }} without any surrounding <w:p> tags
+            # This allow for inline {rr <var> }} and paragraph {rp <var> }) styling
+            # This is mandatory to have jinja2 generating correct xml code
+            pat = (
+                r"<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)r%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>"
                 % {"y": y}
             )
             src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
