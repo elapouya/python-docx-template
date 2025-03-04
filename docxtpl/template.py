@@ -310,51 +310,40 @@ class DocxTemplate(object):
     def is_paragraph(self, fragment: str) -> bool:
         """Determines whether the fragment is a <w:p>...</w:p> paragraph."""
         return bool(re.match(r'^<w:p\b.*?</w:p>$', fragment, flags=re.DOTALL))
+    
+    def paragraph_contains_syntax_s(self, paragraph: str) -> bool:
+        return bool(re.search(r'{{s\s+[^}]+}}', paragraph))
 
-    def paragraph_contains_subdoc(self, para: str) -> bool:
-        """Indicates if the paragraph contains the *_subdoc variable."""
-        return bool(re.search(r'{{[^{}]*_subdoc\s*}}', para))
-
-    def extract_subdoc_variable(self, para: str) -> str:
-        """
-        Returns the variable {{ something_subdoc }} (the first one that appears)
-        or an empty string if not found.
-        """
-        m = re.search(r'({{[^{}]*_subdoc\s*}})', para)
+    def extract_syntax_s_variable(self, paragraph: str) -> str:
+        m = re.search(r'{{s\s+([^}]+)\s*}}', paragraph)
         return m.group(1) if m else ''
 
+
     def process_fragment(self, fragment: str) -> str:
-        """
-        If 'fragment' is a <w:p> containing *_subdoc, completely replace it with
-        the variable (omitting <w:p>).
-        Otherwise, leave it as is.
-        """
-        if self.is_paragraph(fragment) and self.paragraph_contains_subdoc(fragment):
-            # Extract the variable, e.g. {{ measure.description_subdoc }}
-            subdoc_var = self.extract_subdoc_variable(fragment)
-            # Replace the entire <w:p> with only the variable
-            return subdoc_var  # no <w:p> wrapper
+        if self.is_paragraph(fragment) and self.paragraph_contains_syntax_s(fragment):
+
+            var_inside = self.extract_syntax_s_variable(fragment)
+
+            replaced_var = f"{{{{ {var_inside} }}}}"
+
+            return replaced_var  
         else:
             return fragment
 
-    def clean_template_xml_for_subdocs(self, xml: str) -> str:
-        """
-        1) Split into <w:p> fragments and text outside <w:p>.
-        2) Replace the paragraph containing *_subdoc with only the variable.
-        3) Reassemble, effectively removing the parent <w:p> and leaving
-        the subdoc “floating”.
-        """
+
+    def clean_template_xml_for_special_syntax(self, xml: str) -> str:
+
         fragments = self.split_paragraphs(xml)
         new_fragments = [self.process_fragment(frag) for frag in fragments]
         final_xml = "".join(new_fragments)
-
         return final_xml
+
 
     def render_xml_part(self, src_xml, part, context, jinja_env=None):
         src_xml = re.sub(r"<w:p([ >])", r"\n<w:p\1", src_xml)
 
         # Clean the XML template BEFORE passing it to Jinja2
-        src_xml = self.clean_template_xml_for_subdocs(src_xml)
+        src_xml = self.clean_template_xml_for_special_syntax(src_xml)
 
         try:
             self.current_rendering_part = part
