@@ -18,6 +18,7 @@ import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
+import re
 
 try:
     from html import escape  # noqa: F401
@@ -297,8 +298,64 @@ class DocxTemplate(object):
 
         return src_xml
 
+    def split_paragraphs(self, xml: str) -> list[str]:
+        """
+        Splits the XML into an interleaved list:
+        [ fragment_outside_paragraph, <w:p>...</w:p>, fragment_outside_paragraph, <w:p>...</w:p>, ... ].
+        """
+        # Pattern to capture entire paragraphs
+        pattern = r'(<w:p\b.*?</w:p>)'
+        return re.split(pattern, xml, flags=re.DOTALL)
+
+    def is_paragraph(self, fragment: str) -> bool:
+        """Determines whether the fragment is a <w:p>...</w:p> paragraph."""
+        return bool(re.match(r'^<w:p\b.*?</w:p>$', fragment, flags=re.DOTALL))
+
+    def paragraph_contains_subdoc(self, para: str) -> bool:
+        """Indicates if the paragraph contains the *_subdoc variable."""
+        return bool(re.search(r'{{[^{}]*_subdoc\s*}}', para))
+
+    def extract_subdoc_variable(self, para: str) -> str:
+        """
+        Returns the variable {{ something_subdoc }} (the first one that appears)
+        or an empty string if not found.
+        """
+        m = re.search(r'({{[^{}]*_subdoc\s*}})', para)
+        return m.group(1) if m else ''
+
+    def process_fragment(self, fragment: str) -> str:
+        """
+        If 'fragment' is a <w:p> containing *_subdoc, completely replace it with
+        the variable (omitting <w:p>).
+        Otherwise, leave it as is.
+        """
+        if self.is_paragraph(fragment) and self.paragraph_contains_subdoc(fragment):
+            # Extract the variable, e.g. {{ measure.description_subdoc }}
+            subdoc_var = self.extract_subdoc_variable(fragment)
+            # Replace the entire <w:p> with only the variable
+            return subdoc_var  # no <w:p> wrapper
+        else:
+            return fragment
+
+    def clean_template_xml_for_subdocs(self, xml: str) -> str:
+        """
+        1) Split into <w:p> fragments and text outside <w:p>.
+        2) Replace the paragraph containing *_subdoc with only the variable.
+        3) Reassemble, effectively removing the parent <w:p> and leaving
+        the subdoc “floating”.
+        """
+        fragments = self.split_paragraphs(xml)
+        new_fragments = [self.process_fragment(frag) for frag in fragments]
+        final_xml = "".join(new_fragments)
+
+        return final_xml
+
     def render_xml_part(self, src_xml, part, context, jinja_env=None):
         src_xml = re.sub(r"<w:p([ >])", r"\n<w:p\1", src_xml)
+
+        # Clean the XML template BEFORE passing it to Jinja2
+        src_xml = self.clean_template_xml_for_subdocs(src_xml)
+
         try:
             self.current_rendering_part = part
             if jinja_env:
@@ -306,16 +363,18 @@ class DocxTemplate(object):
             else:
                 template = Template(src_xml)
             dst_xml = template.render(context)
+
         except TemplateError as exc:
             if hasattr(exc, "lineno") and exc.lineno is not None:
                 line_number = max(exc.lineno - 4, 0)
                 exc.docx_context = map(
                     lambda x: re.sub(r"<[^>]+>", "", x),
-                    src_xml.splitlines()[line_number: (line_number + 7)],  # fmt: skip
+                    src_xml.splitlines()[line_number : (line_number + 7)],  # fmt: skip
                 )
-
             raise exc
         dst_xml = re.sub(r"\n<w:p([ >])", r"<w:p\1", dst_xml)
+
+        # Adjust placeholders
         dst_xml = (
             dst_xml.replace("{_{", "{{")
             .replace("}_}", "}}")
@@ -323,7 +382,9 @@ class DocxTemplate(object):
             .replace("%_}", "%}")
         )
         dst_xml = self.resolve_listing(dst_xml)
+
         return dst_xml
+
 
     def render_properties(
         self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
