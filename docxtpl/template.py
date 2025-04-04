@@ -46,6 +46,7 @@ class DocxTemplate(object):
         self.docx = None
         self.is_rendered = False
         self.is_saved = False
+        self.allow_missing_pics = False
 
     def init_docx(self, reload: bool = True):
         if not self.docx or (self.is_rendered and reload):
@@ -797,10 +798,11 @@ class DocxTemplate(object):
             if rel.reltype in (REL_TYPE.HEADER, REL_TYPE.FOOTER):
                 self._replace_docx_part_pics(rel.target_part, replaced_pics)
 
-        # make sure all template images defined by user were replaced
-        for img_id, replaced in replaced_pics.items():
-            if not replaced:
-                raise ValueError("Picture %s not found in the docx template" % img_id)
+        if not self.allow_missing_pics:
+            # make sure all template images defined by user were replaced
+            for img_id, replaced in replaced_pics.items():
+                if not replaced:
+                    raise ValueError("Picture %s not found in the docx template" % img_id)
 
     def get_pic_map(self):
         return self.pic_map
