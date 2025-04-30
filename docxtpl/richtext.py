@@ -20,7 +20,7 @@ class RichText(object):
 
     def __init__(self, text=None, **text_prop):
         self.xml = ""
-        if text:
+        if text is None:
             self.add(text, **text_prop)
 
     def add(
