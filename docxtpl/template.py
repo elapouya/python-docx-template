@@ -160,7 +160,7 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
         src_xml = re.sub(
-            r"({{r.\s.*?}}|{%r.\s.*?%})",
+            r"({{[rq]\s.*?}}|{%[rq].\s.*?%})",
             r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
             src_xml,
             flags=re.DOTALL,
@@ -173,7 +173,7 @@ class DocxTemplate(object):
             r"-%}(?:(?!<w:t[ >]|{%|{{).)*?<w:t[^>]*?>", "%}", src_xml, flags=re.DOTALL
         )
 
-        for y in ["tr", "tc", "p"]:
+        for y in ["tr", "tc", "p", "r"]:
             # replace into xml code the row/paragraph/run containing
             # {%y xxx %} or {{y xxx}} template tag
             # by {% xxx %} or {{ xx }} without any surrounding <w:y> tags :
@@ -184,17 +184,17 @@ class DocxTemplate(object):
             )
             src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
         
-        for y in ["p", "r"]: 
-            # replace into xml paragraph or run containing
-            # {%rp xxx %} or {{rp xxx}} template tag
-            # by {% xxx %} or {{ xx }} without any surrounding <w:p> tags
-            # This allow for inline {rr <var> }} and paragraph {rp <var> }) styling
-            # This is mandatory to have jinja2 generating correct xml code
-            pat = (
-                r"<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)r%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>"
-                % {"y": y}
-            )
-            src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
+        # For paragraph level richtext
+        # replace into xml paragraph containing 
+        # {%q xxx %} or {{q xxx}} template tag
+        # by {% xxx %} or {{ xx }} without any surrounding <w:p> tags
+        # This allow for inline {r <var> }} and paragraph {q <var> }) styling
+        # This is mandatory to have jinja2 generating correct xml code
+        pat = (
+            r"<w:p[ >](?:(?!<w:p[ >]).)*({%%|{{)q ([^}%%]*(?:%%}|}})).*?</w:p>"
+            
+        )
+        src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
 
         for y in ["tr", "tc", "p"]:
             # same thing, but for {#y xxx #} (but not where y == 'r', since that
