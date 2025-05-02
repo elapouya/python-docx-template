@@ -38,6 +38,8 @@ class RichText(object):
         strike=False,
         font=None,
         url_id=None,
+        rtl=False,
+        lang=None,
     ):
 
         # If a RichText is added
@@ -73,8 +75,12 @@ class RichText(object):
             prop += '<w:vertAlign w:val="superscript"/>'
         if bold:
             prop += "<w:b/>"
+            if rtl:
+                prop += '<w:bCs/>'
         if italic:
             prop += "<w:i/>"
+            if rtl:
+                prop += '<w:iCs/>'
         if underline:
             if underline not in [
                 "single",
@@ -98,7 +104,10 @@ class RichText(object):
             prop += '<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'.format(
                 font=font, regional_font=regional_font
             )
-
+        if rtl:
+            prop += '<w:rtl w:val="true"/>'
+        if lang:
+            prop += '<w:lang w:val="%s"/>' % lang
         xml = "<w:r>"
         if prop:
             xml += "<w:rPr>%s</w:rPr>" % prop
