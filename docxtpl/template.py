@@ -195,7 +195,8 @@ class DocxTemplate(object):
             src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
 
         # add vMerge
-        # use {% vm %} to make this table cell and its copies be vertically merged within a {% for %}
+        # use {% vm %} to make this table cell and its copies
+        # be vertically merged within a {% for %}
         def v_merge_tc(m):
             def v_merge(m1):
                 return (
@@ -864,7 +865,8 @@ class DocxTemplate(object):
                         replaced_pics[img_id] = True
                         break
 
-            # FIXME: figure out what exceptions are thrown here and catch more specific exceptions
+            # FIXME: figure out what exceptions are thrown here
+            # and catch more specific exceptions
             except Exception:
                 continue
 

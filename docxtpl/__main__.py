@@ -78,8 +78,8 @@ def check_exists_ask_overwrite(arg_value, overwrite):
     if os.path.exists(arg_value) and not overwrite:
         try:
             msg = (
-                "File %s already exists, would you like to overwrite the existing file? (y/n)"
-                % arg_value
+                "File %s already exists, would you like to overwrite the existing file? "
+                "(y/n)" % arg_value
             )
             if input(msg).lower() == "y":
                 return True
@@ -115,9 +115,8 @@ def get_json_data(json_path):
             return json_data
         except json.JSONDecodeError as e:
             print(
-                "There was an error on line {e.lineno}, column {e.colno} while trying to parse file {json_path}".format(
-                    e=e, json_path=json_path
-                )
+                "There was an error on line {e.lineno}, column {e.colno} while trying "
+                "to parse file {json_path}".format(e=e, json_path=json_path)
             )
             raise RuntimeError("Failed to get json data.")
 
