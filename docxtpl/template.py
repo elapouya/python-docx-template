@@ -161,7 +161,7 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
         src_xml = re.sub(
-            r"({{[rq]\s.*?}}|{%[rq].\s.*?%})",
+            r"({{r\s.*?}}|{%r\s.*?%})",
             r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
             src_xml,
             flags=re.DOTALL,
@@ -184,18 +184,6 @@ class DocxTemplate(object):
                 % {"y": y}
             )
             src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
-        
-        # For paragraph level richtext
-        # replace into xml paragraph containing 
-        # {%q xxx %} or {{q xxx}} template tag
-        # by {% xxx %} or {{ xx }} without any surrounding <w:p> tags
-        # This allow for inline {r <var> }} and paragraph {q <var> }) styling
-        # This is mandatory to have jinja2 generating correct xml code
-        pat = (
-            r"<w:p[ >](?:(?!<w:p[ >]).)*({%%|{{)q ([^}%%]*(?:%%}|}})).*?</w:p>"
-            
-        )
-        src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
 
         for y in ["tr", "tc", "p"]:
             # same thing, but for {#y xxx #} (but not where y == 'r', since that
@@ -814,7 +802,9 @@ class DocxTemplate(object):
             # make sure all template images defined by user were replaced
             for img_id, replaced in replaced_pics.items():
                 if not replaced:
-                    raise ValueError("Picture %s not found in the docx template" % img_id)
+                    raise ValueError(
+                        "Picture %s not found in the docx template" % img_id
+                    )
 
     def get_pic_map(self):
         return self.pic_map

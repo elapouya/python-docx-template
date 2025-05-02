@@ -263,6 +263,14 @@ You can add an hyperlink to a text by using a Richtext with this syntax::
 
 Put ``rt`` in your context, then use ``{{r rt}}`` in your template
 
+RichTextParagraph
+-----------------
+
+If you want to change paragraph properties, you can use ``RichTextParagraph()`` or ``RP()`` object.
+It must be added to the template by using ``{{p <var> }}``.
+Have a look to the example here ``tests/richtextparagraph.py``.
+
+
 Inline image
 ------------
 

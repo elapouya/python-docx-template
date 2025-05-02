@@ -47,6 +47,10 @@ class RichText(object):
             self.xml += text.xml
             return
 
+        # # If nothing to add : just return
+        # if text is None or text == "":
+        #     return
+
         # If not a string : cast to string (ex: int, dict etc...)
         if not isinstance(text, (str, bytes)):
             text = str(text)
@@ -76,11 +80,11 @@ class RichText(object):
         if bold:
             prop += "<w:b/>"
             if rtl:
-                prop += '<w:bCs/>'
+                prop += "<w:bCs/>"
         if italic:
             prop += "<w:i/>"
             if rtl:
-                prop += '<w:iCs/>'
+                prop += "<w:iCs/>"
         if underline:
             if underline not in [
                 "single",
@@ -128,6 +132,7 @@ class RichText(object):
     def __html__(self):
         return self.xml
 
+
 class RichTextParagraph(object):
     """class to generate Rich Text Paragraphs when using templates variables
 
@@ -149,7 +154,7 @@ class RichTextParagraph(object):
         # If a RichText is added
         if not isinstance(text, RichText):
             text = RichText(text)
-        
+
         prop = ""
         if parastyle:
             prop += '<w:pStyle w:val="%s"/>' % parastyle
@@ -170,8 +175,6 @@ class RichTextParagraph(object):
     def __html__(self):
         return self.xml
 
-            
-            
 
 R = RichText
 RP = RichTextParagraph
