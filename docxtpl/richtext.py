@@ -128,5 +128,50 @@ class RichText(object):
     def __html__(self):
         return self.xml
 
+class RichTextParagraph(object):
+    """class to generate Rich Text Paragraphs when using templates variables
+
+    This is much faster than using Subdoc class,
+    but this only for texts OUTSIDE an existing paragraph.
+    """
+
+    def __init__(self, text=None, **text_prop):
+        self.xml = ""
+        if text:
+            self.add(text, **text_prop)
+
+    def add(
+        self,
+        text,
+        parastyle=None,
+    ):
+
+        # If a RichText is added
+        if not isinstance(text, RichText):
+            text = RichText(text)
+        
+        prop = ""
+        if parastyle:
+            prop += '<w:pStyle w:val="%s"/>' % parastyle
+
+        xml = "<w:p>"
+        if prop:
+            xml += "<w:pPr>%s</w:pPr>" % prop
+        xml += text.xml
+        xml += "</w:p>"
+        self.xml += xml
+
+    def __unicode__(self):
+        return self.xml
+
+    def __str__(self):
+        return self.xml
+
+    def __html__(self):
+        return self.xml
+
+            
+            
 
 R = RichText
+RP = RichTextParagraph
