@@ -304,7 +304,7 @@ calling method `new_subdoc()` ::
    tpl.save('output/merge_docx.docx')
 
 In the above example, the content of 'templates/merge_docx_subdoc.docx' will be inserted into the parent document in place of the declared
-variable `{{ mysubdoc }}`.
+variable `{{p mysubdoc }}`.
 
 See `tests/merge_docx.py` for full code.
 

@@ -1,3 +1,9 @@
+0.20.0 (2024-12-29)
+-------------------
+- Add RichTextParagraph (Thanks to ST-Imrie)
+- Add RTL support for bold/italic (Thanks to bm-rana)
+- Update documentation
+
 0.19.1 (2024-12-29)
 -------------------
 - PR #575 : fix unicode in footnotes (Thanks to Jonathan Pyle)
