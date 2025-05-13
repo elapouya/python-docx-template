@@ -318,11 +318,10 @@ class DocxTemplate(object):
 
             raise exc
         dst_xml = re.sub(r"\n<w:p([ >])", r"<w:p\1", dst_xml)
-        dst_xml = (
-            dst_xml.replace("{_{", "{{")
-            .replace("}_}", "}}")
-            .replace("{_%", "{%")
-            .replace("%_}", "%}")
+        dst_xml = re.sub(
+            r"([{}%])[^{}%_\f\n\r\t\v]*?_[^{}%_\f\n\r\t\v]*?([{}%])",
+            r"\1\2",
+            dst_xml
         )
         dst_xml = self.resolve_listing(dst_xml)
         return dst_xml
