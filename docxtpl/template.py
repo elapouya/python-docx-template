@@ -887,20 +887,34 @@ class DocxTemplate(object):
         self.is_saved = True
 
     def get_undeclared_template_variables(
-        self, jinja_env: Optional[Environment] = None
+        self, jinja_env: Optional[Environment] = None, context: Optional[Dict[str, Any]] = None
     ) -> Set[str]:
-        self.init_docx(reload=False)
-        xml = self.get_xml()
+        # Create a temporary document to analyze the template without affecting the current state
+        temp_doc = Document(self.template_file)
+        
+        # Get XML from the temporary document
+        xml = self.xml_to_string(temp_doc._element.body)
         xml = self.patch_xml(xml)
+        
+        # Add headers and footers
         for uri in [self.HEADER_URI, self.FOOTER_URI]:
-            for relKey, part in self.get_headers_footers(uri):
-                _xml = self.get_part_xml(part)
-                xml += self.patch_xml(_xml)
+            for relKey, val in temp_doc._part.rels.items():
+                if (val.reltype == uri) and (val.target_part.blob):
+                    _xml = self.xml_to_string(parse_xml(val.target_part.blob))
+                    xml += self.patch_xml(_xml)
+        
         if jinja_env:
             env = jinja_env
         else:
             env = Environment()
+        
         parse_content = env.parse(xml)
-        return meta.find_undeclared_variables(parse_content)
-
-    undeclared_template_variables = property(get_undeclared_template_variables)
+        all_variables = meta.find_undeclared_variables(parse_content)
+        
+        # If context is provided, return only variables that are not in the context
+        if context is not None:
+            provided_variables = set(context.keys())
+            return all_variables - provided_variables
+        
+        # If no context provided, return all variables (original behavior)
+        return all_variables
