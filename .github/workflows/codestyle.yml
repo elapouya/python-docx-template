@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .
+        pip install --group dev -e .
     - uses: astral-sh/ruff-action@v3
     - name: Lint with ruff
       run: |
@@ -25,3 +25,4 @@ jobs:
         ruff format --check
         ruff check
         ruff check --statistics
+        mypy .

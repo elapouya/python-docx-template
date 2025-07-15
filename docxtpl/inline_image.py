@@ -4,8 +4,12 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
+from __future__ import annotations
+
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
+
+from .template import DocxTemplate
 
 
 class InlineImage:
@@ -14,7 +18,7 @@ class InlineImage:
     This is much faster than using Subdoc class.
     """
 
-    tpl = None
+    tpl: DocxTemplate = None  # type:ignore[assignment]
     image_descriptor = None
     width = None
     height = None
@@ -50,7 +54,7 @@ class InlineImage:
         return run
 
     def _insert_image(self):
-        pic = self.tpl.current_rendering_part.new_pic_inline(
+        pic = self.tpl.current_rendering_part.new_pic_inline(  # type:ignore[union-attr]
             self.image_descriptor,
             self.width,
             self.height,

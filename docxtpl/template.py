@@ -6,13 +6,17 @@ Created : 2015-03-12
 
 from __future__ import annotations
 
+import binascii
 import functools
 import io
+import os
+import re
+import zipfile
 from os import PathLike
 from typing import IO, Any
 
 import docx.oxml.ns
-from docx import Document
+from docx.api import Document, DocumentObject
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from docx.opc.oxml import parse_xml
 from docx.opc.part import XmlPart
@@ -21,16 +25,6 @@ from jinja2.exceptions import TemplateError
 from lxml import etree
 
 from .subdoc import Subdoc
-
-try:
-    from html import escape
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # noqa: F401
-import binascii
-import os
-import re
-import zipfile
 
 
 class DocxTemplate:
@@ -42,7 +36,7 @@ class DocxTemplate:
     def __init__(self, template_file: IO[bytes] | str | PathLike) -> None:
         self.template_file = template_file
         self.reset_replacements()
-        self.docx = None
+        self.docx: DocumentObject = None
         self.is_rendered = False
         self.is_saved = False
         self.allow_missing_pics = False
@@ -359,8 +353,8 @@ class DocxTemplate:
             return xml
 
         def resolve_run(paragraph_properties, m):
-            run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
-            run_properties = run_properties.group(0) if run_properties else ""
+            m_run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
+            run_properties = m_run_properties.group(0) if m_run_properties else ""
             return re.sub(
                 r"<w:t(?: [^>]*)?>.*?</w:t>",
                 lambda x: resolve_text(run_properties, paragraph_properties, x),
@@ -369,8 +363,8 @@ class DocxTemplate:
             )
 
         def resolve_paragraph(m):
-            paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
-            paragraph_properties = paragraph_properties.group(0) if paragraph_properties else ""
+            m_paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
+            paragraph_properties = m_paragraph_properties.group(0) if m_paragraph_properties else ""
             return re.sub(
                 r"<w:r(?: [^>]*)?>.*?</w:r>",
                 lambda x: resolve_run(paragraph_properties, x),
@@ -547,8 +541,7 @@ class DocxTemplate:
                 # left after extras removal.
                 extra_space = 0
                 if len(columns_left) > 0:
-                    extra_space = removed_width / len(columns_left)
-                    extra_space = int(extra_space)
+                    extra_space = int(removed_width / len(columns_left))
 
                 for c in columns_left:
                     c.set(ns + "w", str(int(float(c.get(ns + "w")) + extra_space)))
@@ -695,12 +688,13 @@ class DocxTemplate:
     def post_processing(self, docx_file):
         if self.crc_to_new_media or self.crc_to_new_embedded or self.zipname_to_replace:
             if hasattr(docx_file, "read"):
-                tmp_file = io.BytesIO()
-                DocxTemplate(docx_file).save(tmp_file)
-                tmp_file.seek(0)
+                tmp_io = io.BytesIO()
+                DocxTemplate(docx_file).save(tmp_io)
+                tmp_io.seek(0)
                 docx_file.seek(0)
                 docx_file.truncate()
                 docx_file.seek(0)
+                tmp_file: IO[bytes] | str = tmp_io
 
             else:
                 tmp_file = f"{docx_file}_docxtpl_before_replace_medias"

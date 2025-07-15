@@ -35,5 +35,5 @@ documents_data = [
 for document_data in documents_data:
     dest_file = document_data["dest_file"]
     context = document_data["context"]
-    tpl.render(context)
+    tpl.render(context)  # type:ignore[arg-type]
     tpl.save(f"output/{dest_file}")

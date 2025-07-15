@@ -29,6 +29,12 @@ extend-select = [
     "RUF100", # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
 ]
 
+[tool.mypy]
+pretty = true
+python_version = "3.9"
+check_untyped_defs = true
+ignore_missing_imports = true
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
