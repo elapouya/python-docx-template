@@ -1,20 +1,19 @@
-from setuptools import setup
 import os
 import re
-import sys
+
+from setuptools import setup
 
 # To register onto Pypi :
 # python setup.py sdist bdist_wheel upload
 
 
 def read(*names):
-    values = dict()
+    values = {}
     for name in names:
         filename = name + ".rst"
         if os.path.isfile(filename):
-            fd = open(filename)
-            value = fd.read()
-            fd.close()
+            with open(filename) as fd:
+                value = fd.read()
         else:
             value = ""
         values[name] = value
@@ -22,27 +21,21 @@ def read(*names):
 
 
 long_description = """
-%(README)s
+{README}
 
 News
 ====
-%(CHANGES)s
-""" % read(
-    "README", "CHANGES"
-)
+{CHANGES}
+""".format(**read("README", "CHANGES"))
 
 
 def get_version(pkg):
     path = os.path.join(os.path.dirname(__file__), pkg, "__init__.py")
-    if sys.version_info >= (3, 0):
-        fh = open(path, encoding="utf-8")  # required to read utf-8 file on windows
-    else:
-        fh = open(path)  # encoding parameter does not exist in python 2
-    with fh:
+    with open(path, encoding="utf-8") as fh:  # encoding parameter does not exist in python 2
         m = re.search(r'^__version__\s*=\s*[\'"]([^\'"]+)[\'"]', fh.read(), re.M)
     if m:
         return m.group(1)
-    raise RuntimeError("Unable to find __version__ string in %s." % path)
+    raise RuntimeError(f"Unable to find __version__ string in {path}.")
 
 
 setup(

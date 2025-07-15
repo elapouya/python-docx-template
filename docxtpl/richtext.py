@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
 try:
     from html import escape
 except ImportError:
@@ -11,7 +11,7 @@ except ImportError:
     from cgi import escape
 
 
-class RichText(object):
+class RichText:
     """class to generate Rich Text when using templates variables
 
     This is much faster than using Subdoc class,
@@ -41,7 +41,6 @@ class RichText(object):
         rtl=False,
         lang=None,
     ):
-
         # If a RichText is added
         if isinstance(text, RichText):
             self.xml += text.xml
@@ -61,18 +60,18 @@ class RichText(object):
         prop = ""
 
         if style:
-            prop += '<w:rStyle w:val="%s"/>' % style
+            prop += f'<w:rStyle w:val="{style}"/>'
         if color:
             if color[0] == "#":
                 color = color[1:]
-            prop += '<w:color w:val="%s"/>' % color
+            prop += f'<w:color w:val="{color}"/>'
         if highlight:
             if highlight[0] == "#":
                 highlight = highlight[1:]
-            prop += '<w:shd w:fill="%s"/>' % highlight
+            prop += f'<w:shd w:fill="{highlight}"/>'
         if size:
-            prop += '<w:sz w:val="%s"/>' % size
-            prop += '<w:szCs w:val="%s"/>' % size
+            prop += f'<w:sz w:val="{size}"/>'
+            prop += f'<w:szCs w:val="{size}"/>'
         if subscript:
             prop += '<w:vertAlign w:val="subscript"/>'
         if superscript:
@@ -97,30 +96,25 @@ class RichText(object):
                 "wave",
             ]:
                 underline = "single"
-            prop += '<w:u w:val="%s"/>' % underline
+            prop += f'<w:u w:val="{underline}"/>'
         if strike:
             prop += "<w:strike/>"
         if font:
             regional_font = ""
             if ":" in font:
                 region, font = font.split(":", 1)
-                regional_font = ' w:{region}="{font}"'.format(font=font, region=region)
-            prop += '<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'.format(
-                font=font, regional_font=regional_font
-            )
+                regional_font = f' w:{region}="{font}"'
+            prop += f'<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'
         if rtl:
             prop += '<w:rtl w:val="true"/>'
         if lang:
-            prop += '<w:lang w:val="%s"/>' % lang
+            prop += f'<w:lang w:val="{lang}"/>'
         xml = "<w:r>"
         if prop:
-            xml += "<w:rPr>%s</w:rPr>" % prop
-        xml += '<w:t xml:space="preserve">%s</w:t></w:r>' % text
+            xml += f"<w:rPr>{prop}</w:rPr>"
+        xml += f'<w:t xml:space="preserve">{text}</w:t></w:r>'
         if url_id:
-            xml = '<w:hyperlink r:id="%s" w:tgtFrame="_blank">%s</w:hyperlink>' % (
-                url_id,
-                xml,
-            )
+            xml = f'<w:hyperlink r:id="{url_id}" w:tgtFrame="_blank">{xml}</w:hyperlink>'
         self.xml += xml
 
     def __unicode__(self):
@@ -133,7 +127,7 @@ class RichText(object):
         return self.xml
 
 
-class RichTextParagraph(object):
+class RichTextParagraph:
     """class to generate Rich Text Paragraphs when using templates variables
 
     This is much faster than using Subdoc class,
@@ -150,18 +144,17 @@ class RichTextParagraph(object):
         text,
         parastyle=None,
     ):
-
         # If a RichText is added
         if not isinstance(text, RichText):
             text = RichText(text)
 
         prop = ""
         if parastyle:
-            prop += '<w:pStyle w:val="%s"/>' % parastyle
+            prop += f'<w:pStyle w:val="{parastyle}"/>'
 
         xml = "<w:p>"
         if prop:
-            xml += "<w:pPr>%s</w:pPr>" % prop
+            xml += f"<w:pPr>{prop}</w:pPr>"
         xml += text.xml
         xml += "</w:p>"
         self.xml += xml

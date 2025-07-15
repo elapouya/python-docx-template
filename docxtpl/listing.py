@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
 try:
     from html import escape
 except ImportError:
@@ -11,7 +11,7 @@ except ImportError:
     from cgi import escape
 
 
-class Listing(object):
+class Listing:
     r"""class to manage \n and \a without to use RichText,
     by this way you keep the current template styling
 

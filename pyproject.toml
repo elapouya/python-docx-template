@@ -1,22 +1,34 @@
-[tool.poetry]
+[project]
 name = "docxtpl"
-version = "0.17.0"
+dynamic = ["version"]
 description = "Python docx template engine"
-authors = ["Eric Lapouyade"]
+authors = [{name="Eric Lapouyade", email=""}]
 readme = "README.rst"
+dependencies = [
+    "python-docx (>=1.1.2,<2)",
+    "docxcompose (>=1.4.0,<2)",
+    "jinja2 (>=3.1.4,<4)",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-python-docx = "^1.1.2"
-docxcompose = "^1.4.0"
-jinja2 = "^3.1.4"
-black = "^24.4.2"
-twine = "^6.1.0"
+[dependency-groups]
+dev = [
+    "mypy >=1.7.0",
+]
 
+[tool.ruff]
+line-length = 127
 
-[tool.poetry.group.dev.dependencies]
-flake8 = "^7.1.0"
+[tool.ruff.lint]
+extend-select = [
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "I",  # isort
+    "UP", # pyupgrade
+    "SIM",    # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "FA",     # https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+    "RUF100", # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

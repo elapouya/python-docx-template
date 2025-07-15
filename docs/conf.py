@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # python-docx-template documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar 12 17:32:17 2015.

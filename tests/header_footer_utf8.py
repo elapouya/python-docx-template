@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2016-07-19
 
@@ -13,8 +12,7 @@ tpl = DocxTemplate("templates/header_footer_tpl_utf8.docx")
 
 sd = tpl.new_subdoc()
 p = sd.add_paragraph(
-    "This is a sub-document to check it does not break header and footer with utf-8 "
-    "characters inside the template .docx"
+    "This is a sub-document to check it does not break header and footer with utf-8 characters inside the template .docx"
 )
 
 context = {

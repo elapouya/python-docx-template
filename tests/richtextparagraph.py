@@ -16,12 +16,9 @@ rtp.add(
     parastyle="myrichparastyle",
 )
 rtp.add("Any built in paragraph style can be used", parastyle="IntenseQuote")
+rtp.add("or you can add your own, unlocking all style options", parastyle="createdStyle")
 rtp.add(
-    "or you can add your own, unlocking all style options", parastyle="createdStyle"
-)
-rtp.add(
-    "To use, just create a style in your template word doc with the formatting you want "
-    "and call it in the code.",
+    "To use, just create a style in your template word doc with the formatting you want and call it in the code.",
     parastyle="normal",
 )
 
@@ -43,9 +40,7 @@ rtp.add(
     "space things out a bit or just write a little less.",
     parastyle="WideLineSpacing",
 )
-rtp.add(
-    "You can also set the background colour of a line.", parastyle="LineShadingGreen"
-)
+rtp.add("You can also set the background colour of a line.", parastyle="LineShadingGreen")
 
 rt.add("This works with ")
 rt.add("Rich ", bold=True)
