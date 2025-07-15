@@ -4,7 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-__version__ = "0.20.0"
+__version__ = "0.20.1"
 
 # flake8: noqa
 from .inline_image import InlineImage

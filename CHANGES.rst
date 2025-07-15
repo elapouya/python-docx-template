@@ -1,3 +1,7 @@
+0.20.1 (2025-07-15)
+-------------------
+- Fix and improve get_undeclared_template_variables() method (Thanks to Pablo Esteban)
+
 0.20.0 (2024-12-29)
 -------------------
 - Add RichTextParagraph (Thanks to ST-Imrie)
