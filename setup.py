@@ -43,6 +43,7 @@ setup(
     version=get_version("docxtpl"),
     description="Python docx template engine",
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     classifiers=[
         "Intended Audience :: Developers",
         "Development Status :: 4 - Beta",
@@ -58,7 +59,8 @@ setup(
     keywords="jinja2",
     url="https://github.com/elapouya/python-docx-template",
     author="Eric Lapouyade",
-    license="LGPL 2.1",
+    license="LGPL-2.1-only",
+    license_files=[],
     packages=["docxtpl"],
     install_requires=["python-docx>=1.1.1", "docxcompose", "jinja2", "lxml"],
     extras_require={"docs": ["Sphinx", "sphinxcontrib-napoleon"]},
