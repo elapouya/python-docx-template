@@ -2,18 +2,47 @@
 name = "docxtpl"
 dynamic = ["version"]
 description = "Python docx template engine"
-authors = [{name="Eric Lapouyade", email=""}]
+authors = [{name="Eric Lapouyade", email="elapouya@proton.me"}]
 readme = "README.rst"
+license = "LGPL 2.1"
+requires-python = ">=3.8"
+classifiers=[
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+keywords = ["jinja2"]
 dependencies = [
     "python-docx (>=1.1.2,<2)",
-    "docxcompose (>=1.4.0,<2)",
-    "jinja2 (>=3.1.4,<4)",
+    "docxcompose",
+    "jinja2",
+    "lxml",
 ]
 
 [dependency-groups]
-dev = [
-    "mypy >=1.7.0",
-]
+dev = ["mypy"]
+docs = ["Sphinx", "sphinxcontrib-napoleon"]
+
+[project.urls]
+homepage = "https://github.com/elapouya/python-docx-template"
+repository = "https://github.com/elapouya/python-docx-template.git"
+document = "https://docxtpl.readthedocs.org"
+
+[tool.pdm]
+version = {source="file", path="src/docxtpl/__init__.py"}
+
+[tool.poetry]
+version = '0.0.0'
+
+[tool.poetry-plugin-version]
+source = "src/docxtpl/__init__.py"
 
 [tool.ruff]
 line-length = 127
@@ -31,7 +60,7 @@ extend-select = [
 
 [tool.mypy]
 pretty = true
-python_version = "3.9"
+python_version = "3.8"
 check_untyped_defs = true
 ignore_missing_imports = true
 
