@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
 
-from docx import Document
-from docx.oxml import CT_SectPr
-from docx.opc.constants import RELATIONSHIP_TYPE as RT
-from docxcompose.properties import CustomProperties
-from docxcompose.utils import xpath
-from docxcompose.composer import Composer
-from docxcompose.utils import NS
-from lxml import etree
 import re
+
+from docx import Document
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
+from docx.oxml import CT_SectPr
+from docxcompose.composer import Composer
+from docxcompose.properties import CustomProperties
+from docxcompose.utils import NS, xpath
+from lxml import etree
 
 
 class SubdocComposer(Composer):
@@ -25,7 +24,7 @@ class SubdocComposer(Composer):
         # Remove custom property fields but keep the values
         if remove_property_fields:
             cprops = CustomProperties(doc)
-            for name in cprops.keys():
+            for name in cprops:
                 cprops.dissolve_fields(name)
 
         self._create_style_id_mapping(doc)
@@ -59,13 +58,13 @@ class SubdocComposer(Composer):
                 ("qs", RT.DIAGRAM_QUICK_STYLE),
                 ("cs", RT.DIAGRAM_COLORS),
             ):
-                dm_rid = dgm_rel.get("{%s}%s" % (NS["r"], item))
+                dm_rid = dgm_rel.get("{{{}}}{}".format(NS["r"], item))
                 dm_part = doc.part.rels[dm_rid].target_part
                 new_rid = self.doc.part.relate_to(dm_part, rt_type)
-                dgm_rel.set("{%s}%s" % (NS["r"], item), new_rid)
+                dgm_rel.set("{{{}}}{}".format(NS["r"], item), new_rid)
 
 
-class Subdoc(object):
+class Subdoc:
     """Class for subdocument to insert into master document"""
 
     def __init__(self, tpl, docpath=None):
@@ -87,9 +86,7 @@ class Subdoc(object):
         xml = re.sub(
             r"</?w:body[^>]*>",
             "",
-            etree.tostring(
-                self.subdocx.element.body, encoding="unicode", pretty_print=False
-            ),
+            etree.tostring(self.subdocx.element.body, encoding="unicode", pretty_print=False),
         )
         return xml
 

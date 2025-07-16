@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from docxtpl import DocxTemplate
 
 tpl = DocxTemplate("templates/horizontal_merge_tpl.docx")

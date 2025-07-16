@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2022-08-03
 @author: Dongfang Song
 """
-
 
 from docxtpl import DocxTemplate, RichText
 

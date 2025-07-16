@@ -1,20 +1,24 @@
-# -*- coding: utf-8 -*-
 """
 Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
+from __future__ import annotations
+
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
 
+from .template import DocxTemplate
 
-class InlineImage(object):
+
+class InlineImage:
     """Class to generate an inline image
 
     This is much faster than using Subdoc class.
     """
 
-    tpl = None
+    tpl: DocxTemplate = None  # type:ignore[assignment]
     image_descriptor = None
     width = None
     height = None
@@ -50,7 +54,7 @@ class InlineImage(object):
         return run
 
     def _insert_image(self):
-        pic = self.tpl.current_rendering_part.new_pic_inline(
+        pic = self.tpl.current_rendering_part.new_pic_inline(  # type:ignore[union-attr]
             self.image_descriptor,
             self.width,
             self.height,
@@ -58,15 +62,10 @@ class InlineImage(object):
         if self.anchor:
             run = parse_xml(pic)
             if run.xpath(".//a:blip"):
-                hyperlink = self._add_hyperlink(
-                    run, self.anchor, self.tpl.current_rendering_part
-                )
+                hyperlink = self._add_hyperlink(run, self.anchor, self.tpl.current_rendering_part)
                 pic = hyperlink.xml
 
-        return (
-            "</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>"
-            '<w:t xml:space="preserve">' % pic
-        )
+        return f'</w:t></w:r><w:r><w:drawing>{pic}</w:drawing></w:r><w:r><w:t xml:space="preserve">'
 
     def __unicode__(self):
         return self._insert_image()
