@@ -4,33 +4,30 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
+from __future__ import annotations
 
-from os import PathLike
-from typing import Any, Optional, IO, Union, Dict, Set
-from .subdoc import Subdoc
+import binascii
 import functools
 import io
-from lxml import etree
-from docx import Document
+import os
+import re
+import zipfile
+from os import PathLike
+from typing import IO, Any
+
+import docx.oxml.ns
+from docx.api import Document, DocumentObject
+from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from docx.opc.oxml import parse_xml
 from docx.opc.part import XmlPart
-import docx.oxml.ns
-from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
+from lxml import etree
 
-try:
-    from html import escape  # noqa: F401
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # noqa: F401
-import re
-import binascii
-import os
-import zipfile
+from .subdoc import Subdoc
 
 
-class DocxTemplate(object):
+class DocxTemplate:
     """Class for managing docx files as they were jinja2 templates"""
 
     HEADER_URI = (
@@ -40,17 +37,17 @@ class DocxTemplate(object):
         "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
     )
 
-    def __init__(self, template_file: Union[IO[bytes], str, PathLike]) -> None:
+    def __init__(self, template_file: IO[bytes] | str | PathLike) -> None:
         self.template_file = template_file
         self.reset_replacements()
-        self.docx = None
+        self.docx: DocumentObject = None  # type:ignore[assignment]
         self.is_rendered = False
         self.is_saved = False
         self.allow_missing_pics = False
 
     def init_docx(self, reload: bool = True):
         if not self.docx or (self.is_rendered and reload):
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file)  # type:ignore[arg-type]
             self.is_rendered = False
 
     def render_init(self):
@@ -303,15 +300,14 @@ class DocxTemplate(object):
         src_xml = re.sub(r"<w:p([ >])", r"\n<w:p\1", src_xml)
         try:
             self.current_rendering_part = part
-            if jinja_env:
-                template = jinja_env.from_string(src_xml)
-            else:
-                template = Template(src_xml)
+            template = (
+                jinja_env.from_string(src_xml) if jinja_env else Template(src_xml)
+            )
             dst_xml = template.render(context)
         except TemplateError as exc:
             if hasattr(exc, "lineno") and exc.lineno is not None:
                 line_number = max(exc.lineno - 4, 0)
-                exc.docx_context = map(
+                exc.docx_context = map(  # type:ignore[attr-defined]
                     lambda x: re.sub(r"<[^>]+>", "", x),
                     src_xml.splitlines()[line_number: (line_number + 7)],  # fmt: skip
                 )
@@ -328,7 +324,7 @@ class DocxTemplate(object):
         return dst_xml
 
     def render_properties(
-        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+        self, context: dict[str, Any], jinja_env: Environment | None = None
     ) -> None:
         # List of string attributes of docx.opc.coreprops.CoreProperties which are strings.
         # It seems that some attributes cannot be written as strings. Those are commented out.
@@ -355,7 +351,7 @@ class DocxTemplate(object):
             setattr(self.docx.core_properties, prop, rendered)
 
     def render_footnotes(
-        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+        self, context: dict[str, Any], jinja_env: Environment | None = None
     ) -> None:
         if jinja_env is None:
             jinja_env = Environment()
@@ -375,7 +371,6 @@ class DocxTemplate(object):
                     part._blob = xml.encode("utf-8")
 
     def resolve_listing(self, xml):
-
         def resolve_text(run_properties, paragraph_properties, m):
             xml = m.group(0).replace(
                 "\t",
@@ -400,8 +395,8 @@ class DocxTemplate(object):
             return xml
 
         def resolve_run(paragraph_properties, m):
-            run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
-            run_properties = run_properties.group(0) if run_properties else ""
+            m_run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
+            run_properties = m_run_properties.group(0) if m_run_properties else ""
             return re.sub(
                 r"<w:t(?: [^>]*)?>.*?</w:t>",
                 lambda x: resolve_text(run_properties, paragraph_properties, x),
@@ -410,9 +405,9 @@ class DocxTemplate(object):
             )
 
         def resolve_paragraph(m):
-            paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
+            m_paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
             paragraph_properties = (
-                paragraph_properties.group(0) if paragraph_properties else ""
+                m_paragraph_properties.group(0) if m_paragraph_properties else ""
             )
             return re.sub(
                 r"<w:r(?: [^>]*)?>.*?</w:r>",
@@ -469,8 +464,8 @@ class DocxTemplate(object):
 
     def render(
         self,
-        context: Dict[str, Any],
-        jinja_env: Optional[Environment] = None,
+        context: dict[str, Any],
+        jinja_env: Environment | None = None,
         autoescape: bool = False,
     ) -> None:
         # init template working attributes
@@ -535,7 +530,7 @@ class DocxTemplate(object):
                 width = 0.0
                 new_average = None
                 for c in columns:
-                    if not c.get(ns + "w") is None:
+                    if c.get(ns + "w") is not None:
                         width += float(c.get(ns + "w"))
                 # try to keep proportion of table
                 if width > 0:
@@ -596,8 +591,7 @@ class DocxTemplate(object):
                 # left after extras removal.
                 extra_space = 0
                 if len(columns_left) > 0:
-                    extra_space = removed_width / len(columns_left)
-                    extra_space = int(extra_space)
+                    extra_space = int(removed_width / len(columns_left))
 
                 for c in columns_left:
                     c.set(ns + "w", str(int(float(c.get(ns + "w")) + extra_space)))
@@ -743,37 +737,38 @@ class DocxTemplate(object):
 
     def post_processing(self, docx_file):
         if self.crc_to_new_media or self.crc_to_new_embedded or self.zipname_to_replace:
-
             if hasattr(docx_file, "read"):
-                tmp_file = io.BytesIO()
-                DocxTemplate(docx_file).save(tmp_file)
-                tmp_file.seek(0)
+                bytes_io = io.BytesIO()
+                DocxTemplate(docx_file).save(bytes_io)
+                bytes_io.seek(0)
                 docx_file.seek(0)
                 docx_file.truncate()
                 docx_file.seek(0)
+                tmp_file: IO[bytes] | str = bytes_io
 
             else:
-                tmp_file = "%s_docxtpl_before_replace_medias" % docx_file
+                tmp_file = f"{docx_file}_docxtpl_before_replace_medias"
                 os.rename(docx_file, tmp_file)
 
-            with zipfile.ZipFile(tmp_file) as zin:
-                with zipfile.ZipFile(docx_file, "w") as zout:
-                    for item in zin.infolist():
-                        buf = zin.read(item.filename)
-                        if item.filename in self.zipname_to_replace:
-                            zout.writestr(item, self.zipname_to_replace[item.filename])
-                        elif (
-                            item.filename.startswith("word/media/")
-                            and item.CRC in self.crc_to_new_media
-                        ):
-                            zout.writestr(item, self.crc_to_new_media[item.CRC])
-                        elif (
-                            item.filename.startswith("word/embeddings/")
-                            and item.CRC in self.crc_to_new_embedded
-                        ):
-                            zout.writestr(item, self.crc_to_new_embedded[item.CRC])
-                        else:
-                            zout.writestr(item, buf)
+            with zipfile.ZipFile(tmp_file) as zin, zipfile.ZipFile(
+                docx_file, "w"
+            ) as zout:
+                for item in zin.infolist():
+                    buf = zin.read(item.filename)
+                    if item.filename in self.zipname_to_replace:
+                        zout.writestr(item, self.zipname_to_replace[item.filename])
+                    elif (
+                        item.filename.startswith("word/media/")
+                        and item.CRC in self.crc_to_new_media
+                    ):
+                        zout.writestr(item, self.crc_to_new_media[item.CRC])
+                    elif (
+                        item.filename.startswith("word/embeddings/")
+                        and item.CRC in self.crc_to_new_embedded
+                    ):
+                        zout.writestr(item, self.crc_to_new_embedded[item.CRC])
+                    else:
+                        zout.writestr(item, buf)
 
             if not hasattr(tmp_file, "read"):
                 os.remove(tmp_file)
@@ -781,7 +776,6 @@ class DocxTemplate(object):
                 docx_file.seek(0)
 
     def pre_processing(self):
-
         if self.pics_to_replace:
             self._replace_pics()
 
@@ -803,15 +797,12 @@ class DocxTemplate(object):
             # make sure all template images defined by user were replaced
             for img_id, replaced in replaced_pics.items():
                 if not replaced:
-                    raise ValueError(
-                        "Picture %s not found in the docx template" % img_id
-                    )
+                    raise ValueError(f"Picture {img_id} not found in the docx template")
 
     def get_pic_map(self):
         return self.pic_map
 
     def _replace_docx_part_pics(self, doc_part, replaced_pics):
-
         et = etree.fromstring(doc_part.blob)
 
         part_map = {}
@@ -836,22 +827,16 @@ class DocxTemplate(object):
 
                 non_visual_properties = "pic:pic/pic:nvPicPr/pic:cNvPr/"
                 filename = gd.xpath(
-                    "%s@name" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
+                    f"{non_visual_properties}@name", namespaces=docx.oxml.ns.nsmap
                 )[0]
                 titles = gd.xpath(
-                    "%s@title" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
+                    f"{non_visual_properties}@title", namespaces=docx.oxml.ns.nsmap
                 )
-                if titles:
-                    title = titles[0]
-                else:
-                    title = ""
+                title = titles[0] if titles else ""
                 descriptions = gd.xpath(
-                    "%s@descr" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
+                    f"{non_visual_properties}@descr", namespaces=docx.oxml.ns.nsmap
                 )
-                if descriptions:
-                    description = descriptions[0]
-                else:
-                    description = ""
+                description = descriptions[0] if descriptions else ""
 
                 part_map[filename] = (
                     doc_part.rels[rel].target_ref,
@@ -860,7 +845,7 @@ class DocxTemplate(object):
 
                 # replace data
                 for img_id, img_data in self.pics_to_replace.items():
-                    if img_id == filename or img_id == title or img_id == description:
+                    if img_id in (filename, title, description):
                         part_map[filename][1]._blob = img_data
                         replaced_pics[img_id] = True
                         break
@@ -876,23 +861,23 @@ class DocxTemplate(object):
         self.init_docx()
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK, is_external=True)
 
-    def save(self, filename: Union[IO[bytes], str, PathLike], *args, **kwargs) -> None:
+    def save(self, filename: IO[bytes] | str | PathLike, *args, **kwargs) -> None:
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file)  # type:ignore[arg-type]
         self.pre_processing()
-        self.docx.save(filename, *args, **kwargs)
+        self.docx.save(filename, *args, **kwargs)  # type:ignore[arg-type]
         self.post_processing(filename)
         self.is_saved = True
 
     def get_undeclared_template_variables(
         self,
-        jinja_env: Optional[Environment] = None,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Set[str]:
+        jinja_env: Environment | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> set[str]:
         # Create a temporary document to analyze the template without affecting the current state
-        temp_doc = Document(self.template_file)
+        temp_doc = Document(self.template_file)  # type:ignore[arg-type]
 
         # Get XML from the temporary document
         xml = self.xml_to_string(temp_doc._element.body)
@@ -905,10 +890,7 @@ class DocxTemplate(object):
                     _xml = self.xml_to_string(parse_xml(val.target_part.blob))
                     xml += self.patch_xml(_xml)
 
-        if jinja_env:
-            env = jinja_env
-        else:
-            env = Environment()
+        env = jinja_env or Environment()
 
         parse_content = env.parse(xml)
         all_variables = meta.find_undeclared_variables(parse_content)

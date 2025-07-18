@@ -4,8 +4,14 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+from __future__ import annotations
+from typing import IO
+
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
+from docx.shared import Length
+
+from .template import DocxTemplate
 
 
 class InlineImage(object):
@@ -14,13 +20,20 @@ class InlineImage(object):
     This is much faster than using Subdoc class.
     """
 
-    tpl = None
+    tpl: DocxTemplate = None  # type:ignore[assignment]
     image_descriptor = None
-    width = None
-    height = None
+    width: int | Length | None = None
+    height: int | Length | None = None
     anchor = None
 
-    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None):
+    def __init__(
+        self,
+        tpl: DocxTemplate,
+        image_descriptor: str | IO[bytes],
+        width: int | Length | None = None,
+        height: int | Length | None = None,
+        anchor=None,
+    ) -> None:
         self.tpl, self.image_descriptor = tpl, image_descriptor
         self.width, self.height = width, height
         self.anchor = anchor
@@ -49,8 +62,9 @@ class InlineImage(object):
 
         return run
 
-    def _insert_image(self):
-        pic = self.tpl.current_rendering_part.new_pic_inline(
+    def _insert_image(self) -> str:
+        rendering_part = self.tpl.current_rendering_part
+        pic = rendering_part.new_pic_inline(  # type:ignore[union-attr]
             self.image_descriptor,
             self.width,
             self.height,
@@ -58,9 +72,7 @@ class InlineImage(object):
         if self.anchor:
             run = parse_xml(pic)
             if run.xpath(".//a:blip"):
-                hyperlink = self._add_hyperlink(
-                    run, self.anchor, self.tpl.current_rendering_part
-                )
+                hyperlink = self._add_hyperlink(run, self.anchor, rendering_part)
                 pic = hyperlink.xml
 
         return (
