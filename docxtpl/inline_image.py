@@ -21,7 +21,7 @@ class InlineImage(object):
     """
 
     tpl: DocxTemplate = None  # type:ignore[assignment]
-    image_descriptor = None
+    image_descriptor: str | IO[bytes] = None  # type:ignore[assignment]
     width: int | Length | None = None
     height: int | Length | None = None
     anchor = None
@@ -64,7 +64,7 @@ class InlineImage(object):
 
     def _insert_image(self) -> str:
         rendering_part = self.tpl.current_rendering_part
-        pic = rendering_part.new_pic_inline(  # type:ignore[union-attr]
+        pic = rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
             self.height,

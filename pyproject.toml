@@ -23,6 +23,7 @@ lxml-stubs = "^0.5.1"
 pretty = true
 python_version = "3.9"
 check_untyped_defs = true
+warn_unused_ignores = true
 exclude = ["docs", "build", "setup.py"]
 
 [[tool.mypy.overrides]]
