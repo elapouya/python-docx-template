@@ -13,10 +13,10 @@ import os
 import re
 import zipfile
 from os import PathLike
-from typing import IO, Any
+from typing import IO, TYPE_CHECKING, Any
 
 import docx.oxml.ns
-from docx.api import Document, DocumentObject
+from docx import Document
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from docx.opc.oxml import parse_xml
 from docx.opc.part import XmlPart
@@ -25,6 +25,10 @@ from jinja2.exceptions import TemplateError
 from lxml import etree
 
 from .subdoc import Subdoc
+
+
+if TYPE_CHECKING:
+    from docx.document import Document as DocumentObject
 
 
 class DocxTemplate:
