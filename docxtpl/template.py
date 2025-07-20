@@ -751,28 +751,27 @@ class DocxTemplate:
                 tmp_file: IO[bytes] | str = bytes_io
 
             else:
-                tmp_file = f"{docx_file}_docxtpl_before_replace_medias"
+                tmp_file = "%s_docxtpl_before_replace_medias" % docx_file
                 os.rename(docx_file, tmp_file)
 
-            with zipfile.ZipFile(tmp_file) as zin, zipfile.ZipFile(
-                docx_file, "w"
-            ) as zout:
-                for item in zin.infolist():
-                    buf = zin.read(item.filename)
-                    if item.filename in self.zipname_to_replace:
-                        zout.writestr(item, self.zipname_to_replace[item.filename])
-                    elif (
-                        item.filename.startswith("word/media/")
-                        and item.CRC in self.crc_to_new_media
-                    ):
-                        zout.writestr(item, self.crc_to_new_media[item.CRC])
-                    elif (
-                        item.filename.startswith("word/embeddings/")
-                        and item.CRC in self.crc_to_new_embedded
-                    ):
-                        zout.writestr(item, self.crc_to_new_embedded[item.CRC])
-                    else:
-                        zout.writestr(item, buf)
+            with zipfile.ZipFile(tmp_file) as zin:
+                with zipfile.ZipFile(docx_file, "w") as zout:
+                    for item in zin.infolist():
+                        buf = zin.read(item.filename)
+                        if item.filename in self.zipname_to_replace:
+                            zout.writestr(item, self.zipname_to_replace[item.filename])
+                        elif (
+                            item.filename.startswith("word/media/")
+                            and item.CRC in self.crc_to_new_media
+                        ):
+                            zout.writestr(item, self.crc_to_new_media[item.CRC])
+                        elif (
+                            item.filename.startswith("word/embeddings/")
+                            and item.CRC in self.crc_to_new_embedded
+                        ):
+                            zout.writestr(item, self.crc_to_new_embedded[item.CRC])
+                        else:
+                            zout.writestr(item, buf)
 
             if not hasattr(tmp_file, "read"):
                 os.remove(tmp_file)
@@ -801,7 +800,9 @@ class DocxTemplate:
             # make sure all template images defined by user were replaced
             for img_id, replaced in replaced_pics.items():
                 if not replaced:
-                    raise ValueError(f"Picture {img_id} not found in the docx template")
+                    raise ValueError(
+                        "Picture %s not found in the docx template" % img_id
+                    )
 
     def get_pic_map(self):
         return self.pic_map
@@ -831,14 +832,14 @@ class DocxTemplate:
 
                 non_visual_properties = "pic:pic/pic:nvPicPr/pic:cNvPr/"
                 filename = gd.xpath(
-                    f"{non_visual_properties}@name", namespaces=docx.oxml.ns.nsmap
+                    "%s@name" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )[0]
                 titles = gd.xpath(
-                    f"{non_visual_properties}@title", namespaces=docx.oxml.ns.nsmap
+                    "%s@title" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )
                 title = titles[0] if titles else ""
                 descriptions = gd.xpath(
-                    f"{non_visual_properties}@descr", namespaces=docx.oxml.ns.nsmap
+                    "%s@descr" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )
                 description = descriptions[0] if descriptions else ""
 
