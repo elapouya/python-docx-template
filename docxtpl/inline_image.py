@@ -64,7 +64,7 @@ class InlineImage(object):
 
     def _insert_image(self) -> str:
         rendering_part = self.tpl.current_rendering_part
-        pic = rendering_part.new_pic_inline(  # type:ignore[union-attr]
+        pic = rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
             self.height,

@@ -380,7 +380,7 @@ class DocxTemplate:
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml.encode("utf-8")
 
-    def resolve_listing(self, xml) -> str:
+    def resolve_listing(self, xml: str) -> str:
         def resolve_text(run_properties, paragraph_properties, m) -> str:
             xml = m.group(0).replace(
                 "\t",
