@@ -21,7 +21,7 @@ class InlineImage(object):
     """
 
     tpl: DocxTemplate = None  # type:ignore[assignment]
-    image_descriptor = None
+    image_descriptor: str | IO[bytes] = None  # type:ignore[assignment]
     width: int | Length | None = None
     height: int | Length | None = None
     anchor = None
