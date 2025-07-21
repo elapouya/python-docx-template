@@ -4,6 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
+
 from __future__ import annotations
 
 import binascii
@@ -232,9 +233,7 @@ class DocxTemplate:
         # Use ``{% hm %}`` to make table cell become horizontally merged within
         # a ``{% for %}``.
         def h_merge_tc(m) -> str:
-            xml_to_patch = (
-                m.group()
-            )  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
+            xml_to_patch = m.group()  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
 
             def with_gridspan(m1) -> str:
                 return (
@@ -319,7 +318,7 @@ class DocxTemplate:
                 line_number = max(exc.lineno - 4, 0)
                 exc.docx_context = map(  # type:ignore[attr-defined]
                     lambda x: re.sub(r"<[^>]+>", "", x),
-                    src_xml.splitlines()[line_number: (line_number + 7)],  # fmt: skip
+                    src_xml.splitlines()[line_number : (line_number + 7)],  # fmt: skip
                 )
 
             raise exc
@@ -830,14 +829,8 @@ class DocxTemplate:
         for gd in gds:  # type:ignore[union-attr]
             rel = None
             # Either IMAGE, CHART, SMART_ART, ...
-            if not hasattr(gd, "attrib"):
-                continue
             try:
-                uri = gd.attrib["uri"]
-            except KeyError:
-                continue
-            try:
-                if uri == docx.oxml.ns.nsmap["pic"]:
+                if gd.attrib["uri"] == docx.oxml.ns.nsmap["pic"]:  # type:ignore[union-attr]
                     # Either PICTURE or LINKED_PICTURE image
                     blip = gd.xpath(  # type:ignore[union-attr,index]
                         "pic:pic/pic:blipFill/a:blip", namespaces=docx.oxml.ns.nsmap

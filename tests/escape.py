@@ -1,4 +1,4 @@
-from docxtpl import DocxTemplate, R, Listing
+from docxtpl import DocxTemplate, Listing, R
 
 tpl = DocxTemplate("templates/escape_tpl.docx")
 

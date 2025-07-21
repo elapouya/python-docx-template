@@ -5,8 +5,9 @@ Created : 2015-03-12
 @author: sandeeprah, Eric Lapouyade
 """
 
-from docxtpl import DocxTemplate
 import jinja2
+
+from docxtpl import DocxTemplate
 
 jinja_env = jinja2.Environment()
 

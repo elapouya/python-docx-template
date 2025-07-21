@@ -5,11 +5,12 @@ Created : 2017-01-14
 @author: Eric Lapouyade
 """
 
-from docxtpl import DocxTemplate, InlineImage
+import jinja2
 
 # for height and width you have to use millimeters (Mm), inches or points(Pt) class :
 from docx.shared import Mm
-import jinja2
+
+from docxtpl import DocxTemplate, InlineImage
 
 tpl = DocxTemplate("templates/inline_image_tpl.docx")
 

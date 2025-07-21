@@ -4,6 +4,7 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
 try:
     from html import escape
 except ImportError:

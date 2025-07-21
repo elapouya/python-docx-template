@@ -4,7 +4,9 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
 from __future__ import annotations
+
 from typing import IO
 
 from docx.oxml import OxmlElement, parse_xml
@@ -63,8 +65,7 @@ class InlineImage(object):
         return run
 
     def _insert_image(self) -> str:
-        rendering_part = self.tpl.current_rendering_part
-        pic = rendering_part.new_pic_inline(
+        pic = self.tpl.current_rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
             self.height,
@@ -72,7 +73,9 @@ class InlineImage(object):
         if self.anchor:
             run = parse_xml(pic)
             if run.xpath(".//a:blip"):
-                hyperlink = self._add_hyperlink(run, self.anchor, rendering_part)
+                hyperlink = self._add_hyperlink(
+                    run, self.anchor, self.tpl.current_rendering_part
+                )
                 pic = hyperlink.xml
 
         return (

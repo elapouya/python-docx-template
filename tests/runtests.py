@@ -1,6 +1,6 @@
-import subprocess
 import glob
 import os
+import subprocess
 
 tests = sorted(glob.glob("[A-Za-z]*.py"))
 excludes = ["runtests.py"]

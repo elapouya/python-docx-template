@@ -4,7 +4,9 @@ Created : 2021-12-20
 
 @author: Eric Lapouyade
 """
+
 from __future__ import annotations
+
 from typing import Any
 
 from docxtpl import DocxTemplate

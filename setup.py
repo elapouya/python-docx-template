@@ -1,7 +1,8 @@
-from setuptools import setup
 import os
 import re
 import sys
+
+from setuptools import setup
 
 # To register onto Pypi :
 # python setup.py sdist bdist_wheel upload
