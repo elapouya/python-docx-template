@@ -14,7 +14,6 @@ jobs:
           - "3.10"
           - "3.9"
           - "3.8"
-          - "3.7"
       fail-fast: false
     steps:
       - name: Dump GitHub context
@@ -34,3 +33,18 @@ jobs:
           python setup.py install
       - name: Test
         run: python tests/runtest.py
+
+  test_py37:
+    runs-on: ubuntu-latest
+    container: python:3.7-slim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Install Dependencies
+        run: |
+          python3.7 -m ensurepip
+          python3.7 -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python3.7 setup.py install
+      - name: Test
+        run: python3.7 tests/runtest.py
