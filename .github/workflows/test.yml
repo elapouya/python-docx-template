@@ -32,7 +32,7 @@ jobs:
           pip install -r requirements.txt
           python setup.py install
       - name: Test
-        run: python tests/runtest.py
+        run: python tests/runtests.py
 
   test_py37:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
           pip install -r requirements.txt
           python3.7 setup.py install
       - name: Test
-        run: python3.7 tests/runtest.py
+        run: python3.7 tests/runtests.py
