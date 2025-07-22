@@ -25,11 +25,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python setup.py install
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --all-extras
       - name: Test
         run: python tests/runtests.py
 
@@ -39,11 +37,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install Dependencies
-        run: |
-          python3.7 -m ensurepip
-          python3.7 -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python3.7 setup.py install
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --all-extras
       - name: Test
         run: python3.7 tests/runtests.py

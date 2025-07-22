@@ -286,6 +286,8 @@ Please see tests/inline_image.py for an example.
 Sub-documents
 -------------
 
+> Need to install with the subdoc extra: `pip install "docxtpl[subdoc]"`
+
 A template variable can contain a complex subdoc object and be built from scratch using python-docx document methods.
 To do so, first, get the sub-document object from your template object, then use it by treating it as a python-docx document object.
 See example in `tests/subdoc.py`.
