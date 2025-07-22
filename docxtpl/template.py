@@ -25,12 +25,12 @@ from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 from lxml import etree
 
-from .subdoc import Subdoc
-
 if TYPE_CHECKING:
     from docx.document import Document as _Document
     from docx.oxml.document import CT_Document
     from docx.parts.story import StoryPart
+
+    from .subdoc import Subdoc
 
     class DocumentObject(_Document):
         _element: CT_Document
@@ -622,6 +622,8 @@ class DocxTemplate:
             elt.attrib["id"] = str(self.docx_ids_index)
 
     def new_subdoc(self, docpath=None) -> Subdoc:
+        from .subdoc import Subdoc
+
         self.init_docx()
         return Subdoc(self, docpath)
 

@@ -11,5 +11,8 @@ __version__ = "0.20.1"
 from .inline_image import InlineImage
 from .listing import Listing
 from .richtext import RichText, R, RichTextParagraph, RP
-from .subdoc import Subdoc
 from .template import DocxTemplate
+try:
+    from .subdoc import Subdoc
+except ImportError:
+    pass
