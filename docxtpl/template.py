@@ -318,7 +318,7 @@ class DocxTemplate:
                 line_number = max(exc.lineno - 4, 0)
                 exc.docx_context = map(  # type:ignore[attr-defined]
                     lambda x: re.sub(r"<[^>]+>", "", x),
-                    src_xml.splitlines()[line_number : (line_number + 7)],  # fmt: skip
+                    src_xml.splitlines()[line_number: (line_number + 7)],  # fmt: skip
                 )
 
             raise exc
