@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
       - name: Test
-        run: python tests/runtests.py
+        run: uv run python tests/runtests.py
       - name: Build
         run: uv build
 
@@ -41,8 +41,10 @@ jobs:
       - uses: actions/setup-python@v5
       - uses: astral-sh/setup-uv@v6
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --all-extras --python=python3.7
       - name: Test
-        run: python3.7 tests/runtests.py
+        run: |
+          uv run python tests/runtests.py
+          uv run python -V
       - name: Build
         run: uv build --python=python3.7
