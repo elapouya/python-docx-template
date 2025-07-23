@@ -30,6 +30,8 @@ jobs:
         run: uv sync --all-extras
       - name: Test
         run: python tests/runtests.py
+      - name: Build
+        run: uv build
 
   test_py37:
     runs-on: ubuntu-latest
@@ -42,3 +44,5 @@ jobs:
         run: uv sync --all-extras
       - name: Test
         run: python3.7 tests/runtests.py
+      - name: Build
+        run: uv build --python=python3.7

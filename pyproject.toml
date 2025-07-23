@@ -64,3 +64,8 @@ ignore_missing_imports = true
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.pdm.scripts]
+style = "flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__"
+type = "mypy ."
+check = {composite = ["style", "type {args}"]}
