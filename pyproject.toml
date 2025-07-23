@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Python docx template engine"
 authors = [{name="Eric Lapouyade", email="elapouya@proton.me"}]
 readme = "README.rst"
-license = "LGPL 2.1"
+license = {text="LGPL-2.1-only"}
 requires-python = ">=3.7"
 classifiers=[
     "Intended Audience :: Developers",
