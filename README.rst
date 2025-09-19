@@ -9,8 +9,8 @@ Introduction
 
 This package uses 2 major packages :
 
-- [python-docx](https://github.com/python-openxml/python-docx) for reading, writing and creating sub documents
-- [jinja2](https://github.com/pallets/jinja) for managing tags inserted into the template docx
+- `python-docx <https://github.com/python-openxml/python-docx>`_ for reading, writing and creating sub documents
+- `jinja2 <https://github.com/pallets/jinja>`_ for managing tags inserted into the template docx
 
 python-docx-template has been created because python-docx is powerful for creating documents but not for modifying them.
 
