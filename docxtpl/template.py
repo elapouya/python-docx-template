@@ -6,8 +6,7 @@ Created : 2015-03-12
 """
 
 from os import PathLike
-from typing import Any, Optional, IO, Union, Dict, Set
-from .subdoc import Subdoc
+from typing import TYPE_CHECKING, Any, Optional, IO, Union, Dict, Set
 import functools
 import io
 from lxml import etree
@@ -28,6 +27,9 @@ import re
 import binascii
 import os
 import zipfile
+
+if TYPE_CHECKING:
+    from .subdoc import Subdoc
 
 
 class DocxTemplate(object):
@@ -610,7 +612,9 @@ class DocxTemplate(object):
             self.docx_ids_index += 1
             elt.attrib["id"] = str(self.docx_ids_index)
 
-    def new_subdoc(self, docpath=None):
+    def new_subdoc(self, docpath=None) -> Subdoc:
+        from .subdoc import Subdoc
+
         self.init_docx()
         return Subdoc(self, docpath)
 
