@@ -31,7 +31,7 @@ docs = ["Sphinx", "sphinxcontrib-napoleon"]
 
 [dependency-groups]
 dev = [
-    "mypy >=1.17.0; python_version >= '3.9'",
+    "mypy >=1.18.2; python_version >= '3.9'",
     "lxml-stubs >=0.5.1; python_version >= '3.9'",
     "flake8 >=7.3.0; python_version >= '3.9'"
 ]
