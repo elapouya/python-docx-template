@@ -1,5 +1,6 @@
-from docxtpl import DocxTemplate
 from jinja2.exceptions import TemplateError
+
+from docxtpl import DocxTemplate
 
 print("=" * 80)
 print("Generating template error for testing (so it is safe to ignore) :")

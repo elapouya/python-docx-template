@@ -1,7 +1,8 @@
-from setuptools import setup
 import os
 import re
 import sys
+
+from setuptools import setup
 
 # To register onto Pypi :
 # python setup.py sdist bdist_wheel upload
@@ -61,6 +62,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
     keywords="jinja2",
     url="https://github.com/elapouya/python-docx-template",
@@ -68,8 +70,8 @@ setup(
     license="LGPL-2.1-only",
     license_files=[],
     packages=["docxtpl"],
-    install_requires=["python-docx>=1.1.1", "docxcompose", "jinja2", "lxml"],
-    extras_require={"docs": ["Sphinx", "sphinxcontrib-napoleon"]},
+    install_requires=["python-docx>=1.1.1", "jinja2", "lxml"],
+    extras_require={"docs": ["Sphinx", "sphinxcontrib-napoleon"], "subdoc": ["docxcompose"]},
     eager_resources=["docs"],
     zip_safe=False,
 )
