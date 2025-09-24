@@ -1,22 +1,70 @@
-[tool.poetry]
+[project]
 name = "docxtpl"
-version = "0.17.0"
+dynamic = ["version"]
 description = "Python docx template engine"
-authors = ["Eric Lapouyade"]
+authors = [{name="Eric Lapouyade", email="elapouya@proton.me"}]
 readme = "README.rst"
+requires-python = ">=3.7"
+license = {text="LGPL-2.1-only"}
+classifiers=[
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = ["jinja2"]
+dependencies = [
+    "python-docx",
+    "jinja2",
+    "lxml",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-python-docx = "^1.1.2"
-docxcompose = "^1.4.0"
-jinja2 = "^3.1.4"
-black = "^24.4.2"
-twine = "^6.1.0"
+[project.optional-dependencies]
+subdoc = ["docxcompose"]
+docs = ["Sphinx", "sphinxcontrib-napoleon"]
 
+[dependency-groups]
+dev = [
+    "mypy >=1.18.2; python_version >= '3.9'",
+    "lxml-stubs >=0.5.1; python_version >= '3.9'",
+    "flake8 >=7.3.0; python_version >= '3.9'"
+]
 
-[tool.poetry.group.dev.dependencies]
-flake8 = "^7.1.0"
+[project.urls]
+homepage = "https://github.com/elapouya/python-docx-template"
+repository = "https://github.com/elapouya/python-docx-template.git"
+document = "https://docxtpl.readthedocs.org"
+
+[tool.poetry]
+version = "0.0.0"
+
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.from-file]
+source = "docxtpl/__init__.py"
+pattern = '__version__ = "(.+)"'
+
+[tool.mypy]
+pretty = true
+python_version = "3.9"
+check_untyped_defs = true
+warn_unused_ignores = true
+exclude = ["docs", "build", "setup.py"]
+
+[[tool.mypy.overrides]]
+module = ["docxcompose.*"]
+ignore_missing_imports = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core", "poetry-dynamic-versioning >=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
