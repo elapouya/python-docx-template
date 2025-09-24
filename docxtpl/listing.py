@@ -4,11 +4,8 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-try:
-    from html import escape
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape
+
+from ._compat import escape
 
 
 class Listing(object):
