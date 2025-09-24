@@ -41,14 +41,25 @@ homepage = "https://github.com/elapouya/python-docx-template"
 repository = "https://github.com/elapouya/python-docx-template.git"
 document = "https://docxtpl.readthedocs.org"
 
-[tool.pdm]
-version = {source="file", path="docxtpl/__init__.py"}
-
 [tool.poetry]
 version = '0.0.0'
 
-[tool.poetry-plugin-version]
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.from-file]
 source = "docxtpl/__init__.py"
+pattern = '__version__ = "(.+)"'
+
+[tool.pdm.version]
+source = "file"
+path = "docxtpl/__init__.py"
+
+[tool.pdm.scripts]
+style = "flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__"
 
 [tool.mypy]
 pretty = true
@@ -62,10 +73,5 @@ module = ["docxcompose.*"]
 ignore_missing_imports = true
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.scripts]
-style = "flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__"
-type = "mypy ."
-check = {composite = ["style", "type {args}"]}
+requires = ["poetry-core", "poetry-dynamic-versioning >=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
