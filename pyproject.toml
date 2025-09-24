@@ -44,8 +44,15 @@ document = "https://docxtpl.readthedocs.org"
 [tool.poetry]
 version = "0.0.0"
 
-[tool.poetry-plugin-version]
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.from-file]
 source = "docxtpl/__init__.py"
+pattern = '__version__ = "(.+)"'
 
 [tool.mypy]
 pretty = true
@@ -58,9 +65,6 @@ exclude = ["docs", "build", "setup.py"]
 module = ["docxcompose.*"]
 ignore_missing_imports = true
 
-[tool.pdm]
-version = {source="file", path="docxtpl/__init__.py"}
-
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["poetry-core", "poetry-dynamic-versioning >=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
