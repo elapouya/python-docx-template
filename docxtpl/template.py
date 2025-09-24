@@ -4,6 +4,7 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
+# mypy: ignore-errors
 
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Optional, IO, Union, Dict, Set
@@ -18,11 +19,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 
-try:
-    from html import escape  # noqa: F401
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # noqa: F401
+from ._compat import escape  # noqa: F401
 import re
 import binascii
 import os
