@@ -70,8 +70,8 @@ setup(
     license="LGPL-2.1-only",
     license_files=[],
     packages=["docxtpl"],
-    install_requires=["python-docx>=1.1.1", "docxcompose", "jinja2", "lxml"],
-    extras_require={"docs": ["Sphinx", "sphinxcontrib-napoleon"]},
+    install_requires=["python-docx>=1.1.1", "jinja2", "lxml"],
+    extras_require={"docs": ["Sphinx", "sphinxcontrib-napoleon"], "subdoc": ["docxcompose"]},
     eager_resources=["docs"],
     zip_safe=False,
 )

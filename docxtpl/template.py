@@ -7,7 +7,12 @@ Created : 2015-03-12
 
 from __future__ import annotations
 
+<<<<<<< HEAD
 import binascii
+=======
+from os import PathLike
+from typing import IO, TYPE_CHECKING, Any, Generator
+>>>>>>> type-hints
 import functools
 import io
 import os
@@ -25,6 +30,7 @@ from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 from lxml import etree
 
+<<<<<<< HEAD
 if TYPE_CHECKING:
     from docx.document import Document as _Document
     from docx.oxml.document import CT_Document
@@ -33,6 +39,26 @@ if TYPE_CHECKING:
     from .subdoc import Subdoc
 
     class DocumentObject(_Document):
+        _element: CT_Document
+=======
+from ._compat import escape  # noqa: F401
+import re
+import binascii
+import os
+import zipfile
+>>>>>>> type-hints
+
+if TYPE_CHECKING:
+    from docx.document import Document as _DocumentObject
+    from docx.oxml.document import CT_Document
+    from docx.parts.story import StoryPart
+    from .subdoc import Subdoc
+
+    # _element of docx.document.Document is CT_Document
+    # See: https://github.com/python-openxml/python-docx/blob/master/src/docx/document.py#L35
+    # But mypy cast it as 'BaseOxmlElement', and will raise 'has no attribute "body"' when calling `self.docx._element.body`
+    # So we have to use a custom DocumentObject class to reduce unnecessary `type:ignore` marks
+    class DocumentObject(_DocumentObject):
         _element: CT_Document
 
 
@@ -49,14 +75,22 @@ class DocxTemplate:
     def __init__(self, template_file: IO[bytes] | str | PathLike) -> None:
         self.template_file = template_file
         self.reset_replacements()
+<<<<<<< HEAD
         self.docx: DocumentObject = None  # type:ignore[assignment]
+=======
+        self.docx: DocumentObject = None  # type:ignore
+>>>>>>> type-hints
         self.is_rendered = False
         self.is_saved = False
         self.allow_missing_pics = False
 
     def init_docx(self, reload: bool = True) -> None:
         if not self.docx or (self.is_rendered and reload):
+<<<<<<< HEAD
             self.docx = Document(self.template_file)  # type:ignore[arg-type,assignment]
+=======
+            self.docx = Document(self.template_file)  # type:ignore
+>>>>>>> type-hints
             self.is_rendered = False
 
     def render_init(self) -> None:
@@ -66,10 +100,17 @@ class DocxTemplate:
         self.docx_ids_index = 1000
         self.is_saved = False
 
+<<<<<<< HEAD
     def __getattr__(self, name) -> Any:
         return getattr(self.docx, name)
 
     def xml_to_string(self, xml, encoding="unicode") -> str:
+=======
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.docx, name)
+
+    def xml_to_string(self, xml: etree._Element, encoding="unicode") -> str:
+>>>>>>> type-hints
         # Be careful : pretty_print MUST be set to False, otherwise patch_xml()
         # won't work properly
         return etree.tostring(xml, encoding="unicode", pretty_print=False)
@@ -233,7 +274,13 @@ class DocxTemplate:
         # Use ``{% hm %}`` to make table cell become horizontally merged within
         # a ``{% for %}``.
         def h_merge_tc(m) -> str:
+<<<<<<< HEAD
             xml_to_patch = m.group()  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
+=======
+            xml_to_patch = (
+                m.group()
+            )  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
+>>>>>>> type-hints
 
             def with_gridspan(m1) -> str:
                 return (
@@ -431,7 +478,11 @@ class DocxTemplate:
 
         return xml
 
+<<<<<<< HEAD
     def build_xml(self, context, jinja_env=None) -> str:
+=======
+    def build_xml(self, context: dict[str, Any], jinja_env=None) -> str:
+>>>>>>> type-hints
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
@@ -450,14 +501,22 @@ class DocxTemplate:
     def get_part_xml(self, part) -> str:
         return self.xml_to_string(parse_xml(part.blob))
 
+<<<<<<< HEAD
     def get_headers_footers_encoding(self, xml) -> str:
+=======
+    def get_headers_footers_encoding(self, xml: str) -> str:
+>>>>>>> type-hints
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"', xml, re.I)
         if m:
             return m.group(1)
         return "utf-8"
 
     def build_headers_footers_xml(
+<<<<<<< HEAD
         self, context, uri, jinja_env=None
+=======
+        self, context: dict[str, Any], uri: str, jinja_env=None
+>>>>>>> type-hints
     ) -> Generator[tuple[str, bytes]]:
         for relKey, part in self.get_headers_footers(uri):
             xml = self.get_part_xml(part)
@@ -757,9 +816,15 @@ class DocxTemplate:
     def post_processing(self, docx_file) -> None:
         if self.crc_to_new_media or self.crc_to_new_embedded or self.zipname_to_replace:
             if hasattr(docx_file, "read"):
+<<<<<<< HEAD
                 bytes_io = io.BytesIO()
                 DocxTemplate(docx_file).save(bytes_io)
                 bytes_io.seek(0)
+=======
+                tmp_file: IO[bytes] | str = io.BytesIO()
+                DocxTemplate(docx_file).save(tmp_file)
+                tmp_file.seek(0)  # type:ignore[union-attr]
+>>>>>>> type-hints
                 docx_file.seek(0)
                 docx_file.truncate()
                 docx_file.seek(0)
@@ -823,6 +888,10 @@ class DocxTemplate:
         return self.pic_map
 
     def _replace_docx_part_pics(self, doc_part, replaced_pics) -> None:
+<<<<<<< HEAD
+=======
+
+>>>>>>> type-hints
         et = etree.fromstring(doc_part.blob)
 
         part_map: dict = {}
@@ -837,12 +906,19 @@ class DocxTemplate:
                     blip = gd.xpath(  # type:ignore[union-attr,index]
                         "pic:pic/pic:blipFill/a:blip", namespaces=docx.oxml.ns.nsmap
                     )[0]
+<<<<<<< HEAD
                     dest = blip.xpath(  # type:ignore[union-attr]
                         "@r:embed", namespaces=docx.oxml.ns.nsmap
                     )
                     try:
                         rel = dest[0]  # type:ignore[index]
                     except (IndexError, KeyError, TypeError):
+=======
+                    dest = blip.xpath("@r:embed", namespaces=docx.oxml.ns.nsmap)  # type:ignore
+                    if len(dest) > 0:  # type:ignore[arg-type]
+                        rel = dest[0]  # type:ignore[index]
+                    else:
+>>>>>>> type-hints
                         continue
                 else:
                     continue
@@ -854,6 +930,7 @@ class DocxTemplate:
                 titles = gd.xpath(  # type:ignore[union-attr]
                     "%s@title" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )
+<<<<<<< HEAD
                 title = titles[0] if titles else ""  # type:ignore[index]
                 descriptions = gd.xpath(  # type:ignore[union-attr]
                     "%s@descr" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
@@ -861,6 +938,19 @@ class DocxTemplate:
                 description = (
                     descriptions[0] if descriptions else ""  # type:ignore[index]
                 )
+=======
+                if titles:
+                    title = titles[0]  # type:ignore[index]
+                else:
+                    title = ""
+                descriptions = gd.xpath(  # type:ignore[union-attr]
+                    "%s@descr" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
+                )
+                if descriptions:
+                    description = descriptions[0]  # type:ignore[index]
+                else:
+                    description = ""
+>>>>>>> type-hints
 
                 part_map[filename] = (
                     doc_part.rels[rel].target_ref,

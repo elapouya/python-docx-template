@@ -12,3 +12,7 @@ from .inline_image import InlineImage
 from .listing import Listing
 from .richtext import RichText, R, RichTextParagraph, RP
 from .template import DocxTemplate
+try:
+    from .subdoc import Subdoc
+except ImportError:
+    pass

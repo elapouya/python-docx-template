@@ -5,11 +5,15 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
+<<<<<<< HEAD
 try:
     from html import escape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
     from cgi import escape  # type:ignore[attr-defined,no-redef]
+=======
+from ._compat import escape
+>>>>>>> type-hints
 
 
 class Listing(object):

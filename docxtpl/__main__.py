@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -11,7 +13,7 @@ OVERWRITE_ARG = "overwrite"
 QUIET_ARG = "quiet"
 
 
-def make_arg_parser():
+def make_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         usage="python -m docxtpl [-h] [-o] [-q] {} {} {}".format(
             TEMPLATE_ARG, JSON_ARG, OUTPUT_ARG
@@ -42,7 +44,7 @@ def make_arg_parser():
     return parser
 
 
-def get_args(parser):
+def get_args(parser) -> dict:
     try:
         parsed_args = vars(parser.parse_args())
         return parsed_args
@@ -57,7 +59,7 @@ def get_args(parser):
             )
 
 
-def is_argument_valid(arg_name, arg_value, overwrite):
+def is_argument_valid(arg_name: str, arg_value: str, overwrite: bool) -> bool | None:
     # Basic checks for the arguments
     if arg_name == TEMPLATE_ARG:
         return os.path.isfile(arg_value) and arg_value.endswith(".docx")
@@ -69,9 +71,10 @@ def is_argument_valid(arg_name, arg_value, overwrite):
         )
     elif arg_name in [OVERWRITE_ARG, QUIET_ARG]:
         return arg_value in [True, False]
+    return None
 
 
-def check_exists_ask_overwrite(arg_value, overwrite):
+def check_exists_ask_overwrite(arg_value: str, overwrite: bool) -> bool:
     # If output file does not exist or command was run with overwrite option,
     # returns True, else asks for overwrite confirmation. If overwrite is
     # confirmed returns True, else raises OSError.
@@ -93,7 +96,7 @@ def check_exists_ask_overwrite(arg_value, overwrite):
         return True
 
 
-def validate_all_args(parsed_args):
+def validate_all_args(parsed_args: dict) -> None:
     overwrite = parsed_args[OVERWRITE_ARG]
     # Raises AssertionError if any of the arguments is not validated
     try:
@@ -108,7 +111,7 @@ def validate_all_args(parsed_args):
         )
 
 
-def get_json_data(json_path):
+def get_json_data(json_path) -> dict:
     with open(json_path) as file:
         try:
             json_data = json.load(file)
@@ -121,14 +124,14 @@ def get_json_data(json_path):
             raise RuntimeError("Failed to get json data.")
 
 
-def make_docxtemplate(template_path):
+def make_docxtemplate(template_path: str) -> DocxTemplate:
     try:
         return DocxTemplate(template_path)
     except TemplateError:
         raise RuntimeError("Could not create docx template.")
 
 
-def render_docx(doc, json_data):
+def render_docx(doc: DocxTemplate, json_data: dict) -> DocxTemplate:
     try:
         doc.render(json_data)
         return doc
@@ -136,7 +139,7 @@ def render_docx(doc, json_data):
         raise RuntimeError("An error ocurred while trying to render the docx")
 
 
-def save_file(doc, parsed_args):
+def save_file(doc: DocxTemplate, parsed_args: dict) -> None:
     try:
         output_path = parsed_args[OUTPUT_ARG]
         doc.save(output_path)
@@ -151,7 +154,7 @@ def save_file(doc, parsed_args):
         raise RuntimeError("Failed to save file.")
 
 
-def main():
+def main() -> None:
     parser = make_arg_parser()
     # Everything is in a try-except block that catches a RuntimeError that is
     # raised if any of the individual functions called cause an error

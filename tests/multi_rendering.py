@@ -4,6 +4,7 @@ Created : 2021-12-20
 
 @author: Eric Lapouyade
 """
+from typing import cast
 
 from __future__ import annotations
 
@@ -39,6 +40,10 @@ documents_data: list[dict[str, Any]] = [
 
 for document_data in documents_data:
     dest_file = document_data["dest_file"]
+<<<<<<< HEAD
     context: dict[str, str] = document_data["context"]
+=======
+    context = cast(dict, document_data["context"])
+>>>>>>> type-hints
     tpl.render(context)
     tpl.save("output/%s" % dest_file)

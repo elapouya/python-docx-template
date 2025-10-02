@@ -9,6 +9,7 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
+<<<<<<< HEAD
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -16,11 +17,31 @@ jobs:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
     - uses: astral-sh/setup-uv@v6
+=======
+    - uses: actions/checkout@v5
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
+>>>>>>> type-hints
     - name: Install dependencies
       run: uv sync --all-extras --all-groups
     - name: Lint with flake8
       run: |
         # stop the build if there are code styling problems. The GitHub editor is 127 chars wide.
+<<<<<<< HEAD
         uv run flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__
     - name: Check type hints
       run: uv run mypy .
+=======
+        flake8 . --count --max-line-length=127 --show-source --statistics
+    - name: Check type hints
+      run: |
+        pip install mypy lxml-stubs
+        mypy .
+    - name: Ensure library work without docxcompose
+      run: |
+        pip uninstall -y docxcompose
+        python -c "from docxtpl import *"
+>>>>>>> type-hints
