@@ -22,8 +22,6 @@ var/
 .installed.cfg
 *.egg
 tests/output/*
-.venv/
-.mypy_cache/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -64,3 +62,6 @@ target/
 
 #Pycharm
 .idea
+
+# In Project Virtual Environment
+.venv/

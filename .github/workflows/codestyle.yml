@@ -28,3 +28,7 @@ jobs:
       run: |
         pip install mypy lxml-stubs
         mypy .
+    - name: Ensure library work without docxcompose
+      run: |
+        pip uninstall docxcompose
+        python -c "from docxtpl import *"
