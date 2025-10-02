@@ -5,8 +5,10 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 """
 
+from __future__ import annotations
+
 from os import PathLike
-from typing import TYPE_CHECKING, Any, Optional, IO, Union, Dict, Set
+from typing import IO, TYPE_CHECKING, Any, Generator
 import functools
 import io
 from lxml import etree
@@ -18,18 +20,24 @@ from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
 
-try:
-    from html import escape  # noqa: F401
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # noqa: F401
+from ._compat import escape  # noqa: F401
 import re
 import binascii
 import os
 import zipfile
 
 if TYPE_CHECKING:
+    from docx.document import Document as _DocumentObject
+    from docx.oxml.document import CT_Document
+    from docx.parts.story import StoryPart
     from .subdoc import Subdoc
+
+    # _element of docx.document.Document is CT_Document
+    # See: https://github.com/python-openxml/python-docx/blob/master/src/docx/document.py#L35
+    # But mypy cast it as 'BaseOxmlElement', and will raise 'has no attribute "body"' when calling `self.docx._element.body`
+    # So we have to use a custom DocumentObject class to reduce unnecessary `type:ignore` marks
+    class DocumentObject(_DocumentObject):
+        _element: CT_Document
 
 
 class DocxTemplate(object):
@@ -42,46 +50,46 @@ class DocxTemplate(object):
         "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer"
     )
 
-    def __init__(self, template_file: Union[IO[bytes], str, PathLike]) -> None:
+    def __init__(self, template_file: IO[bytes] | str | PathLike) -> None:
         self.template_file = template_file
         self.reset_replacements()
-        self.docx = None
+        self.docx: DocumentObject = None  # type:ignore
         self.is_rendered = False
         self.is_saved = False
         self.allow_missing_pics = False
 
-    def init_docx(self, reload: bool = True):
+    def init_docx(self, reload: bool = True) -> None:
         if not self.docx or (self.is_rendered and reload):
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file)  # type:ignore
             self.is_rendered = False
 
-    def render_init(self):
+    def render_init(self) -> None:
         self.init_docx()
-        self.pic_map = {}
-        self.current_rendering_part = None
+        self.pic_map: dict = {}
+        self.current_rendering_part: StoryPart = None  # type:ignore[assignment]
         self.docx_ids_index = 1000
         self.is_saved = False
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return getattr(self.docx, name)
 
-    def xml_to_string(self, xml, encoding="unicode"):
+    def xml_to_string(self, xml: etree._Element, encoding="unicode") -> str:
         # Be careful : pretty_print MUST be set to False, otherwise patch_xml()
         # won't work properly
         return etree.tostring(xml, encoding="unicode", pretty_print=False)
 
-    def get_docx(self):
+    def get_docx(self) -> DocumentObject:
         self.init_docx()
         return self.docx
 
-    def get_xml(self):
+    def get_xml(self) -> str:
         return self.xml_to_string(self.docx._element.body)
 
-    def write_xml(self, filename):
+    def write_xml(self, filename: str | PathLike) -> None:
         with open(filename, "w") as fh:
             fh.write(self.get_xml())
 
-    def patch_xml(self, src_xml):
+    def patch_xml(self, src_xml: str) -> str:
         """Make a lots of cleaning to have a raw xml understandable by jinja2 :
         strip all unnecessary xml tags, manage table cell background color and colspan,
         unescape html entities, etc..."""
@@ -97,7 +105,7 @@ class DocxTemplate(object):
         # replace {{<some tags>jinja2 stuff<some other tags>}} by {{jinja2 stuff}}
         # same thing with {% ... %} and {# #}
         # "jinja2 stuff" could a variable, a 'if' etc... anything jinja2 will understand
-        def striptags(m):
+        def striptags(m) -> str:
             return re.sub(
                 "</w:t>.*?(<w:t>|<w:t [^>]*>)", "", m.group(0), flags=re.DOTALL
             )
@@ -110,7 +118,7 @@ class DocxTemplate(object):
         )
 
         # manage table cell colspan
-        def colspan(m):
+        def colspan(m) -> str:
             cell_xml = m.group(1) + m.group(3)
             cell_xml = re.sub(
                 r"<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>",
@@ -133,7 +141,7 @@ class DocxTemplate(object):
         )
 
         # manage table cell background color
-        def cellbg(m):
+        def cellbg(m) -> str:
             cell_xml = m.group(1) + m.group(3)
             cell_xml = re.sub(
                 r"<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>",
@@ -199,8 +207,8 @@ class DocxTemplate(object):
         # add vMerge
         # use {% vm %} to make this table cell and its copies
         # be vertically merged within a {% for %}
-        def v_merge_tc(m):
-            def v_merge(m1):
+        def v_merge_tc(m) -> str:
+            def v_merge(m1) -> str:
                 return (
                     '<w:vMerge w:val="{% if loop.first %}restart{% else %}continue{% endif %}"/>'
                     + m1.group(1)  # Everything between ``</w:tcPr>`` and ``<w:t>``.
@@ -228,12 +236,12 @@ class DocxTemplate(object):
 
         # Use ``{% hm %}`` to make table cell become horizontally merged within
         # a ``{% for %}``.
-        def h_merge_tc(m):
+        def h_merge_tc(m) -> str:
             xml_to_patch = (
                 m.group()
             )  # Everything between ``</w:tc>`` and ``</w:tc>`` with ``{% hm %}`` inside.
 
-            def with_gridspan(m1):
+            def with_gridspan(m1) -> str:
                 return (
                     m1.group(1)  # ``w:gridSpan w:val="``.
                     + "{{ "
@@ -242,7 +250,7 @@ class DocxTemplate(object):
                     + m1.group(3)  # Closing quotation mark.
                 )
 
-            def without_gridspan(m2):
+            def without_gridspan(m2) -> str:
                 return (
                     '<w:gridSpan w:val="{{ loop.length }}"/>'
                     + m2.group(1)  # Everything between ``</w:tcPr>`` and ``<w:t>``.
@@ -285,7 +293,7 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
 
-        def clean_tags(m):
+        def clean_tags(m) -> str:
             return (
                 m.group(0)
                 .replace(r"&#8216;", "'")
@@ -301,7 +309,9 @@ class DocxTemplate(object):
 
         return src_xml
 
-    def render_xml_part(self, src_xml, part, context, jinja_env=None):
+    def render_xml_part(
+        self, src_xml: str, part: StoryPart, context: dict[str, Any], jinja_env=None
+    ) -> str:
         src_xml = re.sub(r"<w:p([ >])", r"\n<w:p\1", src_xml)
         try:
             self.current_rendering_part = part
@@ -313,7 +323,7 @@ class DocxTemplate(object):
         except TemplateError as exc:
             if hasattr(exc, "lineno") and exc.lineno is not None:
                 line_number = max(exc.lineno - 4, 0)
-                exc.docx_context = map(
+                exc.docx_context = map(  # type:ignore[attr-defined]
                     lambda x: re.sub(r"<[^>]+>", "", x),
                     src_xml.splitlines()[line_number: (line_number + 7)],  # fmt: skip
                 )
@@ -330,7 +340,7 @@ class DocxTemplate(object):
         return dst_xml
 
     def render_properties(
-        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+        self, context: dict[str, Any], jinja_env: Environment | None = None
     ) -> None:
         # List of string attributes of docx.opc.coreprops.CoreProperties which are strings.
         # It seems that some attributes cannot be written as strings. Those are commented out.
@@ -357,7 +367,7 @@ class DocxTemplate(object):
             setattr(self.docx.core_properties, prop, rendered)
 
     def render_footnotes(
-        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+        self, context: dict[str, Any], jinja_env: Environment | None = None
     ) -> None:
         if jinja_env is None:
             jinja_env = Environment()
@@ -376,9 +386,8 @@ class DocxTemplate(object):
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml.encode("utf-8")
 
-    def resolve_listing(self, xml):
-
-        def resolve_text(run_properties, paragraph_properties, m):
+    def resolve_listing(self, xml: str) -> str:
+        def resolve_text(run_properties, paragraph_properties, m) -> str:
             xml = m.group(0).replace(
                 "\t",
                 "</w:t></w:r>"
@@ -401,9 +410,9 @@ class DocxTemplate(object):
             )
             return xml
 
-        def resolve_run(paragraph_properties, m):
-            run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
-            run_properties = run_properties.group(0) if run_properties else ""
+        def resolve_run(paragraph_properties, m) -> str:
+            m_run_properties = re.search(r"<w:rPr>.*?</w:rPr>", m.group(0))
+            run_properties = m_run_properties.group(0) if m_run_properties else ""
             return re.sub(
                 r"<w:t(?: [^>]*)?>.*?</w:t>",
                 lambda x: resolve_text(run_properties, paragraph_properties, x),
@@ -411,10 +420,10 @@ class DocxTemplate(object):
                 flags=re.DOTALL,
             )
 
-        def resolve_paragraph(m):
-            paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
+        def resolve_paragraph(m) -> str:
+            m_paragraph_properties = re.search(r"<w:pPr>.*?</w:pPr>", m.group(0))
             paragraph_properties = (
-                paragraph_properties.group(0) if paragraph_properties else ""
+                m_paragraph_properties.group(0) if m_paragraph_properties else ""
             )
             return re.sub(
                 r"<w:r(?: [^>]*)?>.*?</w:r>",
@@ -429,32 +438,34 @@ class DocxTemplate(object):
 
         return xml
 
-    def build_xml(self, context, jinja_env=None):
+    def build_xml(self, context: dict[str, Any], jinja_env=None) -> str:
         xml = self.get_xml()
         xml = self.patch_xml(xml)
         xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
         return xml
 
-    def map_tree(self, tree):
+    def map_tree(self, tree) -> None:
         root = self.docx._element
         body = root.body
         root.replace(body, tree)
 
-    def get_headers_footers(self, uri):
+    def get_headers_footers(self, uri: str) -> Generator[tuple[str, StoryPart]]:
         for relKey, val in self.docx._part.rels.items():
             if (val.reltype == uri) and (val.target_part.blob):
                 yield relKey, val.target_part
 
-    def get_part_xml(self, part):
+    def get_part_xml(self, part) -> str:
         return self.xml_to_string(parse_xml(part.blob))
 
-    def get_headers_footers_encoding(self, xml):
+    def get_headers_footers_encoding(self, xml: str) -> str:
         m = re.match(r'<\?xml[^\?]+\bencoding="([^"]+)"', xml, re.I)
         if m:
             return m.group(1)
         return "utf-8"
 
-    def build_headers_footers_xml(self, context, uri, jinja_env=None):
+    def build_headers_footers_xml(
+        self, context: dict[str, Any], uri: str, jinja_env=None
+    ) -> Generator[tuple[str, bytes]]:
         for relKey, part in self.get_headers_footers(uri):
             xml = self.get_part_xml(part)
             encoding = self.get_headers_footers_encoding(xml)
@@ -462,7 +473,7 @@ class DocxTemplate(object):
             xml = self.render_xml_part(xml, part, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
-    def map_headers_footers_xml(self, relKey, xml):
+    def map_headers_footers_xml(self, relKey, xml) -> None:
         part = self.docx._part.rels[relKey].target_part
         new_part = XmlPart.load(part.partname, part.content_type, xml, part.package)
         for rId, rel in part.rels.items():
@@ -471,8 +482,8 @@ class DocxTemplate(object):
 
     def render(
         self,
-        context: Dict[str, Any],
-        jinja_env: Optional[Environment] = None,
+        context: dict[str, Any],
+        jinja_env: Environment | None = None,
         autoescape: bool = False,
     ) -> None:
         # init template working attributes
@@ -515,7 +526,7 @@ class DocxTemplate(object):
 
     # using of TC tag in for cycle can cause that count of columns does not
     # correspond to real count of columns in row. This function is able to fix it.
-    def fix_tables(self, xml):
+    def fix_tables(self, xml: str) -> etree._Element:
         parser = etree.XMLParser(recover=True)
         tree = etree.fromstring(xml, parser=parser)
         # get namespace
@@ -523,6 +534,8 @@ class DocxTemplate(object):
         # walk trough xml and find table
         for t in tree.iter(ns + "tbl"):
             tblGrid = t.find(ns + "tblGrid")
+            if tblGrid is None:
+                continue
             columns = tblGrid.findall(ns + "gridCol")
             to_add = 0
             # walk trough all rows and try to find if there is higher cell count
@@ -536,25 +549,24 @@ class DocxTemplate(object):
                 # (we want to preserve it)
                 width = 0.0
                 new_average = None
+                ns_w = ns + "w"
                 for c in columns:
-                    if not c.get(ns + "w") is None:
-                        width += float(c.get(ns + "w"))
+                    w = c.get(ns_w)
+                    if w is not None:
+                        width += float(w)
                 # try to keep proportion of table
                 if width > 0:
                     old_average = width / len(columns)
                     new_average = width / (len(columns) + to_add)
                     # scale the old columns
                     for c in columns:
-                        c.set(
-                            ns + "w",
-                            str(
-                                int(float(c.get(ns + "w")) * new_average / old_average)
-                            ),
-                        )
+                        w = c.get(ns_w)
+                        if w is not None:
+                            c.set(ns_w, str(int(float(w) * new_average / old_average)))
                     # add new columns
                     for i in range(to_add):
                         etree.SubElement(
-                            tblGrid, ns + "gridCol", {ns + "w": str(int(new_average))}
+                            tblGrid, ns + "gridCol", {ns_w: str(int(new_average))}
                         )
 
             # Refetch columns after columns addition.
@@ -563,7 +575,7 @@ class DocxTemplate(object):
 
             cells_len_max = 0
 
-            def get_cell_len(total, cell):
+            def get_cell_len(total: int, cell) -> int:
                 tc_pr = cell.find(ns + "tcPr")
                 grid_span = None if tc_pr is None else tc_pr.find(ns + "gridSpan")
 
@@ -587,8 +599,11 @@ class DocxTemplate(object):
                 # table back to its original width.
                 removed_width = 0.0
 
+                ns_w = ns + "w"
                 for c in columns[-to_remove:]:
-                    removed_width += float(c.get(ns + "w"))
+                    w = c.get(ns_w)
+                    if w is not None:
+                        removed_width += float(w)
 
                     tblGrid.remove(c)
 
@@ -598,15 +613,16 @@ class DocxTemplate(object):
                 # left after extras removal.
                 extra_space = 0
                 if len(columns_left) > 0:
-                    extra_space = removed_width / len(columns_left)
-                    extra_space = int(extra_space)
+                    extra_space = int(removed_width / len(columns_left))
 
                 for c in columns_left:
-                    c.set(ns + "w", str(int(float(c.get(ns + "w")) + extra_space)))
+                    w = c.get(ns_w)
+                    if w is not None:
+                        c.set(ns_w, str(int(float(w)) + extra_space))
 
         return tree
 
-    def fix_docpr_ids(self, tree):
+    def fix_docpr_ids(self, tree) -> None:
         # some Ids may have some collisions : so renumbering all of them :
         for elt in tree.xpath("//wp:docPr", namespaces=docx.oxml.ns.nsmap):
             self.docx_ids_index += 1
@@ -619,7 +635,7 @@ class DocxTemplate(object):
         return Subdoc(self, docpath)
 
     @staticmethod
-    def get_file_crc(file_obj):
+    def get_file_crc(file_obj: IO[bytes] | str | PathLike) -> int:
         if hasattr(file_obj, "read"):
             buf = file_obj.read()
         else:
@@ -629,7 +645,7 @@ class DocxTemplate(object):
         crc = binascii.crc32(buf) & 0xFFFFFFFF
         return crc
 
-    def replace_media(self, src_file, dst_file):
+    def replace_media(self, src_file, dst_file) -> None:
         """Replace one media by another one into a docx
 
         This has been done mainly because it is not possible to add images in
@@ -655,7 +671,7 @@ class DocxTemplate(object):
             with open(dst_file, "rb") as fh:
                 self.crc_to_new_media[crc] = fh.read()
 
-    def replace_pic(self, embedded_file, dst_file):
+    def replace_pic(self, embedded_file, dst_file) -> None:
         """Replace embedded picture with original-name given by embedded_file.
            (give only the file basename, not the full path)
            The new picture is given by dst_file (either a filename or a file-like
@@ -677,7 +693,7 @@ class DocxTemplate(object):
             with open(dst_file, "rb") as fh:
                 self.pics_to_replace[embedded_file] = fh.read()
 
-    def replace_embedded(self, src_file, dst_file):
+    def replace_embedded(self, src_file, dst_file) -> None:
         """Replace one embedded object by another one into a docx
 
         This has been done mainly because it is not possible to add images
@@ -694,7 +710,7 @@ class DocxTemplate(object):
             crc = self.get_file_crc(src_file)
             self.crc_to_new_embedded[crc] = fh.read()
 
-    def replace_zipname(self, zipname, dst_file):
+    def replace_zipname(self, zipname, dst_file) -> None:
         """Replace one file in the docx file
 
         First note that a MSWord .docx file is in fact a zip file.
@@ -724,7 +740,7 @@ class DocxTemplate(object):
         with open(dst_file, "rb") as fh:
             self.zipname_to_replace[zipname] = fh.read()
 
-    def reset_replacements(self):
+    def reset_replacements(self) -> None:
         """Reset replacement dictionaries
 
         This will reset data for image/embedded/zipname replacement
@@ -740,18 +756,17 @@ class DocxTemplate(object):
         If you instantiate DocxTemplate object before each render(),
         this method is useless.
         """
-        self.crc_to_new_media = {}
-        self.crc_to_new_embedded = {}
-        self.zipname_to_replace = {}
-        self.pics_to_replace = {}
+        self.crc_to_new_media: dict = {}
+        self.crc_to_new_embedded: dict = {}
+        self.zipname_to_replace: dict = {}
+        self.pics_to_replace: dict = {}
 
-    def post_processing(self, docx_file):
+    def post_processing(self, docx_file) -> None:
         if self.crc_to_new_media or self.crc_to_new_embedded or self.zipname_to_replace:
-
             if hasattr(docx_file, "read"):
-                tmp_file = io.BytesIO()
+                tmp_file: IO[bytes] | str = io.BytesIO()
                 DocxTemplate(docx_file).save(tmp_file)
-                tmp_file.seek(0)
+                tmp_file.seek(0)  # type:ignore[union-attr]
                 docx_file.seek(0)
                 docx_file.truncate()
                 docx_file.seek(0)
@@ -784,12 +799,11 @@ class DocxTemplate(object):
             if hasattr(docx_file, "read"):
                 docx_file.seek(0)
 
-    def pre_processing(self):
-
+    def pre_processing(self) -> None:
         if self.pics_to_replace:
             self._replace_pics()
 
-    def _replace_pics(self):
+    def _replace_pics(self) -> None:
         """Replaces pictures xml tags in the docx template with pictures provided by the user"""
 
         replaced_pics = {key: False for key in self.pics_to_replace}
@@ -811,49 +825,49 @@ class DocxTemplate(object):
                         "Picture %s not found in the docx template" % img_id
                     )
 
-    def get_pic_map(self):
+    def get_pic_map(self) -> dict:
         return self.pic_map
 
-    def _replace_docx_part_pics(self, doc_part, replaced_pics):
+    def _replace_docx_part_pics(self, doc_part, replaced_pics) -> None:
 
         et = etree.fromstring(doc_part.blob)
 
-        part_map = {}
+        part_map: dict = {}
 
         gds = et.xpath("//a:graphic/a:graphicData", namespaces=docx.oxml.ns.nsmap)
-        for gd in gds:
+        for gd in gds:  # type:ignore[union-attr]
             rel = None
             # Either IMAGE, CHART, SMART_ART, ...
             try:
-                if gd.attrib["uri"] == docx.oxml.ns.nsmap["pic"]:
+                if gd.attrib["uri"] == docx.oxml.ns.nsmap["pic"]:  # type:ignore[union-attr]
                     # Either PICTURE or LINKED_PICTURE image
-                    blip = gd.xpath(
+                    blip = gd.xpath(  # type:ignore[union-attr,index]
                         "pic:pic/pic:blipFill/a:blip", namespaces=docx.oxml.ns.nsmap
                     )[0]
-                    dest = blip.xpath("@r:embed", namespaces=docx.oxml.ns.nsmap)
-                    if len(dest) > 0:
-                        rel = dest[0]
+                    dest = blip.xpath("@r:embed", namespaces=docx.oxml.ns.nsmap)  # type:ignore
+                    if len(dest) > 0:  # type:ignore[arg-type]
+                        rel = dest[0]  # type:ignore[index]
                     else:
                         continue
                 else:
                     continue
 
                 non_visual_properties = "pic:pic/pic:nvPicPr/pic:cNvPr/"
-                filename = gd.xpath(
+                filename = gd.xpath(  # type:ignore[union-attr,index]
                     "%s@name" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )[0]
-                titles = gd.xpath(
+                titles = gd.xpath(  # type:ignore[union-attr]
                     "%s@title" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )
                 if titles:
-                    title = titles[0]
+                    title = titles[0]  # type:ignore[index]
                 else:
                     title = ""
-                descriptions = gd.xpath(
+                descriptions = gd.xpath(  # type:ignore[union-attr]
                     "%s@descr" % non_visual_properties, namespaces=docx.oxml.ns.nsmap
                 )
                 if descriptions:
-                    description = descriptions[0]
+                    description = descriptions[0]  # type:ignore[index]
                 else:
                     description = ""
 
@@ -880,26 +894,26 @@ class DocxTemplate(object):
         self.init_docx()
         return self.docx._part.relate_to(url, REL_TYPE.HYPERLINK, is_external=True)
 
-    def save(self, filename: Union[IO[bytes], str, PathLike], *args, **kwargs) -> None:
+    def save(self, filename: IO[bytes] | str | PathLike, *args, **kwargs) -> None:
         # case where save() is called without doing rendering
         # ( user wants only to replace image/embedded/zipname )
         if not self.is_saved and not self.is_rendered:
-            self.docx = Document(self.template_file)
+            self.docx = Document(self.template_file)  # type:ignore[arg-type,assignment]
         self.pre_processing()
-        self.docx.save(filename, *args, **kwargs)
+        self.docx.save(filename, *args, **kwargs)  # type:ignore[arg-type]
         self.post_processing(filename)
         self.is_saved = True
 
     def get_undeclared_template_variables(
         self,
-        jinja_env: Optional[Environment] = None,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Set[str]:
+        jinja_env: Environment | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> set[str]:
         # Create a temporary document to analyze the template without affecting the current state
-        temp_doc = Document(self.template_file)
+        temp_doc = Document(self.template_file)  # type:ignore[arg-type]
 
         # Get XML from the temporary document
-        xml = self.xml_to_string(temp_doc._element.body)
+        xml = self.xml_to_string(temp_doc._element.body)  # type:ignore[attr-defined]
         xml = self.patch_xml(xml)
 
         # Add headers and footers
