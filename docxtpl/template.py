@@ -32,7 +32,8 @@ if TYPE_CHECKING:
     from docx.parts.story import StoryPart
     from .subdoc import Subdoc
 
-    # _element of docx.document.Document is [CT_Document](https://github.com/python-openxml/python-docx/blob/e45454602b53e8e572b179ccf1c91093ec9f4ed7/src/docx/document.py#L35)
+    # _element of docx.document.Document is CT_Document
+    # See: https://github.com/python-openxml/python-docx/blob/master/src/docx/document.py#L35
     # But mypy cast it as 'BaseOxmlElement', and will raise 'has no attribute "body"' when calling `self.docx._element.body`
     # So we have to use a custom DocumentObject class to reduce unnecessary `type:ignore` marks
     class DocumentObject(_DocumentObject):
