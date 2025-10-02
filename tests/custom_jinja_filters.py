@@ -5,9 +5,8 @@ Created : 2015-03-12
 @author: sandeeprah, Eric Lapouyade
 """
 
-import jinja2
-
 from docxtpl import DocxTemplate
+import jinja2
 
 jinja_env = jinja2.Environment()
 

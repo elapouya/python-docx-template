@@ -5,9 +5,8 @@ Created : 2015-03-12
 @author: Eric Lapouyade
 """
 
-from docx.shared import Inches
-
 from docxtpl import DocxTemplate
+from docx.shared import Inches
 
 tpl = DocxTemplate("templates/subdoc_tpl.docx")
 

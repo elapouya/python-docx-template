@@ -5,9 +5,8 @@ Created : 2019-05-22
 @author: Eric Dufresne
 """
 
-import io
-
 from docxtpl import DocxTemplate
+import io
 
 DEST_FILE = "output/header_footer_image_file_obj.docx"
 DEST_FILE2 = "output/header_footer_image_file_obj2.docx"

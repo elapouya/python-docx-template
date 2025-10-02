@@ -4,13 +4,8 @@ dynamic = ["version"]
 description = "Python docx template engine"
 authors = [{name="Eric Lapouyade", email="elapouya@proton.me"}]
 readme = "README.rst"
-<<<<<<< HEAD
-license = {text="LGPL-2.1-only"}
-requires-python = ">=3.7"
-=======
 requires-python = ">=3.7"
 license = {text="LGPL-2.1-only"}
->>>>>>> type-hints
 classifiers=[
     "Intended Audience :: Developers",
     "Development Status :: 4 - Beta",
@@ -36,11 +31,7 @@ docs = ["Sphinx", "sphinxcontrib-napoleon"]
 
 [dependency-groups]
 dev = [
-<<<<<<< HEAD
-    "mypy >=1.17.0; python_version >= '3.9'",
-=======
     "mypy >=1.18.2; python_version >= '3.9'",
->>>>>>> type-hints
     "lxml-stubs >=0.5.1; python_version >= '3.9'",
     "flake8 >=7.3.0; python_version >= '3.9'"
 ]
@@ -49,25 +40,6 @@ dev = [
 homepage = "https://github.com/elapouya/python-docx-template"
 repository = "https://github.com/elapouya/python-docx-template.git"
 document = "https://docxtpl.readthedocs.org"
-<<<<<<< HEAD
-
-[tool.pdm]
-version = {source="file", path="docxtpl/__init__.py"}
-
-[tool.poetry]
-version = '0.0.0'
-
-[tool.poetry-plugin-version]
-source = "docxtpl/__init__.py"
-
-[tool.mypy]
-pretty = true
-python_version = "3.9"
-check_untyped_defs = true
-warn_unused_ignores = true
-exclude = ["docs", "build", "setup.py"]
-
-=======
 
 [tool.poetry]
 version = "0.0.0"
@@ -89,21 +61,10 @@ check_untyped_defs = true
 warn_unused_ignores = true
 exclude = ["docs", "build", "setup.py"]
 
->>>>>>> type-hints
 [[tool.mypy.overrides]]
 module = ["docxcompose.*"]
 ignore_missing_imports = true
 
 [build-system]
-<<<<<<< HEAD
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.scripts]
-style = "flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__"
-type = "mypy ."
-check = {composite = ["style", "type {args}"]}
-=======
 requires = ["poetry-core", "poetry-dynamic-versioning >=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
->>>>>>> type-hints
