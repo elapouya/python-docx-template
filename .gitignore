@@ -63,10 +63,10 @@ target/
 
 #Pycharm
 .idea
-<<<<<<< HEAD
+
+# Uv/Pdm
 .pdm-python
-=======
+.python-version
 
 # In Project Virtual Environment
 .venv/
->>>>>>> type-hints
