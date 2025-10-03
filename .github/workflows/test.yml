@@ -25,13 +25,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
-      - uses: astral-sh/setup-uv@v6
+      - name: Install and configure Poetry
+        run: |
+          pip install -U pip poetry
+          poetry env use ${{ matrix.python-version }}
       - name: Install dependencies
-        run: uv sync --all-extras --all-groups
+        run: poetry install --all-extras --all-groups
       - name: Test
-        run: uv run python tests/runtests.py
+        run: poetry run python tests/runtests.py
       - name: Build
-        run: uv build
+        run: poetry build
 
   test_py37:
     runs-on: ubuntu-latest
@@ -39,12 +42,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
-      - uses: astral-sh/setup-uv@v6
+      - name: Install and configure Poetry
+        run: |
+          pip install -U pip poetry
+          poetry env use 3.7
       - name: Install dependencies
-        run: uv sync --all-extras --all-groups --python=python3.7
+        run: poetry install --all-extras --all-groups
       - name: Test
         run: |
-          uv run python tests/runtests.py
-          uv run python -V
+          poetry run python tests/runtests.py
+          poetry run python -V
       - name: Build
-        run: uv build --python=python3.7
+        run: poetry build
