@@ -27,7 +27,7 @@ jobs:
           allow-prereleases: true
       - name: Install and configure Poetry
         run: |
-          pip install -U pip poetry
+          python3 -m pip install -U pip poetry
           poetry env use ${{ matrix.python-version }}
       - name: Install dependencies
         run: poetry install --all-extras --all-groups
@@ -42,9 +42,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
       - name: Install and configure Poetry
         run: |
-          pip install -U pip poetry
+          python3 -m pip install -U pip poetry
           poetry env use 3.7
       - name: Install dependencies
         run: poetry install --all-extras --all-groups
