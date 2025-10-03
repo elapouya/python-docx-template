@@ -5,11 +5,7 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
-try:
-    from html import escape
-except ImportError:
-    # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # type:ignore[attr-defined,no-redef]
+from ._compat import escape
 
 
 class RichText(object):
@@ -42,6 +38,7 @@ class RichText(object):
         rtl=False,
         lang=None,
     ):
+
         # If a RichText is added
         if isinstance(text, RichText):
             self.xml += text.xml
@@ -150,6 +147,7 @@ class RichTextParagraph(object):
         text,
         parastyle=None,
     ):
+
         # If a RichText is added
         if not isinstance(text, RichText):
             text = RichText(text)

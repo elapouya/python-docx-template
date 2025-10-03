@@ -7,13 +7,14 @@ Created : 2021-07-30
 
 from __future__ import annotations
 
-from typing import IO
+from typing import IO, TYPE_CHECKING
 
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
-from docx.shared import Length
 
-from .template import DocxTemplate
+if TYPE_CHECKING:
+    from docx.shared import Length
+    from .template import DocxTemplate
 
 
 class InlineImage(object):

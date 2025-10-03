@@ -4,8 +4,8 @@ dynamic = ["version"]
 description = "Python docx template engine"
 authors = [{name="Eric Lapouyade", email="elapouya@proton.me"}]
 readme = "README.rst"
-license = {text="LGPL-2.1-only"}
 requires-python = ">=3.7"
+license = {text="LGPL-2.1-only"}
 classifiers=[
     "Intended Audience :: Developers",
     "Development Status :: 4 - Beta",
@@ -42,7 +42,7 @@ repository = "https://github.com/elapouya/python-docx-template.git"
 document = "https://docxtpl.readthedocs.org"
 
 [tool.poetry]
-version = '0.0.0'
+version = "0.0.0"
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
@@ -53,13 +53,6 @@ enable = true
 [tool.poetry-dynamic-versioning.from-file]
 source = "docxtpl/__init__.py"
 pattern = '__version__ = "(.+)"'
-
-[tool.pdm.version]
-source = "file"
-path = "docxtpl/__init__.py"
-
-[tool.pdm.scripts]
-style = "flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__"
 
 [tool.mypy]
 pretty = true

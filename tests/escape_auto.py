@@ -7,6 +7,7 @@ from unicodedata import name
 
 from docxtpl import DocxTemplate
 
+
 XML_RESERVED = """<"&'>"""
 
 tpl = DocxTemplate("templates/escape_tpl_auto.docx")

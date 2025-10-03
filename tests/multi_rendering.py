@@ -4,16 +4,13 @@ Created : 2021-12-20
 
 @author: Eric Lapouyade
 """
-
-from __future__ import annotations
-
-from typing import Any
+from typing import cast
 
 from docxtpl import DocxTemplate
 
 tpl = DocxTemplate("templates/multi_rendering_tpl.docx")
 
-documents_data: list[dict[str, Any]] = [
+documents_data = [
     {
         "dest_file": "multi_render1.docx",
         "context": {
@@ -39,6 +36,6 @@ documents_data: list[dict[str, Any]] = [
 
 for document_data in documents_data:
     dest_file = document_data["dest_file"]
-    context: dict[str, str] = document_data["context"]
+    context = cast(dict, document_data["context"])
     tpl.render(context)
     tpl.save("output/%s" % dest_file)

@@ -15,12 +15,20 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
-    - uses: astral-sh/setup-uv@v6
     - name: Install dependencies
-      run: uv sync --all-extras --all-groups
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
     - name: Lint with flake8
       run: |
+        pip install flake8
         # stop the build if there are code styling problems. The GitHub editor is 127 chars wide.
-        uv run --no-sync flake8 . --count --max-line-length=127 --show-source --statistics --exclude .venv,__pycache__
+        flake8 . --count --max-line-length=127 --show-source --statistics
     - name: Check type hints
-      run: uv run --no-sync mypy .
+      run: |
+        pip install mypy lxml-stubs
+        mypy .
+    - name: Ensure library work without docxcompose
+      run: |
+        pip uninstall -y docxcompose
+        python -c "from docxtpl import *"
