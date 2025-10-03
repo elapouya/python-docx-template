@@ -15,4 +15,4 @@ from .template import DocxTemplate
 try:
     from .subdoc import Subdoc
 except ImportError:
-    pass
+    ...

@@ -1,0 +1,58 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.13"
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+          - "3.8"
+      fail-fast: false
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+      - name: Install and configure Poetry
+        run: |
+          python3 -m pip install -U pip poetry
+          poetry env use ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: poetry install --all-extras --all-groups
+      - name: Test
+        run: poetry run python tests/runtests.py
+      - name: Build
+        run: poetry build
+
+  test_py37:
+    runs-on: ubuntu-latest
+    container: python:3.7-slim
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: Install and configure Poetry
+        run: |
+          python3 -m pip install -U pip poetry
+          poetry env use 3.7
+      - name: Install dependencies
+        run: poetry install --all-extras --all-groups
+      - name: Test
+        run: |
+          poetry run python tests/runtests.py
+          poetry run python -V
+      - name: Build
+        run: poetry build
