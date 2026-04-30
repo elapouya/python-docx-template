@@ -4,7 +4,7 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
-from docx.oxml import OxmlElement, parse_xml
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 
@@ -19,11 +19,24 @@ class InlineImage(object):
     width = None
     height = None
     anchor = None
+    title = None
+    descr = None
 
-    def __init__(self, tpl, image_descriptor, width=None, height=None, anchor=None):
+    def __init__(
+        self,
+        tpl,
+        image_descriptor,
+        width=None,
+        height=None,
+        anchor=None,
+        title=None,
+        descr=None,
+    ):
         self.tpl, self.image_descriptor = tpl, image_descriptor
         self.width, self.height = width, height
         self.anchor = anchor
+        self.title = str(title) if title is not None else None
+        self.descr = str(descr) if descr is not None else None
 
     def _add_hyperlink(self, run, url, part):
         # Create a relationship for the hyperlink
@@ -49,19 +62,30 @@ class InlineImage(object):
 
         return run
 
+    def _set_doc_properties(self, run):
+        docPr = run.xpath(".//wp:docPr")[0]
+        cNvPr = run.xpath(".//pic:cNvPr")[0]
+
+        for elt in (docPr, cNvPr):
+            if self.title is not None:
+                elt.set("title", self.title)
+            if self.descr is not None:
+                elt.set("descr", self.descr)
+
     def _insert_image(self):
         pic = self.tpl.current_rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
             self.height,
-        ).xml
+        )
+        if self.title is not None or self.descr is not None:
+            self._set_doc_properties(pic)
         if self.anchor:
-            run = parse_xml(pic)
-            if run.xpath(".//a:blip"):
-                hyperlink = self._add_hyperlink(
-                    run, self.anchor, self.tpl.current_rendering_part
+            if pic.xpath(".//a:blip"):
+                pic = self._add_hyperlink(
+                    pic, self.anchor, self.tpl.current_rendering_part
                 )
-                pic = hyperlink.xml
+        pic = pic.xml
 
         return (
             "</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>"
