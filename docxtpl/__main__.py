@@ -109,7 +109,7 @@ def validate_all_args(parsed_args):
 
 
 def get_json_data(json_path):
-    with open(json_path) as file:
+    with open(json_path, encoding="utf-8") as file:
         try:
             json_data = json.load(file)
             return json_data
