@@ -71,6 +71,17 @@ class DocxTemplate(object):
         # won't work properly
         return etree.tostring(xml, encoding="unicode", pretty_print=False)
 
+    def _validate_xml(self, xml):
+        try:
+            etree.fromstring(xml.encode("utf-8") if isinstance(xml, str) else xml)
+        except etree.XMLSyntaxError as exc:
+            raise ValueError(
+                "Generated XML is invalid. This often happens when context "
+                "values contain unescaped '<', '>' or '&' characters. "
+                "Use the |e filter, pass autoescape=True to render(), or "
+                "use RichText/Listing where appropriate."
+            ) from exc
+
     def get_docx(self):
         self.init_docx()
         return self.docx
@@ -328,6 +339,7 @@ class DocxTemplate(object):
             .replace("%_}", "%}")
         )
         dst_xml = self.resolve_listing(dst_xml)
+        self._validate_xml(dst_xml)
         return dst_xml
 
     def render_properties(

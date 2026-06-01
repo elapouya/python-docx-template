@@ -327,6 +327,9 @@ especially ``<``, ``>`` and ``&``. In order to use them, you must escape them. T
 
 See tests/escape.py example for more informations.
 
+If unescaped context values make the generated XML invalid, rendering raises a ``ValueError`` instead of recovering the invalid
+XML and producing a corrupted docx.
+
 Another solution, if you want to include a listing into your document, that is to escape the text and manage ``\n``, ``\a``, and ``\f``
 you can use the ``Listing`` class :
 
@@ -532,4 +535,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
