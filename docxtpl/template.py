@@ -4,7 +4,6 @@ Created : 2015-03-12
 
 @author: Eric Lapouyade
 """
-
 from __future__ import annotations
 
 from os import PathLike
