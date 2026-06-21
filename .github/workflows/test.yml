@@ -39,22 +39,17 @@ jobs:
     container: python:3.8-slim
     steps:
       - uses: actions/checkout@v6
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install and configure Poetry
-        run: |
-          python3.12 -m pip install -U pip "poetry>=2.0"
-          poetry env use 3.8
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Create virtual environment
+        run: uv venv --python 3.8
       - name: Install dependencies
-        run: poetry install --all-extras --all-groups
+        run: uv sync --all-extras --all-groups
       - name: Build
-        run: poetry build
+        run: uv build
       - name: Test
         run: |
-          poetry run python tests/runtests.py
-          poetry run python -V
+          uv run --frozen python tests/runtests.py
+          uv run --frozen python -V
 
   test_py37:
     runs-on: ubuntu-22.04
