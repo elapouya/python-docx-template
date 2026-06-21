@@ -4,6 +4,7 @@ Created : 2021-12-20
 
 @author: Eric Lapouyade
 """
+from typing import cast
 
 from docxtpl import DocxTemplate
 
@@ -35,6 +36,6 @@ documents_data = [
 
 for document_data in documents_data:
     dest_file = document_data["dest_file"]
-    context = document_data["context"]
+    context = cast(dict, document_data["context"])
     tpl.render(context)
     tpl.save("output/%s" % dest_file)

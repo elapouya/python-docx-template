@@ -8,6 +8,8 @@ name = "pypi"
 [dev-packages]
 docxtpl = {editable = true, path = "."}
 flake8 = "*"
+mypy = "*"
+lxml-stubs = "*"
 
 [requires]
 python_version = "3"
