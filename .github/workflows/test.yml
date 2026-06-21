@@ -45,7 +45,7 @@ jobs:
           python-version: "3.12"
       - name: Install and configure Poetry
         run: |
-          python3 -m pip install -U pip "poetry>=2.0"
+          python3.12 -m pip install -U pip "poetry>=2.0"
           poetry env use 3.8
       - name: Install dependencies
         run: poetry install --all-extras --all-groups
@@ -67,7 +67,7 @@ jobs:
           python-version: "3.12"
       - name: Install and configure Poetry
         run: |
-          python3 -m pip install -U pip "poetry>=2.0"
+          python3.12 -m pip install -U pip "poetry>=2.0"
           poetry env use 3.7
       - name: Install dependencies
         run: poetry install --all-extras --all-groups
