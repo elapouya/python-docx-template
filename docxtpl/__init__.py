@@ -6,11 +6,20 @@ Created : 2015-03-12
 """
 
 __version__ = "0.20.2"
+__all__ = (
+    "InlineImage",
+    "Listing",
+    "RichText",
+    "R",
+    "RichTextParagraph",
+    "RP",
+    "DocxTemplate",
+    "Subdoc",
+)
 
-# flake8: noqa
 from .inline_image import InlineImage
 from .listing import Listing
-from .richtext import RichText, R, RichTextParagraph, RP
+from .richtext import RP, R, RichText, RichTextParagraph
 from .template import DocxTemplate
 
 try:

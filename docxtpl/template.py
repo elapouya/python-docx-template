@@ -6,29 +6,35 @@ Created : 2015-03-12
 """
 from __future__ import annotations
 
-from os import PathLike
-from typing import IO, TYPE_CHECKING, Any, Generator
+import binascii
 import functools
 import io
-from lxml import etree
+import os
+import re
+import zipfile
+from os import PathLike
+from typing import IO, TYPE_CHECKING, Any, Generator
+
+import docx.oxml.ns
 from docx import Document
+from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from docx.opc.oxml import parse_xml
 from docx.opc.part import XmlPart
-import docx.oxml.ns
-from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
 from jinja2 import Environment, Template, meta
 from jinja2.exceptions import TemplateError
+from lxml import etree
 
-from ._compat import escape  # noqa: F401
-import re
-import binascii
-import os
-import zipfile
+try:
+    from html import escape  # noqa: F401
+except ImportError:
+    # cgi.escape is deprecated in python 3.7
+    from cgi import escape  # noqa: F401  # type:ignore[attr-defined,no-redef]
 
 if TYPE_CHECKING:
     from docx.document import Document as _DocumentObject
     from docx.oxml.document import CT_Document
     from docx.parts.story import StoryPart
+
     from .subdoc import Subdoc
 
     # _element of docx.document.Document is CT_Document
