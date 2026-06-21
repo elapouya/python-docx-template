@@ -13,7 +13,6 @@ jobs:
           - "3.11"
           - "3.10"
           - "3.9"
-          - "3.8"
       fail-fast: false
     steps:
       - name: Dump GitHub context
@@ -36,6 +35,27 @@ jobs:
       - name: Test
         run: python tests/runtests.py
 
+  test_py38:
+    runs-on: ubuntu-latest
+    container: python:3.8-slim
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install and configure Poetry
+        run: |
+          python3 -m pip install -U pip poetry
+          poetry env use 3.8
+      - name: Install dependencies
+        run: poetry install --all-extras --all-groups
+      - name: Build
+        run: poetry build
+      - name: Test
+        run: |
+          poetry run python tests/runtests.py
+          poetry run python -V
+
   test_py37:
     runs-on: ubuntu-latest
     container: python:3.7-slim
@@ -43,16 +63,16 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: "3.12"
       - name: Install and configure Poetry
         run: |
           python3 -m pip install -U pip poetry
           poetry env use 3.7
       - name: Install dependencies
         run: poetry install --all-extras --all-groups
+      - name: Build
+        run: poetry build
       - name: Test
         run: |
           poetry run python tests/runtests.py
           poetry run python -V
-      - name: Build
-        run: poetry build
