@@ -44,7 +44,7 @@ def make_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def get_args(parser) -> dict:
+def get_args(parser: argparse.ArgumentParser) -> dict:
     try:
         parsed_args = vars(parser.parse_args())
         return parsed_args
@@ -111,7 +111,7 @@ def validate_all_args(parsed_args: dict) -> None:
         )
 
 
-def get_json_data(json_path) -> dict:
+def get_json_data(json_path: str) -> dict:
     with open(json_path) as file:
         try:
             json_data = json.load(file)
