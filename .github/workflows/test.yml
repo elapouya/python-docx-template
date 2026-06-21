@@ -36,13 +36,13 @@ jobs:
         run: python tests/runtests.py
 
   test_py38:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container: python:3.8-slim
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.x"
       - name: Install and configure Poetry
         run: |
           python3 -m pip install -U pip poetry
@@ -57,13 +57,13 @@ jobs:
           poetry run python -V
 
   test_py37:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container: python:3.7-slim
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.x"
       - name: Install and configure Poetry
         run: |
           python3 -m pip install -U pip poetry
