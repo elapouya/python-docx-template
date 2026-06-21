@@ -5,15 +5,15 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
-from docx import Document
-from docx.oxml import CT_SectPr
-from docx.opc.constants import RELATIONSHIP_TYPE as RT
-from docxcompose.properties import CustomProperties
-from docxcompose.utils import xpath
-from docxcompose.composer import Composer
-from docxcompose.utils import NS
-from lxml import etree
 import re
+
+from docx import Document
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
+from docx.oxml import CT_SectPr
+from docxcompose.composer import Composer
+from docxcompose.properties import CustomProperties
+from docxcompose.utils import NS, xpath
+from lxml import etree
 
 
 class SubdocComposer(Composer):
