@@ -82,10 +82,38 @@ class DocxTemplate(object):
         with open(filename, "w") as fh:
             fh.write(self.get_xml())
 
-    def patch_xml(self, src_xml):
+    @staticmethod
+    def _get_delim_repr(env, attr, default):
+        """Return the regex-escaped representation of a jinja2 delimiter."""
+        if env is None:
+            return re.escape(default)
+        return re.escape(getattr(env, attr))
+
+    def patch_xml(self, src_xml, jinja_env=None):
         """Make a lots of cleaning to have a raw xml understandable by jinja2 :
         strip all unnecessary xml tags, manage table cell background color and colspan,
         unescape html entities, etc..."""
+
+        # Resolve delimiter strings (regex-escaped) for dynamic patterns.
+        # When jinja_env is None, defaults to standard Jinja2 delimiters.
+        vo = self._get_delim_repr(jinja_env, "variable_start_string", "{{")
+        vc = self._get_delim_repr(jinja_env, "variable_end_string", "}}")
+        bo = self._get_delim_repr(jinja_env, "block_start_string", "{%")
+        bc = self._get_delim_repr(jinja_env, "block_end_string", "%}")
+        co = self._get_delim_repr(jinja_env, "comment_start_string", "{#")
+        cc = self._get_delim_repr(jinja_env, "comment_end_string", "#}")
+
+        # Build a union pattern matching any Jinja2 tag:
+        #   block_start ... block_end  |  comment_start ... comment_end  |  variable_start ... variable_end
+        def _tag_union():
+            parts = []
+            if bo and bc:
+                parts.append(f"{bo}(?:(?!{bc}).)*")
+            if co and cc:
+                parts.append(f"{co}(?:(?!{cc}).)*")
+            if vo and vc:
+                parts.append(f"{vo}(?:(?!{vc}).)*")
+            return "|".join(parts)
 
         # replace {<something>{ by {{   ( works with {{ }} {% and %} {# and #})
         src_xml = re.sub(
@@ -103,12 +131,14 @@ class DocxTemplate(object):
                 "</w:t>.*?(<w:t>|<w:t [^>]*>)", "", m.group(0), flags=re.DOTALL
             )
 
-        src_xml = re.sub(
-            r"{%(?:(?!%}).)*|{#(?:(?!#}).)*|{{(?:(?!}}).)*",
-            striptags,
-            src_xml,
-            flags=re.DOTALL,
-        )
+        tag_pat = _tag_union()
+        if tag_pat:
+            src_xml = re.sub(
+                tag_pat,
+                striptags,
+                src_xml,
+                flags=re.DOTALL,
+            )
 
         # manage table cell colspan
         def colspan(m):
@@ -286,19 +316,23 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
 
-        def clean_tags(m):
+        def _clean_inner(text):
             return (
-                m.group(0)
-                .replace(r"&#8216;", "'")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("“", '"')
-                .replace("”", '"')
-                .replace("‘", "'")
-                .replace("’", "'")
+                text.replace("&#8216;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
             )
 
-        src_xml = re.sub(r"(?<=\{[\{%])(.*?)(?=[\}%]})", clean_tags, src_xml)
+        # Build a dynamic pattern to match content *inside* any Jinja2 tag
+        # (between start and end delimiters) and apply HTML entity cleanup.
+        # Uses capture groups to preserve delimiter boundaries since
+        # lookbehind/lookahead widths can vary with custom delimiters.
+        clean_start = f"({vo}|{bo}|{co})"
+        clean_end = f"({vc}|{bc}|{cc})"
+        src_xml = re.sub(
+            clean_start + r"(.*?)" + clean_end,
+            lambda m: m.group(1) + _clean_inner(m.group(2)) + m.group(3),
+            src_xml,
+            flags=re.DOTALL,
+        )
 
         return src_xml
 
@@ -372,7 +406,8 @@ class DocxTemplate(object):
                     xml = self.patch_xml(
                         part.blob.decode("utf-8")
                         if isinstance(part.blob, bytes)
-                        else part.blob
+                        else part.blob,
+                        jinja_env,
                     )
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml.encode("utf-8")
@@ -432,7 +467,7 @@ class DocxTemplate(object):
 
     def build_xml(self, context, jinja_env=None):
         xml = self.get_xml()
-        xml = self.patch_xml(xml)
+        xml = self.patch_xml(xml, jinja_env)
         xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
         return xml
 
@@ -459,7 +494,7 @@ class DocxTemplate(object):
         for relKey, part in self.get_headers_footers(uri):
             xml = self.get_part_xml(part)
             encoding = self.get_headers_footers_encoding(xml)
-            xml = self.patch_xml(xml)
+            xml = self.patch_xml(xml, jinja_env)
             xml = self.render_xml_part(xml, part, context, jinja_env)
             yield relKey, xml.encode(encoding)
 
@@ -901,14 +936,14 @@ class DocxTemplate(object):
 
         # Get XML from the temporary document
         xml = self.xml_to_string(temp_doc._element.body)
-        xml = self.patch_xml(xml)
+        xml = self.patch_xml(xml, jinja_env)
 
         # Add headers and footers
         for uri in [self.HEADER_URI, self.FOOTER_URI]:
             for relKey, val in temp_doc._part.rels.items():
                 if (val.reltype == uri) and (val.target_part.blob):
                     _xml = self.xml_to_string(parse_xml(val.target_part.blob))
-                    xml += self.patch_xml(_xml)
+                    xml += self.patch_xml(_xml, jinja_env)
 
         if jinja_env:
             env = jinja_env
