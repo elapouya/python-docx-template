@@ -183,7 +183,7 @@ class DocxTemplate(object):
             # by {% xxx %} or {{ xx }} without any surrounding <w:y> tags :
             # This is mandatory to have jinja2 generating correct xml code
             pat = (
-                r"<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ([^}%%]*(?:%%}|}})).*?</w:%(y)s>"
+                r"<w:%(y)s[ >](?:(?!<w:%(y)s[ >]).)*({%%|{{)%(y)s ((?:(?!%%}|}}).)*(?:%%}|}})).*?</w:%(y)s>"
                 % {"y": y}
             )
             src_xml = re.sub(pat, r"\1 \2", src_xml, flags=re.DOTALL)
