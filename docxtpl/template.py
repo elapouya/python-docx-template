@@ -78,7 +78,8 @@ if TYPE_CHECKING:
 _ILLEGAL_XML_CHARS_RE = re.compile(
     "["
     "\x00-\x08\x0b\x0c\x0e-\x1f"   # C0 controls except \t \n \r
-    "\x7f-\x84\x86-\x9f"           # DEL + C1 controls (illegal in XML 1.0)
+    "\x7f-\x9f"                    # DEL + C1 controls (illegal in XML 1.0)
+    "\ud800-\udfff"                # UTF-16 surrogate code points
     "\ufdd0-\ufdef"                # noncharacters
     "\ufffe\uffff"                 # BMP noncharacters
     "]"
