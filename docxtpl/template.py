@@ -69,6 +69,34 @@ if TYPE_CHECKING:
     from .subdoc import Subdoc
 
 
+# Characters that are illegal in XML 1.0 (Char production, XML spec §2.2).
+# These must be stripped from rendered output because a single illegal character
+# injected through a context value (e.g. a C0 control like "\x01") makes the whole
+# part XML fail strict parsing. The legal XML whitespace controls \t (0x09),
+# \n (0x0A) and \r (0x0D) are intentionally preserved.
+# This mirrors the well-known openpyxl ILLEGAL_CHARACTERS_RE approach.
+_ILLEGAL_XML_CHARS_RE = re.compile(
+    "["
+    "\x00-\x08\x0b\x0c\x0e-\x1f"   # C0 controls except \t \n \r
+    "\x7f-\x9f"                    # DEL + C1 controls (illegal in XML 1.0)
+    "\ud800-\udfff"                # UTF-16 surrogate code points
+    "\ufdd0-\ufdef"                # noncharacters
+    "\ufffe\uffff"                 # BMP noncharacters
+    "]"
+)
+
+
+def _strip_illegal_xml_chars(xml):
+    """Remove XML-1.0-illegal characters from a rendered XML string.
+
+    Uses a search-guarded fast path so clean input (the common case) is returned
+    unchanged without allocating a new string.
+    """
+    if _ILLEGAL_XML_CHARS_RE.search(xml):
+        return _ILLEGAL_XML_CHARS_RE.sub("", xml)
+    return xml
+
+
 class DocxTemplate(object):
     """Class for managing docx files as they were jinja2 templates"""
 
@@ -474,6 +502,9 @@ class DocxTemplate(object):
                 )
 
             raise exc
+        # Strip XML-1.0-illegal characters injected through context values before
+        # the rendered string is parsed, so a single bad char can't corrupt output.
+        dst_xml = _strip_illegal_xml_chars(dst_xml)
         dst_xml = self._RE_PARAGRAPH_REMOVE_NEWLINE.sub(r"<w:p\1", dst_xml)
         dst_xml = (
             dst_xml.replace("{_{", "{{")
@@ -509,6 +540,7 @@ class DocxTemplate(object):
             initial = getattr(self.docx.core_properties, prop)
             template = jinja_env.from_string(initial)
             rendered = template.render(context)
+            rendered = _strip_illegal_xml_chars(rendered)
             setattr(self.docx.core_properties, prop, rendered)
 
     def render_footnotes(
