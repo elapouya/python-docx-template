@@ -66,6 +66,9 @@ exclude = ["docs", "build", "setup.py"]
 module = ["docxcompose.*"]
 ignore_missing_imports = true
 
+[tool.pdm]
+version = {source="file", path="docxtpl/__init__.py"}
+
 [build-system]
-requires = ["poetry-core", "poetry-dynamic-versioning >=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
