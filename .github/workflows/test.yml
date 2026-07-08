@@ -1,0 +1,69 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.14"
+          - "3.13"
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+      fail-fast: false
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          activate-environment: true
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
+      - name: Build
+        run: uv build
+      - name: Test
+        run: python tests/runtests.py
+
+  test_py38:
+    runs-on: ubuntu-22.04
+    container: python:3.8-slim
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Create virtual environment
+        run: uv venv --python 3.8
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
+      - name: Build
+        run: uv build
+      - name: Test
+        run: |
+          uv run --frozen python tests/runtests.py
+          uv run --frozen python -V
+
+  test_py37:
+    runs-on: ubuntu-22.04
+    container: python:3.7-slim
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Create virtual environment
+        run: uv venv --python 3.7
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
+      - name: Build
+        run: uv build
+      - name: Test
+        run: |
+          uv run --frozen python tests/runtests.py
+          uv run --frozen python -V

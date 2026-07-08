@@ -9,7 +9,7 @@ try:
     from html import escape
 except ImportError:
     # cgi.escape is deprecated in python 3.7
-    from cgi import escape  # type:ignore[attr-defined,no-redef]
+    from cgi import escape  # type:ignore
 
 
 class RichText(object):
@@ -63,6 +63,14 @@ class RichText(object):
 
         if style:
             prop += '<w:rStyle w:val="%s"/>' % style
+        if font:
+            regional_font = ""
+            if ":" in font:
+                region, font = font.split(":", 1)
+                regional_font = ' w:{region}="{font}"'.format(font=font, region=region)
+            prop += '<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'.format(
+                font=font, regional_font=regional_font
+            )
         if color:
             if color[0] == "#":
                 color = color[1:]
@@ -101,14 +109,6 @@ class RichText(object):
             prop += '<w:u w:val="%s"/>' % underline
         if strike:
             prop += "<w:strike/>"
-        if font:
-            regional_font = ""
-            if ":" in font:
-                region, font = font.split(":", 1)
-                regional_font = ' w:{region}="{font}"'.format(font=font, region=region)
-            prop += '<w:rFonts w:ascii="{font}" w:hAnsi="{font}" w:cs="{font}"{regional_font}/>'.format(
-                font=font, regional_font=regional_font
-            )
         if rtl:
             prop += '<w:rtl w:val="true"/>'
         if lang:
