@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 
 from .template import DocxTemplate, TemplateError
 
@@ -9,11 +10,13 @@ JSON_ARG = "json_path"
 OUTPUT_ARG = "output_filename"
 OVERWRITE_ARG = "overwrite"
 QUIET_ARG = "quiet"
+VALIDATE_ARG = "validate"
+REPORT_ARG = "report"
 
 
 def make_arg_parser():
     parser = argparse.ArgumentParser(
-        usage="python -m docxtpl [-h] [-o] [-q] {} {} {}".format(
+        usage="python -m docxtpl [-h] [-o] [-q] [--validate] [--report FILE] {} [{}] [{}]".format(
             TEMPLATE_ARG, JSON_ARG, OUTPUT_ARG
         ),
         description="Make docx file from existing template docx and json data.",
@@ -22,10 +25,30 @@ def make_arg_parser():
         TEMPLATE_ARG, type=str, help="The path to the template docx file."
     )
     parser.add_argument(
-        JSON_ARG, type=str, help="The path to the json file with the data."
+        JSON_ARG,
+        type=str,
+        nargs="?",
+        default=None,
+        help="The path to the json file with the data.",
     )
     parser.add_argument(
-        OUTPUT_ARG, type=str, help="The filename to save the generated docx."
+        OUTPUT_ARG,
+        type=str,
+        nargs="?",
+        default=None,
+        help="The filename to save the generated docx.",
+    )
+    parser.add_argument(
+        "--" + VALIDATE_ARG,
+        action="store_true",
+        help="Check if the template Jinja2 syntax is valid.",
+    )
+    parser.add_argument(
+        "--" + REPORT_ARG,
+        type=str,
+        metavar="FILE",
+        default=None,
+        help="Write validation result as JSON to FILE (requires --validate).",
     )
     parser.add_argument(
         "-" + OVERWRITE_ARG[0],
@@ -67,8 +90,10 @@ def is_argument_valid(arg_name, arg_value, overwrite):
         return arg_value.endswith(".docx") and check_exists_ask_overwrite(
             arg_value, overwrite
         )
-    elif arg_name in [OVERWRITE_ARG, QUIET_ARG]:
+    elif arg_name in [OVERWRITE_ARG, QUIET_ARG, VALIDATE_ARG]:
         return arg_value in [True, False]
+    elif arg_name == REPORT_ARG:
+        return arg_value is None or isinstance(arg_value, str)
 
 
 def check_exists_ask_overwrite(arg_value, overwrite):
@@ -94,10 +119,30 @@ def check_exists_ask_overwrite(arg_value, overwrite):
 
 
 def validate_all_args(parsed_args):
+    if parsed_args.get(REPORT_ARG) and not parsed_args.get(VALIDATE_ARG):
+        raise RuntimeError("--report requires --validate.")
+
+    if parsed_args[VALIDATE_ARG]:
+        template_path = parsed_args[TEMPLATE_ARG]
+        if not is_argument_valid(TEMPLATE_ARG, template_path, False):
+            raise RuntimeError(
+                'The specified {arg_name} "{arg_value}" is not valid.'.format(
+                    arg_name=TEMPLATE_ARG, arg_value=template_path
+                )
+            )
+        return
+
+    if not parsed_args[JSON_ARG] or not parsed_args[OUTPUT_ARG]:
+        raise RuntimeError(
+            "json_path and output_filename are required in render mode."
+        )
+
     overwrite = parsed_args[OVERWRITE_ARG]
     # Raises AssertionError if any of the arguments is not validated
     try:
         for arg_name, arg_value in parsed_args.items():
+            if arg_name in (VALIDATE_ARG, REPORT_ARG):
+                continue
             if not is_argument_valid(arg_name, arg_value, overwrite):
                 raise AssertionError
     except AssertionError:
@@ -106,6 +151,41 @@ def validate_all_args(parsed_args):
                 arg_name=arg_name, arg_value=arg_value
             )
         )
+
+
+def validate_template_syntax(template_path):
+    try:
+        doc = DocxTemplate(template_path)
+        doc.get_undeclared_template_variables()
+        return None
+    except TemplateError as e:
+        return str(e)
+    except Exception as e:
+        return str(e)
+
+
+def write_validation_report(report_path, valid, error=None):
+    payload = {"valid": valid}
+    if error is not None:
+        payload["error"] = error
+    with open(report_path, "w") as f:
+        json.dump(payload, f)
+
+
+def run_validation(parsed_args):
+    template_path = os.path.abspath(parsed_args[TEMPLATE_ARG])
+    error = validate_template_syntax(template_path)
+    valid = error is None
+
+    if not valid:
+        print(error)
+    elif not parsed_args[QUIET_ARG]:
+        print("Template syntax is valid.")
+
+    if parsed_args.get(REPORT_ARG):
+        write_validation_report(parsed_args[REPORT_ARG], valid, error)
+
+    return 0 if valid else 1
 
 
 def get_json_data(json_path):
@@ -159,6 +239,8 @@ def main():
     parsed_args = get_args(parser)
     try:
         validate_all_args(parsed_args)
+        if parsed_args[VALIDATE_ARG]:
+            sys.exit(run_validation(parsed_args))
         json_data = get_json_data(os.path.abspath(parsed_args[JSON_ARG]))
         doc = make_docxtemplate(os.path.abspath(parsed_args[TEMPLATE_ARG]))
         doc = render_docx(doc, json_data)

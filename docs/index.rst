@@ -471,21 +471,28 @@ Command-line execution
 
 One can use `docxtpl` module directly on command line to generate a docx from a template and a json file as a context::
 
-   usage: python -m docxtpl [-h] [-o] [-q] template_path json_path output_filename
+   usage: python -m docxtpl [-h] [-o] [-q] [--validate] [--report FILE] template_path [json_path] [output_filename]
 
    Make docx file from existing template docx and json data.
 
    positional arguments:
      template_path    The path to the template docx file.
-     json_path        The path to the json file with the data.
-     output_filename  The filename to save the generated docx.
+     json_path        The path to the json file with the data (not required with --validate).
+     output_filename  The filename to save the generated docx (not required with --validate).
 
    optional arguments:
      -h, --help       show this help message and exit
      -o, --overwrite  If output file already exists, overwrites without asking
                       for confirmation
      -q, --quiet      Do not display unnecessary messages
+     --validate       Check if the template Jinja2 syntax is valid
+     --report FILE    Write validation result as JSON to FILE (requires --validate)
 
+To validate a template without generating a document::
+
+   python -m docxtpl template.docx --validate
+
+If the syntax is invalid, the error is printed to the console. With ``--report FILE``, a JSON report is written, for example ``{"valid": false, "error": "..."}`` or ``{"valid": true}``.
 
 See tests/module_execute.py for an example.
 
