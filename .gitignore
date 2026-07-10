@@ -62,3 +62,6 @@ target/
 
 #Pycharm
 .idea
+
+# In Project Virtual Environment
+.venv/

@@ -4,8 +4,19 @@ Created : 2021-07-30
 
 @author: Eric Lapouyade
 """
+
+from __future__ import annotations
+
+from typing import IO, TYPE_CHECKING
+
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+
+if TYPE_CHECKING:
+    from docx.parts.story import CT_Inline, StoryPart
+    from docx.shared import Length
+
+    from .template import DocxTemplate
 
 
 class InlineImage(object):
@@ -14,20 +25,20 @@ class InlineImage(object):
     This is much faster than using Subdoc class.
     """
 
-    tpl = None
-    image_descriptor = None
-    width = None
-    height = None
+    tpl: DocxTemplate | None = None
+    image_descriptor: str | IO[bytes] | None = None
+    width: int | Length | None = None
+    height: int | Length | None = None
     anchor = None
     title = None
     descr = None
 
     def __init__(
         self,
-        tpl,
-        image_descriptor,
-        width=None,
-        height=None,
+        tpl: DocxTemplate,
+        image_descriptor: str | IO[bytes],
+        width: int | Length | None = None,
+        height: int | Length | None = None,
         anchor=None,
         title=None,
         descr=None,
@@ -38,7 +49,7 @@ class InlineImage(object):
         self.title = str(title) if title is not None else None
         self.descr = str(descr) if descr is not None else None
 
-    def _add_hyperlink(self, run, url, part):
+    def _add_hyperlink(self, run: CT_Inline, url: str, part: StoryPart) -> CT_Inline:
         # Create a relationship for the hyperlink
         r_id = part.relate_to(
             url,
@@ -62,7 +73,7 @@ class InlineImage(object):
 
         return run
 
-    def _set_doc_properties(self, run):
+    def _set_doc_properties(self, run: CT_Inline) -> None:
         docPr = run.xpath(".//wp:docPr")[0]
         cNvPr = run.xpath(".//pic:cNvPr")[0]
 
@@ -72,7 +83,10 @@ class InlineImage(object):
             if self.descr is not None:
                 elt.set("descr", self.descr)
 
-    def _insert_image(self):
+    def _insert_image(self) -> str:
+        if TYPE_CHECKING:
+            assert self.tpl is not None
+            assert self.image_descriptor is not None
         pic = self.tpl.current_rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
@@ -80,23 +94,19 @@ class InlineImage(object):
         )
         if self.title is not None or self.descr is not None:
             self._set_doc_properties(pic)
-        if self.anchor:
-            if pic.xpath(".//a:blip"):
-                pic = self._add_hyperlink(
-                    pic, self.anchor, self.tpl.current_rendering_part
-                )
-        pic = pic.xml
+        if self.anchor and pic.xpath(".//a:blip"):
+            pic = self._add_hyperlink(pic, self.anchor, self.tpl.current_rendering_part)
 
         return (
             "</w:t></w:r><w:r><w:drawing>%s</w:drawing></w:r><w:r>"
-            '<w:t xml:space="preserve">' % pic
+            '<w:t xml:space="preserve">' % pic.xml
         )
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self._insert_image()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._insert_image()
 
-    def __html__(self):
+    def __html__(self) -> str:
         return self._insert_image()
