@@ -136,6 +136,13 @@ Note the ``r`` right after the opening braces.
 
 **VERY IMPORTANT :** Variables must not contains characters like ``<``, ``>`` and ``&`` unless using Escaping_
 
+Dictionary keys named like dictionary methods must use bracket notation. For
+example, use ``{{ soil['pop'] }}`` for ``context = {'soil': {'pop': 2}}``.
+``{{ soil.pop }}`` resolves to the dictionary ``pop`` method instead of the
+``'pop'`` key. With autoescaping disabled, rendering that method representation
+can produce invalid XML; ``autoescape=True`` prevents the invalid XML but does
+not select the dictionary key for you.
+
 **IMPORTANT :** Always put space after a starting var delimiter and a space before the ending one :
 
 Avoid::
