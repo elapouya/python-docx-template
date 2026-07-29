@@ -120,6 +120,13 @@ class DocxTemplate(object):
                 flags=re.DOTALL,
             )
             cell_xml = re.sub(r"<w:gridSpan[^/]*/>", "", cell_xml, count=1)
+            # a self-closing <w:tcPr/> would leave the inserted gridSpan outside of it
+            cell_xml = re.sub(
+                r"<w:tcPr(\s[^>]*)?/>",
+                lambda mm: "<w:tcPr%s></w:tcPr>" % (mm.group(1) or ""),
+                cell_xml,
+                count=1,
+            )
             return re.sub(
                 r"(<w:tcPr[^>]*>)",
                 r'\1<w:gridSpan w:val="{{%s}}"/>' % m.group(2),
@@ -143,6 +150,13 @@ class DocxTemplate(object):
                 flags=re.DOTALL,
             )
             cell_xml = re.sub(r"<w:shd[^/]*/>", "", cell_xml, count=1)
+            # a self-closing <w:tcPr/> would leave the inserted shd outside of it
+            cell_xml = re.sub(
+                r"<w:tcPr(\s[^>]*)?/>",
+                lambda mm: "<w:tcPr%s></w:tcPr>" % (mm.group(1) or ""),
+                cell_xml,
+                count=1,
+            )
             return re.sub(
                 r"(<w:tcPr[^>]*>)",
                 r'\1<w:shd w:val="clear" w:color="auto" w:fill="{{%s}}"/>' % m.group(2),
