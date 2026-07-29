@@ -79,7 +79,10 @@ class DocxTemplate(object):
         return self.xml_to_string(self.docx._element.body)
 
     def write_xml(self, filename):
-        with open(filename, "w") as fh:
+        # XML defaults to UTF-8 : do not rely on the locale default encoding,
+        # it is not UTF-8 on Windows and raises UnicodeEncodeError as soon as
+        # the document contains a character it cannot represent.
+        with open(filename, "w", encoding="utf-8") as fh:
             fh.write(self.get_xml())
 
     def patch_xml(self, src_xml):

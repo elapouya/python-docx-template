@@ -109,10 +109,19 @@ def validate_all_args(parsed_args):
 
 
 def get_json_data(json_path):
-    with open(json_path) as file:
+    # JSON is UTF-8 encoded (RFC 8259) : do not rely on the locale default
+    # encoding, it is not UTF-8 on Windows. "utf-8-sig" also skips the BOM
+    # that Windows editors and PowerShell put at the beginning of the file.
+    with open(json_path, encoding="utf-8-sig") as file:
         try:
             json_data = json.load(file)
             return json_data
+        except UnicodeDecodeError as e:
+            print(
+                "File {json_path} is not UTF-8 encoded : {e.reason} at byte {e.start}. "
+                "Please save it as UTF-8.".format(e=e, json_path=json_path)
+            )
+            raise RuntimeError("Failed to get json data.")
         except json.JSONDecodeError as e:
             print(
                 "There was an error on line {e.lineno}, column {e.colno} while trying "
