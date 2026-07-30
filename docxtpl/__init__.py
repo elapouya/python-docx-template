@@ -7,14 +7,13 @@ Created : 2015-03-12
 
 __version__ = "0.20.2"
 __all__ = (
-    "InlineImage",
-    "Listing",
-    "RichText",
-    "R",
-    "RichTextParagraph",
     "RP",
     "DocxTemplate",
-    "Subdoc",
+    "InlineImage",
+    "Listing",
+    "R",
+    "RichText",
+    "RichTextParagraph",
 )
 
 from .inline_image import InlineImage
@@ -24,5 +23,7 @@ from .template import DocxTemplate
 
 try:
     from .subdoc import Subdoc
+
+    __all__ += ("Subdoc",)
 except ImportError:
     pass
