@@ -7,6 +7,7 @@ Created : 2021-07-30
 
 from docx import Document
 from docx.oxml import CT_SectPr
+from docx.oxml.ns import nsmap
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docxcompose.properties import CustomProperties
 from docxcompose.utils import xpath
@@ -14,6 +15,12 @@ from docxcompose.composer import Composer
 from docxcompose.utils import NS
 from lxml import etree
 import re
+
+
+# docxcompose changes python-docx's process-wide ``cp`` prefix to the custom
+# properties namespace. Restore its standard meaning so python-docx updates
+# existing core properties instead of adding conflicting elements.
+nsmap["cp"] = "http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
 
 
 class SubdocComposer(Composer):
