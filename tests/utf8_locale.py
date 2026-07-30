@@ -23,6 +23,13 @@ import sys
 
 CHILD_ENV_FLAG = "DOCXTPL_NON_UTF8_LOCALE_CHILD"
 
+# Resolved once, at import time : until Python 3.9 __file__ is relative to the
+# directory the interpreter was started from, so recomputing it after the
+# os.chdir() below would append a second "tests" component.
+TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_NAME = os.path.basename(__file__)
+STARTUP_DIR = os.getcwd()
+
 TEMPLATE_PATH = "templates/module_execute_tpl.docx"
 JSON_PATH = "templates/module_execute_utf8.json"
 XML_TEMPLATE_PATH = "templates/richtext_eastAsia_tpl.docx"
@@ -41,11 +48,20 @@ def rerun_with_non_utf8_locale():
     env["PYTHONCOERCECLOCALE"] = "0"  # disable C locale coercion (PEP 538)
     env["LC_ALL"] = "C"
     env["LANG"] = "C"
+    # PYTHONPATH entries are relative to the directory this script was started
+    # from, and the child runs in TESTS_DIR : make them absolute so that a
+    # `PYTHONPATH=. python tests/utf8_locale.py` still finds docxtpl.
+    python_path = env.get("PYTHONPATH")
+    if python_path:
+        env["PYTHONPATH"] = os.pathsep.join(
+            os.path.join(STARTUP_DIR, entry) if entry else STARTUP_DIR
+            for entry in python_path.split(os.pathsep)
+        )
     # Give the bare file name : the child filesystem encoding is ASCII, so an
     # accented character in the path would not survive as an argument.
     return subprocess.call(
-        [sys.executable, os.path.basename(__file__)],
-        cwd=os.path.dirname(os.path.abspath(__file__)),
+        [sys.executable, SCRIPT_NAME],
+        cwd=TESTS_DIR,
         env=env,
     )
 
@@ -98,12 +114,12 @@ def check_xml_is_written_as_utf8():
 
 
 if __name__ == "__main__":
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(TESTS_DIR)
     if not os.path.exists("output"):
         os.mkdir("output")
     if os.environ.get(CHILD_ENV_FLAG) != "1":
         print(
-            "Re-running %s with a non UTF-8 locale ..." % os.path.basename(__file__),
+            "Re-running %s with a non UTF-8 locale ..." % SCRIPT_NAME,
             flush=True,
         )
         sys.exit(rerun_with_non_utf8_locale())
