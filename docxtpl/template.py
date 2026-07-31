@@ -115,13 +115,29 @@ class DocxTemplate(object):
                 parts.append(f"{vo}(?:(?!{vc}).)*")
             return "|".join(parts)
 
-        # replace {<something>{ by {{   ( works with {{ }} {% and %} {# and #})
-        src_xml = re.sub(
-            r"(?<={)(<[^>]*>)+(?=[\{%\#])|(?<=[%\}\#])(<[^>]*>)+(?=\})",
-            "",
-            src_xml,
-            flags=re.DOTALL,
-        )
+        # Join delimiter characters split across XML runs.
+        # E.g. "<w:t>[</w:t></w:r><w:r><w:t>[name]]</w:t>" → "[[name]]"
+        # Works for default {{ / {% / {# delimiters and any custom ones.
+        def _raw(attr, default):
+            return getattr(jinja_env, attr) if jinja_env else default
+
+        _join_parts = []
+        for delim in (
+            _raw("variable_start_string", "{{"),
+            _raw("variable_end_string", "}}"),
+            _raw("block_start_string", "{%"),
+            _raw("block_end_string", "%}"),
+            _raw("comment_start_string", "{#"),
+            _raw("comment_end_string", "#}"),
+        ):
+            if len(delim) >= 2:
+                for i in range(1, len(delim)):
+                    left = re.escape(delim[:i])
+                    right = re.escape(delim[i:])
+                    _join_parts.append(f"(?<={left})(<[^>]*>)+(?={right})")
+
+        if _join_parts:
+            src_xml = re.sub("|".join(_join_parts), "", src_xml, flags=re.DOTALL)
 
         # replace {{<some tags>jinja2 stuff<some other tags>}} by {{jinja2 stuff}}
         # same thing with {% ... %} and {# #}
@@ -318,7 +334,13 @@ class DocxTemplate(object):
 
         def _clean_inner(text):
             return (
-                text.replace("&#8216;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+                text.replace("&#8216;", "'")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("“", '"')
+                .replace("”", '"')
+                .replace("‘", "'")
+                .replace("’", "'")
             )
 
         # Build a dynamic pattern to match content *inside* any Jinja2 tag

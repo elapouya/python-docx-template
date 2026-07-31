@@ -4,12 +4,14 @@ This verifies that patch_xml properly strips XML tags from inside
 user-configured Jinja2 blocks when using non-default delimiters
 (like single braces {} instead of double braces {{}}).
 """
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from docxtpl import DocxTemplate
-from jinja2 import Environment
-import zipfile, re
+from docxtpl import DocxTemplate  # noqa: E402
+from jinja2 import Environment  # noqa: E402
+import zipfile  # noqa: E402
+import re  # noqa: E402
 
 TEMPLATE = os.path.join(os.path.dirname(__file__),
                         "templates", "custom_delimiters_tpl.docx")
@@ -68,16 +70,32 @@ def test_default_delimiters_still_work():
 </w:document>"""
     buf = _io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("[Content_Types].xml", """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-</Types>""")
-        zf.writestr("_rels/.rels", """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>""")
+        zf.writestr(
+            "[Content_Types].xml",
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/'
+            'content-types">\n'
+            '  <Default Extension="rels"\n'
+            '   ContentType="application/'
+            'vnd.openxmlformats-package.relationships+xml"/>\n'
+            '  <Default Extension="xml" ContentType="application/xml"/>\n'
+            '  <Override PartName="/word/document.xml"\n'
+            '   ContentType="application/'
+            'vnd.openxmlformats-officedocument.wordprocessingml.'
+            'document.main+xml"/>\n'
+            '</Types>',
+        )
+        zf.writestr(
+            "_rels/.rels",
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/'
+            '2006/relationships">\n'
+            '  <Relationship Id="rId1"\n'
+            '   Type="http://schemas.openxmlformats.org/officeDocument/'
+            '2006/relationships/officeDocument"\n'
+            '   Target="word/document.xml"/>\n'
+            '</Relationships>',
+        )
         zf.writestr("word/document.xml", default_xml)
 
     out_default = os.path.join(os.path.dirname(__file__),
@@ -93,6 +111,33 @@ def test_default_delimiters_still_work():
     print("✅ default_delimiters: PASS")
 
 
+def test_double_bracket_opening_split():
+    """Regression: multi-char opening delimiter ([[) split across XML runs.
+
+    The first delimiter-joining pass must respect user-configured delimiters
+    so that "[" and "[name]]" separated by run tags are re-joined.
+    """
+    tpl = DocxTemplate(TEMPLATE)
+    env = Environment(
+        variable_start_string="[[",
+        variable_end_string="]]",
+    )
+    xml = (
+        '<w:r><w:t>[</w:t></w:r>'
+        '<w:r><w:t>[name]]</w:t></w:r>'
+    )
+    patched = tpl.patch_xml(xml, env)
+    assert "[[name]]" in patched, (
+        f"Delimiter split was not joined: {patched!r}"
+    )
+    rendered = env.from_string(patched).render(name="Alice")
+    assert "Alice" in rendered, (
+        f"Variable not rendered. patched={patched!r} rendered={rendered!r}"
+    )
+    print("✅ double_bracket_opening_split: PASS")
+
+
 if __name__ == "__main__":
     test_custom_delimiters()
     test_default_delimiters_still_work()
+    test_double_bracket_opening_split()
