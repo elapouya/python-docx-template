@@ -13,7 +13,6 @@ from docxcompose.utils import xpath
 from docxcompose.composer import Composer
 from docxcompose.utils import NS
 from lxml import etree
-import re
 
 
 class SubdocComposer(Composer):
@@ -84,14 +83,10 @@ class Subdoc(object):
     def _get_xml(self):
         if self.subdocx.element.body.sectPr is not None:
             self.subdocx.element.body.remove(self.subdocx.element.body.sectPr)
-        xml = re.sub(
-            r"</?w:body[^>]*>",
-            "",
-            etree.tostring(
-                self.subdocx.element.body, encoding="unicode", pretty_print=False
-            ),
+        return "".join(
+            etree.tostring(element, encoding="unicode", pretty_print=False)
+            for element in self.subdocx.element.body
         )
-        return xml
 
     def __unicode__(self):
         return self._get_xml()
