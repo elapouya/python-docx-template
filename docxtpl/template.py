@@ -202,13 +202,19 @@ class DocxTemplate(object):
             flags=re.DOTALL,
         )
 
-        # ensure space preservation
-        src_xml = re.sub(
-            r"<w:t>((?:(?!<w:t>).)*)({{.*?}}|{%.*?%})",
-            r'<w:t xml:space="preserve">\1\2',
-            src_xml,
-            flags=re.DOTALL,
-        )
+        # ensure space preservation for all user-configured delimiters
+        _space_tag_parts = []
+        if vo and vc:
+            _space_tag_parts.append(f"{vo}.*?{vc}")
+        if bo and bc:
+            _space_tag_parts.append(f"{bo}.*?{bc}")
+        if _space_tag_parts:
+            src_xml = re.sub(
+                r"<w:t>((?:(?!<w:t>).)*)(" + "|".join(_space_tag_parts) + ")",
+                r'<w:t xml:space="preserve">\1\2',
+                src_xml,
+                flags=re.DOTALL,
+            )
         src_xml = re.sub(
             r"({{r\s.*?}}|{%r\s.*?%})",
             r'</w:t></w:r><w:r><w:t xml:space="preserve">\1</w:t></w:r><w:r><w:t xml:space="preserve">',
@@ -343,18 +349,31 @@ class DocxTemplate(object):
                 .replace("’", "'")
             )
 
-        # Build a dynamic pattern to match content *inside* any Jinja2 tag
-        # (between start and end delimiters) and apply HTML entity cleanup.
-        # Uses capture groups to preserve delimiter boundaries since
-        # lookbehind/lookahead widths can vary with custom delimiters.
-        clean_start = f"({vo}|{bo}|{co})"
-        clean_end = f"({vc}|{bc}|{cc})"
-        src_xml = re.sub(
-            clean_start + r"(.*?)" + clean_end,
-            lambda m: m.group(1) + _clean_inner(m.group(2)) + m.group(3),
-            src_xml,
-            flags=re.DOTALL,
-        )
+        # HTML entity cleanup inside Jinja2 tags.
+        # Each tag type is processed separately so that an opening
+        # delimiter only pairs with its own closing delimiter -- e.g.
+        # [[ ... ]] never stops at a stray %] inside a string literal.
+        if vo and vc:
+            src_xml = re.sub(
+                f"({vo})(.*?)({vc})",
+                lambda m: m.group(1) + _clean_inner(m.group(2)) + m.group(3),
+                src_xml,
+                flags=re.DOTALL,
+            )
+        if bo and bc:
+            src_xml = re.sub(
+                f"({bo})(.*?)({bc})",
+                lambda m: m.group(1) + _clean_inner(m.group(2)) + m.group(3),
+                src_xml,
+                flags=re.DOTALL,
+            )
+        if co and cc:
+            src_xml = re.sub(
+                f"({co})(.*?)({cc})",
+                lambda m: m.group(1) + _clean_inner(m.group(2)) + m.group(3),
+                src_xml,
+                flags=re.DOTALL,
+            )
 
         return src_xml
 

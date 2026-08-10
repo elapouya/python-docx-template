@@ -50,7 +50,7 @@ def test_custom_delimiters():
     assert "{" not in text, "Leftover { in output"
     assert "}" not in text, "Leftover } in output"
 
-    print("✅ custom_delimiters: PASS")
+    print("OK custom_delimiters: PASS")
 
 
 def test_default_delimiters_still_work():
@@ -108,7 +108,7 @@ def test_default_delimiters_still_work():
     print("Rendered text (default):", repr(text))
     assert "Bob" in text, "Name should appear in output"
     assert "{{" not in text, "Leftover {{ in output"
-    print("✅ default_delimiters: PASS")
+    print("OK default_delimiters: PASS")
 
 
 def test_double_bracket_opening_split():
@@ -134,10 +134,64 @@ def test_double_bracket_opening_split():
     assert "Alice" in rendered, (
         f"Variable not rendered. patched={patched!r} rendered={rendered!r}"
     )
-    print("✅ double_bracket_opening_split: PASS")
+    print("OK double_bracket_opening_split: PASS")
+
+
+def test_foreign_closer_in_string():
+    """Regression: a quoted closing delimiter from another tag type (e.g. %]
+    inside a [[ ... ]] variable) must not terminate the match early,
+    otherwise HTML entities after it are left uncleaned and Jinja2 errors."""
+    tpl = DocxTemplate(TEMPLATE)
+    env = Environment(
+        variable_start_string="[[",
+        variable_end_string="]]",
+        block_start_string="[%",
+        block_end_string="%]",
+        comment_start_string="[#",
+        comment_end_string="#]",
+    )
+    xml = '<w:t>[[ "%]" if 1 &lt; 2 else "x" ]]</w:t>'
+    patched = tpl.patch_xml(xml, env)
+    # After patching, &lt; must have been converted to < so Jinja2 can parse it
+    rendered = env.from_string(patched).render()
+    assert "%]" in rendered, (
+        f"Conditional should evaluate to '%]', got: {rendered!r}"
+    )
+    print("OK foreign_closer_in_string: PASS")
+
+
+def test_custom_delimiter_space_preservation():
+    """Regression: patch_xml must add xml:space='preserve' for custom
+    delimiters just as it does for default {{ }} / {% %}."""
+    tpl = DocxTemplate(TEMPLATE)
+    env = Environment(
+        variable_start_string="[[",
+        variable_end_string="]]",
+    )
+    # Variable with leading/trailing spaces — needs xml:space="preserve"
+    xml = '<w:t>Hello [[ name ]] !</w:t>'
+    patched = tpl.patch_xml(xml, env)
+    assert 'xml:space="preserve"' in patched, (
+        f"Missing space preservation for custom delimiter: {patched!r}"
+    )
+    print("OK custom_delimiter_space_preservation: PASS")
+
+
+def test_default_delimiter_space_preservation():
+    """Ensure default {{ }} space preservation still works as before."""
+    tpl = DocxTemplate(TEMPLATE)
+    xml = '<w:t>Hello {{ name }} !</w:t>'
+    patched = tpl.patch_xml(xml)  # no jinja_env → default delimiters
+    assert 'xml:space="preserve"' in patched, (
+        f"Missing space preservation for default delimiter: {patched!r}"
+    )
+    print("OK default_delimiter_space_preservation: PASS")
 
 
 if __name__ == "__main__":
     test_custom_delimiters()
     test_default_delimiters_still_work()
     test_double_bracket_opening_split()
+    test_foreign_closer_in_string()
+    test_custom_delimiter_space_preservation()
+    test_default_delimiter_space_preservation()
