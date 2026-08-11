@@ -69,6 +69,9 @@ ignore_missing_imports = true
 [tool.pdm]
 version = {source="file", path="docxtpl/__init__.py"}
 
+[tool.pdm.build]
+source-includes = ["LICENSE.txt", "tests/"]
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
