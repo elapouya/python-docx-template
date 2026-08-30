@@ -5,6 +5,8 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
+from copy import deepcopy
+
 from docx import Document
 from docx.oxml import CT_SectPr
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
@@ -81,12 +83,19 @@ class Subdoc(object):
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
-        if self.subdocx.element.body.sectPr is not None:
-            self.subdocx.element.body.remove(self.subdocx.element.body.sectPr)
-        return "".join(
-            etree.tostring(element, encoding="unicode", pretty_print=False)
-            for element in self.subdocx.element.body
-        )
+        body = self.subdocx.element.body
+        if body.sectPr is not None:
+            body.remove(body.sectPr)
+        if len(body) == 0:
+            return ""
+
+        destination_body = self.docx.element.body
+        wrapper = etree.Element(destination_body.tag, nsmap=destination_body.nsmap)
+        for element in body:
+            wrapper.append(deepcopy(element))
+
+        xml = etree.tostring(wrapper, encoding="unicode", pretty_print=False)
+        return xml.partition(">")[2].rpartition("</")[0]
 
     def __unicode__(self):
         return self._get_xml()
