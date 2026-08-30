@@ -18,8 +18,8 @@ EMBEDDING_ZIPNAME = "word/embeddings/Microsoft_Excel_Worksheet.xlsx"
 XLSX_FIXTURES = [
     (
         Path("templates/issue_621_excel_0.xlsx"),
-        4887,
-        "3b7d1befbe9fe6d4dfa8bee06b3dc424774b37079a884e89427c78577516805f",
+        4867,
+        "17ce75452390fd3057db51670b37df9c9027654a9589282d0834070ab6496cf9",
         "No.1",
     ),
     (
