@@ -5,6 +5,8 @@ Created : 2021-07-30
 @author: Eric Lapouyade
 """
 
+from copy import deepcopy
+
 from docx import Document
 from docx.oxml import CT_SectPr
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
@@ -13,7 +15,6 @@ from docxcompose.utils import xpath
 from docxcompose.composer import Composer
 from docxcompose.utils import NS
 from lxml import etree
-import re
 
 
 class SubdocComposer(Composer):
@@ -82,16 +83,19 @@ class Subdoc(object):
         return getattr(self.subdocx, name)
 
     def _get_xml(self):
-        if self.subdocx.element.body.sectPr is not None:
-            self.subdocx.element.body.remove(self.subdocx.element.body.sectPr)
-        xml = re.sub(
-            r"</?w:body[^>]*>",
-            "",
-            etree.tostring(
-                self.subdocx.element.body, encoding="unicode", pretty_print=False
-            ),
-        )
-        return xml
+        body = self.subdocx.element.body
+        if body.sectPr is not None:
+            body.remove(body.sectPr)
+        if len(body) == 0:
+            return ""
+
+        destination_body = self.docx.element.body
+        wrapper = etree.Element(destination_body.tag, nsmap=destination_body.nsmap)
+        for element in body:
+            wrapper.append(deepcopy(element))
+
+        xml = etree.tostring(wrapper, encoding="unicode", pretty_print=False)
+        return xml.partition(">")[2].rpartition("</")[0]
 
     def __unicode__(self):
         return self._get_xml()
