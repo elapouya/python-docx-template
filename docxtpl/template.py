@@ -135,7 +135,12 @@ class DocxTemplate(object):
 
         # manage table cell background color
         def cellbg(m):
-            cell_xml = m.group(1) + m.group(3)
+            cell_xml = re.sub(
+                r"<w:tcPr(\s[^>]*)?/>",
+                r"<w:tcPr\1></w:tcPr>",
+                m.group(1) + m.group(3),
+                count=1,
+            )
             cell_xml = re.sub(
                 r"<w:r[ >](?:(?!<w:r[ >]).)*<w:t></w:t>.*?</w:r>",
                 "",
