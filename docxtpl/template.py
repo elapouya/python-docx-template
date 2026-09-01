@@ -614,7 +614,16 @@ class DocxTemplate(object):
             elt.attrib["id"] = str(self.docx_ids_index)
 
     def new_subdoc(self, docpath=None) -> Subdoc:
-        from .subdoc import Subdoc
+        try:
+            from .subdoc import Subdoc
+        except ModuleNotFoundError as exc:
+            if exc.name == "docxcompose":
+                raise ModuleNotFoundError(
+                    "new_subdoc() requires the optional docxcompose dependency. "
+                    'Install it with: pip install "docxtpl[subdoc]"',
+                    name="docxcompose",
+                ) from exc
+            raise
 
         self.init_docx()
         return Subdoc(self, docpath)
