@@ -6,6 +6,7 @@ Created : 2021-07-30
 """
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.image.image import Image
 
 
 class InlineImage(object):
@@ -73,6 +74,18 @@ class InlineImage(object):
                 elt.set("descr", self.descr)
 
     def _insert_image(self):
+        package = self.tpl.current_rendering_part.package
+        if any(
+            not hasattr(image_part.image, "scaled_dimensions")
+            for image_part in package.image_parts
+        ):
+            image_part = package.get_or_add_image_part(self.image_descriptor)
+            if not hasattr(image_part.image, "scaled_dimensions"):
+                # docxcompose caches a lightweight wrapper for copied images.
+                # Replace only the matching wrapper, leaving unrelated image
+                # parts and exceptions untouched.
+                image_part._image = Image.from_blob(image_part.blob)
+
         pic = self.tpl.current_rendering_part.new_pic_inline(
             self.image_descriptor,
             self.width,
