@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 
 from .template import DocxTemplate, TemplateError
 
@@ -9,11 +10,28 @@ JSON_ARG = "json_path"
 OUTPUT_ARG = "output_filename"
 OVERWRITE_ARG = "overwrite"
 QUIET_ARG = "quiet"
+JSON_ERROR_ARG = "json_error"
+
+
+def template_error_payload(exc: TemplateError) -> dict:
+    payload = {"error": "template_error", "message": str(exc)}
+    if hasattr(exc, "docx_context"):
+        payload["docx_context"] = list(exc.docx_context)
+    return payload
+
+
+def emit_cli_error(payload: dict, json_error: bool = False) -> None:
+    if json_error:
+        json.dump(payload, sys.stderr)
+        sys.stderr.write("\n")
+    else:
+        print("Error: " + payload["message"], file=sys.stderr)
+    sys.exit(1)
 
 
 def make_arg_parser():
     parser = argparse.ArgumentParser(
-        usage="python -m docxtpl [-h] [-o] [-q] {} {} {}".format(
+        usage="python -m docxtpl [-h] [-o] [-q] [--json-error] {} {} {}".format(
             TEMPLATE_ARG, JSON_ARG, OUTPUT_ARG
         ),
         description="Make docx file from existing template docx and json data.",
@@ -38,6 +56,12 @@ def make_arg_parser():
         "--" + QUIET_ARG,
         action="store_true",
         help="Do not display unnecessary messages",
+    )
+    parser.add_argument(
+        "--json-error",
+        dest=JSON_ERROR_ARG,
+        action="store_true",
+        help="Emit errors as JSON on stderr",
     )
     return parser
 
@@ -67,7 +91,7 @@ def is_argument_valid(arg_name, arg_value, overwrite):
         return arg_value.endswith(".docx") and check_exists_ask_overwrite(
             arg_value, overwrite
         )
-    elif arg_name in [OVERWRITE_ARG, QUIET_ARG]:
+    elif arg_name in [OVERWRITE_ARG, QUIET_ARG, JSON_ERROR_ARG]:
         return arg_value in [True, False]
 
 
@@ -122,18 +146,12 @@ def get_json_data(json_path):
 
 
 def make_docxtemplate(template_path):
-    try:
-        return DocxTemplate(template_path)
-    except TemplateError:
-        raise RuntimeError("Could not create docx template.")
+    return DocxTemplate(template_path)
 
 
 def render_docx(doc, json_data):
-    try:
-        doc.render(json_data)
-        return doc
-    except TemplateError:
-        raise RuntimeError("An error ocurred while trying to render the docx")
+    doc.render(json_data)
+    return doc
 
 
 def save_file(doc, parsed_args):
@@ -163,11 +181,17 @@ def main():
         doc = make_docxtemplate(os.path.abspath(parsed_args[TEMPLATE_ARG]))
         doc = render_docx(doc, json_data)
         save_file(doc, parsed_args)
+    except TemplateError as e:
+        emit_cli_error(
+            template_error_payload(e), json_error=parsed_args[JSON_ERROR_ARG]
+        )
     except RuntimeError as e:
-        print("Error: " + e.__str__())
-        return
+        emit_cli_error(
+            {"error": "cli_error", "message": str(e)},
+            json_error=parsed_args[JSON_ERROR_ARG],
+        )
     finally:
-        if not parsed_args[QUIET_ARG]:
+        if not parsed_args[QUIET_ARG] and not parsed_args[JSON_ERROR_ARG]:
             print("Exiting program!")
 
 

@@ -471,7 +471,7 @@ Command-line execution
 
 One can use `docxtpl` module directly on command line to generate a docx from a template and a json file as a context::
 
-   usage: python -m docxtpl [-h] [-o] [-q] template_path json_path output_filename
+   usage: python -m docxtpl [-h] [-o] [-q] [--json-error] template_path json_path output_filename
 
    Make docx file from existing template docx and json data.
 
@@ -485,6 +485,7 @@ One can use `docxtpl` module directly on command line to generate a docx from a 
      -o, --overwrite  If output file already exists, overwrites without asking
                       for confirmation
      -q, --quiet      Do not display unnecessary messages
+     --json-error     Emit errors as JSON on stderr
 
 
 See tests/module_execute.py for an example.
