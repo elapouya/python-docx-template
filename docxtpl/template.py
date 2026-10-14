@@ -377,6 +377,36 @@ class DocxTemplate(object):
                     xml = self.render_xml_part(xml, part, context, jinja_env)
                     part._blob = xml.encode("utf-8")
 
+    @staticmethod
+    def _has_jinja_markers(
+        text: str, jinja_env: Optional[Environment] = None
+    ) -> bool:
+        env = jinja_env if jinja_env is not None else Environment()
+        return (
+            env.variable_start_string in text
+            or env.block_start_string in text
+            or env.comment_start_string in text
+        )
+
+    def render_hyperlinks(
+        self, context: Dict[str, Any], jinja_env: Optional[Environment] = None
+    ) -> None:
+        """Render jinja placeholders in external hyperlink URL targets.
+
+        Hyperlink labels are stored in document XML and are already handled by
+        render_xml_part(), but their URLs are stored as external relationships
+        (e.g. word/_rels/document.xml.rels) and must be rendered separately.
+        """
+        env = jinja_env if jinja_env is not None else Environment()
+        for part in self.docx.part.package.parts:
+            for rel in part.rels.values():
+                if not rel.is_external or rel.reltype != REL_TYPE.HYPERLINK:
+                    continue
+                target = rel.target_ref
+                if not self._has_jinja_markers(target, env):
+                    continue
+                rel._target = env.from_string(target).render(context)
+
     def resolve_listing(self, xml):
 
         def resolve_text(run_properties, paragraph_properties, m):
@@ -510,6 +540,8 @@ class DocxTemplate(object):
         self.render_properties(context, jinja_env)
 
         self.render_footnotes(context, jinja_env)
+
+        self.render_hyperlinks(context, jinja_env)
 
         # set rendered flag
         self.is_rendered = True
@@ -915,8 +947,15 @@ class DocxTemplate(object):
         else:
             env = Environment()
 
-        parse_content = env.parse(xml)
-        all_variables = meta.find_undeclared_variables(parse_content)
+        all_variables = meta.find_undeclared_variables(env.parse(xml))
+        for part in temp_doc.part.package.parts:
+            for rel in part.rels.values():
+                if not rel.is_external or rel.reltype != REL_TYPE.HYPERLINK:
+                    continue
+                target = rel.target_ref
+                if not self._has_jinja_markers(target, env):
+                    continue
+                all_variables |= meta.find_undeclared_variables(env.parse(target))
 
         # If context is provided, return only variables that are not in the context
         if context is not None:
