@@ -308,6 +308,11 @@ calling method `new_subdoc()` ::
 In the above example, the content of 'templates/merge_docx_subdoc.docx' will be inserted into the parent document in place of the declared
 variable `{{p mysubdoc }}`.
 
+When the ``{{p var }}`` placeholder paragraph carries a paragraph style or
+alignment, that style is applied at ``render()`` time to plain body paragraphs
+of the Subdoc (Heading, List, Title, and Subtitle styles are left unchanged).
+See ``tests/subdoc_p_style.py``.
+
 See `tests/merge_docx.py` for full code.
 
 .. _Escaping:

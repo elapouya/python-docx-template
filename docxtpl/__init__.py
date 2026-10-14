@@ -10,6 +10,7 @@ __version__ = "0.20.2"
 # flake8: noqa
 from .inline_image import InlineImage
 from .listing import Listing
+from .p_style import scan_p_placeholder_styles
 from .richtext import RichText, R, RichTextParagraph, RP
 from .template import DocxTemplate
 

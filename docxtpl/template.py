@@ -479,6 +479,12 @@ class DocxTemplate(object):
         # init template working attributes
         self.render_init()
 
+        # Inherit {{p var }} paragraph style onto Subdoc body paragraphs before
+        # patch_xml strips those placeholder paragraphs.
+        from .p_style import apply_p_placeholder_styles
+
+        apply_p_placeholder_styles(self, context)
+
         if autoescape:
             if not jinja_env:
                 jinja_env = Environment(autoescape=autoescape)
