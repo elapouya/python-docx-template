@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 
+from .envelope import expand_context
 from .template import DocxTemplate, TemplateError
 
 TEMPLATE_ARG = "template_path"
@@ -130,6 +131,7 @@ def make_docxtemplate(template_path):
 
 def render_docx(doc, json_data):
     try:
+        json_data = expand_context(doc, json_data)
         doc.render(json_data)
         return doc
     except TemplateError:

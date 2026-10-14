@@ -489,6 +489,21 @@ One can use `docxtpl` module directly on command line to generate a docx from a 
 
 See tests/module_execute.py for an example.
 
+JSON context may include typed objects via a ``__docxtpl__`` envelope so the CLI can
+build ``RichText`` and ``Subdoc`` values before render:
+
+* RichText (use with ``{{r var }}``)::
+
+     {"__docxtpl__": "richtext", "runs": [{"text": "Hello ", "bold": false}, {"text": "world", "bold": true}]}
+
+* Subdoc (use with ``{{p var }}``, alone on its paragraph). Provide either
+  ``docx_base64`` or ``path`` (mutually exclusive). Subdoc envelopes require
+  ``docxcompose`` (``pip install "docxtpl[subdoc]"``)::
+
+     {"__docxtpl__": "subdoc", "path": "fragment.docx"}
+
+See tests/envelope_execute.py for a full CLI example.
+
 Examples
 --------
 

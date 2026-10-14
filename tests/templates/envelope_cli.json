@@ -1,0 +1,13 @@
+{
+  "highlight": {
+    "__docxtpl__": "richtext",
+    "runs": [
+      {"text": "Hello ", "bold": false},
+      {"text": "world", "bold": true}
+    ]
+  },
+  "block": {
+    "__docxtpl__": "subdoc",
+    "path": "templates/envelope_cli_sub.docx"
+  }
+}
