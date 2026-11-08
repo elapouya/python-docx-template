@@ -16,7 +16,7 @@ from docx.opc.oxml import parse_xml
 from docx.opc.part import XmlPart
 import docx.oxml.ns
 from docx.opc.constants import RELATIONSHIP_TYPE as REL_TYPE
-from jinja2 import Environment, Template, meta
+from jinja2 import Environment, Template, meta, nodes
 from jinja2.exceptions import TemplateError
 
 try:
@@ -895,7 +895,14 @@ class DocxTemplate(object):
         self,
         jinja_env: Optional[Environment] = None,
         context: Optional[Dict[str, Any]] = None,
+        nested: bool = False,
     ) -> Set[str]:
+        """Return the names of the variables the template uses but does not define.
+
+        With nested=True the attribute and string-key lookups on those variables are
+        returned as dotted paths, so {{ foo.bar }} and {{ foo["bar"] }} both give
+        "foo.bar" instead of "foo".
+        """
         # Create a temporary document to analyze the template without affecting the current state
         temp_doc = Document(self.template_file)
 
@@ -920,8 +927,39 @@ class DocxTemplate(object):
 
         # If context is provided, return only variables that are not in the context
         if context is not None:
-            provided_variables = set(context.keys())
-            return all_variables - provided_variables
+            all_variables = all_variables - set(context.keys())
 
-        # If no context provided, return all variables (original behavior)
+        if nested:
+            return self._nested_variable_paths(parse_content, all_variables)
+
         return all_variables
+
+    @staticmethod
+    def _nested_variable_paths(ast: nodes.Template, names: Set[str]) -> Set[str]:
+        def lookup_path(node: nodes.Node) -> Optional[list]:
+            if isinstance(node, nodes.Name):
+                return [node.name]
+            if isinstance(node, nodes.Getattr):
+                base = lookup_path(node.node)
+                return None if base is None else base + [node.attr]
+            if isinstance(node, nodes.Getitem):
+                key = node.arg
+                if isinstance(key, nodes.Const) and isinstance(key.value, str):
+                    base = lookup_path(node.node)
+                    return None if base is None else base + [key.value]
+            return None
+
+        paths: Set[str] = set()
+
+        def visit(node: nodes.Node) -> None:
+            if isinstance(node, (nodes.Name, nodes.Getattr, nodes.Getitem)):
+                path = lookup_path(node)
+                if path is not None:
+                    if path[0] in names:
+                        paths.add(".".join(path))
+                    return
+            for child in node.iter_child_nodes():
+                visit(child)
+
+        visit(ast)
+        return paths
