@@ -466,6 +466,22 @@ Then in your template, you will be able to use::
     Euros price : {{ price_dollars|multiply_by(0.88) }}
 
 
+Untrusted templates
+-------------------
+
+By default templates are rendered with a regular jinja environment, so a template can run arbitrary Python code.
+If the docx template comes from a source you do not trust, pass a sandboxed environment to ``render()``::
+
+    from docxtpl import DocxTemplate
+    from jinja2.sandbox import SandboxedEnvironment
+
+    doc = DocxTemplate("my_word_template.docx")
+    doc.render(context, SandboxedEnvironment())
+
+An expression such as ``{{ ''.__class__.__mro__ }}`` then raises a ``jinja2.exceptions.SecurityError`` instead of being evaluated.
+The same environment is used for the document properties and footnotes, and ``get_undeclared_template_variables()`` accepts it too.
+
+
 Command-line execution
 ----------------------
 
