@@ -310,6 +310,11 @@ variable `{{p mysubdoc }}`.
 
 See `tests/merge_docx.py` for full code.
 
+A subdoc is made of paragraphs, so it has to be inserted with the paragraph tag ``{{p mysubdoc }}``, alone in its paragraph.
+With a plain ``{{ mysubdoc }}`` the paragraphs end up inside the text of the paragraph that holds the tag: an empty paragraph is left behind
+and, if the paragraph also has other content such as a bookmark or formatted text, the generated document may be corrupted and refused by Word.
+The same goes for subdocs inserted in a loop: put the tag in its own ``{%p for ... %}`` block and use ``{{p item }}`` inside it.
+
 .. _Escaping:
 
 Escaping
