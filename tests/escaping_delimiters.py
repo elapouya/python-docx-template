@@ -27,6 +27,21 @@ for delimiter in escaped_delimiters:
 # These are not escaped delimiters and must not be changed.
 template.add_paragraph("{a_{hello")
 template.add_paragraph("{f_{")
+
+# Empty and formatted runs do not add text.
+paragraph = template.add_paragraph()
+paragraph.add_run("left }")
+paragraph.add_run()
+paragraph.add_run("_").bold = True
+paragraph.add_run("} right")
+
+# A tab or line break is visible content, even when Word gives it a separate run.
+for separator in ("\t", "\n"):
+    paragraph = template.add_paragraph()
+    paragraph.add_run("left }")
+    paragraph.add_run(separator)
+    paragraph.add_run("_} right")
+
 template.save(template_path)
 
 doc = DocxTemplate(template_path)
@@ -40,4 +55,7 @@ assert paragraphs == [
     *expected_delimiters,
     "{a_{hello",
     "{f_{",
+    "left }} right",
+    "left }\t_} right",
+    "left }\n_} right",
 ]

@@ -87,11 +87,10 @@ class DocxTemplate(object):
         strip all unnecessary xml tags, manage table cell background color and colspan,
         unescape html entities, etc..."""
 
-        # Join escaped Jinja delimiters that Word has split across runs. Limit the
-        # removable XML to tags inside one paragraph so unrelated text is untouched.
-        split_run_gap = (
-            r"(?:</w:t>(?:(?!</?w:p(?:\s|>))<[^>]+>)*<w:t(?: [^>]*)?>)?"
-        )
+        # Between adjacent text nodes, allow run boundaries and font properties.
+        # Other elements, such as tabs and line breaks, interrupt the delimiter.
+        run_markup = r"</?w:r\b[^>]*>|<w:rPr/>|<w:rPr>(?:<[^<>]+/>)*</w:rPr>"
+        split_run_gap = rf"(?:</w:t>(?:{run_markup})*<w:t\b[^>]*>)?"
         for escaped_delimiter in ("{_{", "}_}", "{_%", "%_}"):
             pattern = split_run_gap.join(map(re.escape, escaped_delimiter))
             src_xml = re.sub(pattern, escaped_delimiter, src_xml)
