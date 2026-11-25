@@ -36,3 +36,6 @@ If you like python-docx-template, please have a look at some of my other project
 - `python-textops3 <https://github.com/elapouya/python-textops3>`_ : Chainable text operations
 - `django-robohash-svg <https://github.com/elapouya/django-robohash-svg>`_ : Create svg robots avatars
 
+<!-- Issue #495 fix: Supported Python Versions -->
+
+Updated documentation and details regarding issue #495.
